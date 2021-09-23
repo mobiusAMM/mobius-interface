@@ -182,6 +182,17 @@ export const BridgeableTokens: { [chainId in MultiChainIds]: Token[] } = {
     //   },
     //   []
     // ),
+    new WrappedTokenInfo(
+      {
+        symbol: 'USDC',
+        name: 'US Dollar Coin (ETH)',
+        address: '0x2A3684e9Dc20B857375EA04235F2F7edBe818FA7',
+        chainId: MultiChainIds.POLYGON,
+        logoURI: 'https://etherscan.io/token/images/centre-usdc_28.png',
+        decimals: 6,
+      },
+      []
+    ),
   ],
   [MultiChainIds.ALFAJORES]: [],
   [MultiChainIds.BAKLAVA]: [],
