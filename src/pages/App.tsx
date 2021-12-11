@@ -20,6 +20,7 @@ import ApeViewer from './ApeViewer'
 import Claim from './Claim'
 import Mento from './Mento'
 import OpenSum from './OpenSum'
+import OpenSumDeposit from './OpenSum/Deposit'
 import Pool from './Pool'
 import Manage from './Pool/Manage'
 import Reset from './Reset'
@@ -131,6 +132,7 @@ export default function App() {
               <Route exact strict path="/reset" component={Reset} />
               <Route exact strict path="/ape-mode" component={ApeViewer} />
               <Route exact strict path="/opensum" component={OpenSum} />
+              <Route exact strict path="/opensum/deposit/secret/supersecret" component={OpenSumDeposit} />
               {/* <Route exact strict path="/optics" component={Optics} /> */}
             </Switch>
           </ErrorBoundary>

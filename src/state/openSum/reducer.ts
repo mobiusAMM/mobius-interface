@@ -7,6 +7,7 @@ import { WrappedTokenInfo } from 'state/lists/hooks'
 import { updateBalances } from './actions'
 
 export type ConstantSumPool = {
+  name: string
   address: string
   tokens: [WrappedTokenInfo, WrappedTokenInfo]
   balances?: JSBI[]
