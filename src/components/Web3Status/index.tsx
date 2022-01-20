@@ -152,7 +152,7 @@ function Web3StatusInner() {
           <RowBetween>
             <Text>
               {pending?.length} {t('pending')}
-            </Text>{' '}
+            </Text>
             <Loader stroke="white" />
           </RowBetween>
         ) : (
@@ -173,7 +173,7 @@ function Web3StatusInner() {
   } else {
     return (
       <Web3StatusConnect id="connect-wallet" onClick={() => connect().catch(console.warn)} faded={!address}>
-        <Text>{t('ConnectToAWallet')}</Text>
+        <Text>{t('Connect to a wallet')}</Text>
       </Web3StatusConnect>
     )
   }

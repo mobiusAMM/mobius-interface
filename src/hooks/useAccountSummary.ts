@@ -3,6 +3,8 @@ import { useContractKit, useProvider } from '@celo-tools/use-contractkit'
 import ENS from '@ensdomains/ensjs'
 import { useEffect, useState } from 'react'
 
+import { NOM_REGISTRY_ADDRESS } from '../constants'
+
 type AsyncReturnType<T extends (...args: any) => any> = T extends (...args: any) => Promise<infer U>
   ? U
   : T extends (...args: any) => infer U
@@ -37,7 +39,7 @@ export default function useAccountSummary(address?: string | null): {
         console.error('Could not fetch account summary', e)
       }
 
-      const nom = new ENS({ provider, ensAddress: '0x3DE51c3960400A0F752d3492652Ae4A0b2A36FB3' })
+      const nom = new ENS({ provider, ensAddress: NOM_REGISTRY_ADDRESS })
       try {
         const { name } = await nom.getName(address)
         if (name) setNom(`${name}.nom`)
