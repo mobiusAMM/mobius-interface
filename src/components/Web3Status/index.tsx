@@ -47,17 +47,20 @@ const Web3StatusConnect = styled(Web3StatusGeneric)<{ faded?: boolean }>`
   border: none;
   color: ${({ theme }) => theme.primaryText1};
   font-weight: 500;
+
   :hover,
   :focus {
     border: 1px solid ${({ theme }) => darken(0.05, theme.primary4)};
     color: ${({ theme }) => theme.primaryText1};
   }
+
   ${({ faded }) =>
     faded &&
     css`
       background-color: ${({ theme }) => theme.primary5};
       border: 1px solid ${({ theme }) => theme.primary5};
       color: ${({ theme }) => theme.primaryText1};
+
       :hover,
       :focus {
         border: 1px solid ${({ theme }) => darken(0.05, theme.primary4)};
@@ -74,6 +77,7 @@ const Web3StatusConnected = styled(Web3StatusGeneric)<{ pending?: boolean }>`
   :hover,
   :focus {
     background-color: ${({ pending, theme }) => (pending ? darken(0.05, theme.primary1) : lighten(0.05, theme.bg2))};
+
     :focus {
       border: 1px solid ${({ pending, theme }) => (pending ? darken(0.1, theme.primary1) : darken(0.1, theme.bg3))};
     }
@@ -118,6 +122,7 @@ const StatusIcon: React.FC = () => {
 function Web3StatusInner() {
   const { t } = useTranslation()
   const { connect, address, account } = useContractKit()
+  const { nom } = useAccountSummary(address)
   const error = null
 
   const allTransactions = useAllTransactions()
@@ -132,9 +137,11 @@ function Web3StatusInner() {
   const hasPendingTransactions = !!pending.length
   const toggleWalletModal = useWalletModalToggle()
   let accountName
-  if (account) {
+  if (nom) {
+    accountName = nom
+  } else if (account && !isAddress(account)) {
     // Phone numbers show up under `account`, so we need to check if it is an address
-    accountName = isAddress(account) ? shortenAddress(account) : account
+    accountName = account
   } else if (address) {
     accountName = shortenAddress(address)
   }
@@ -143,7 +150,10 @@ function Web3StatusInner() {
       <Web3StatusConnected id="web3-status-connected" onClick={toggleWalletModal} pending={hasPendingTransactions}>
         {hasPendingTransactions ? (
           <RowBetween>
-            <Text>{pending?.length} Pending</Text> <Loader stroke="white" />
+            <Text>
+              {pending?.length} {t('pending')}
+            </Text>{' '}
+            <Loader stroke="white" />
           </RowBetween>
         ) : (
           <>
@@ -163,7 +173,7 @@ function Web3StatusInner() {
   } else {
     return (
       <Web3StatusConnect id="connect-wallet" onClick={() => connect().catch(console.warn)} faded={!address}>
-        <Text>{t('Connect to a wallet')}</Text>
+        <Text>{t('ConnectToAWallet')}</Text>
       </Web3StatusConnect>
     )
   }
@@ -180,7 +190,7 @@ export default function Web3Status() {
 
   const pending = sortedRecentTransactions.filter((tx) => !tx.receipt).map((tx) => tx.hash)
   const confirmed = sortedRecentTransactions.filter((tx) => tx.receipt).map((tx) => tx.hash)
-  const { summary } = useAccountSummary(account ?? undefined)
+  const { summary, nom } = useAccountSummary(account ?? undefined)
 
   useEffect(() => {
     Sentry.setUser({ id: account ?? undefined })
@@ -192,7 +202,7 @@ export default function Web3Status() {
     <>
       <Web3StatusInner />
       <WalletModal
-        ENSName={summary?.name ?? undefined}
+        ENSName={nom ?? summary?.name ?? undefined}
         pendingTransactions={pending}
         confirmedTransactions={confirmed}
       />
