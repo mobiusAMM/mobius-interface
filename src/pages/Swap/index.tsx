@@ -287,8 +287,12 @@ export default function Swap() {
                       />
                     </RowBetween>
                     <RowBetween>
-                      <TYPE.body>Price Impact</TYPE.body>
-                      <TYPE.body>{`${trade?.priceImpact.toFixed(4)}%`}</TYPE.body>
+                      <Text fontWeight={500} fontSize={14} color={theme.text2}>
+                        Price Impact
+                      </Text>
+                      <Text fontWeight={500} fontSize={14} color={theme.text2}>
+                        {`${trade?.priceImpact.toFixed(4)}%`}
+                      </Text>
                     </RowBetween>
                   </>
                 )}
