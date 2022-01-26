@@ -14,7 +14,6 @@ import { TYPE } from '../../theme'
 import CurrencyLogo from '../CurrencyLogo'
 import DoubleCurrencyLogo from '../DoubleLogo'
 import { Input as NumericalInput } from '../NumericalInput'
-import { RowBetween } from '../Row'
 import CurrencySearchModal from '../SearchModal/CurrencySearchModal'
 
 // const ColorShift = keyframes`
@@ -55,7 +54,7 @@ const InputRow = styled.div<{ selected: boolean }>`
   ${({ theme }) => theme.flexRowNoWrap};
   align-items: center;
   justify-content: space-between;
-  padding: ${({ selected }) => (selected ? '0.75rem 1rem 1.5rem .75rem' : '0.75rem 1rem 1.5rem .75rem')};
+  padding: ${({ selected }) => (selected ? '0.75rem 1rem 0rem .75rem' : '0.75rem 1rem 0rem .75rem')};
 `
 
 const InputDiv = styled.div`
@@ -99,11 +98,12 @@ const CurrencySelect = styled.button<{
 
 const LabelRow = styled.div`
   ${({ theme }) => theme.flexRowNoWrap}
-  align-items: center;
+  align-items: right;
+  justify-content: right;
   color: ${({ theme }) => theme.text1};
   font-size: 0.75rem;
   line-height: 1rem;
-  padding: 0.75rem 1rem 0 1rem;
+  padding: 0.75rem 1rem 0.75rem 1rem;
   background-color: ${({ theme }) => theme.bg2}
   span:hover {
     cursor: pointer;
@@ -240,28 +240,6 @@ export default function CurrencyInputPanel({
   return (
     <InputPanel id={id} hideInput={false} {...rest}>
       <Container hideInput={hideInput}>
-        {!hideInput && (
-          <LabelRow>
-            <RowBetween>
-              <TYPE.body color={theme.text2} fontWeight={500} fontSize={14}>
-                {label}
-              </TYPE.body>
-              {account && (
-                <TYPE.body
-                  onClick={onMax}
-                  color={theme.text2}
-                  fontWeight={500}
-                  fontSize={14}
-                  style={{ display: 'inline', cursor: 'pointer' }}
-                >
-                  {!hideBalance && !!currency && selectedCurrencyBalance
-                    ? (customBalanceText ?? 'Balance: ') + selectedCurrencyBalance?.toSignificant(6)
-                    : ' -'}
-                </TYPE.body>
-              )}
-            </RowBetween>
-          </LabelRow>
-        )}
         <InputRow style={hideInput ? { padding: '0', borderRadius: '8px' } : {}} selected={disableCurrencySelect}>
           {/* <div style={{ display: 'flex', alignItems: 'center' }}> */}
           <CurrencySelect
@@ -315,6 +293,24 @@ export default function CurrencyInputPanel({
             </InputDiv>
           )}
         </InputRow>
+        {!hideInput && (
+          <LabelRow>
+            {account && (
+              <TYPE.body
+                onClick={onMax}
+                color={theme.text2}
+                fontWeight={500}
+                fontSize={14}
+                style={{ display: 'inline', cursor: 'pointer' }}
+              >
+                {!hideBalance &&
+                  !!currency &&
+                  selectedCurrencyBalance &&
+                  (customBalanceText ?? 'Balance: ') + selectedCurrencyBalance?.toSignificant(6)}
+              </TYPE.body>
+            )}
+          </LabelRow>
+        )}
       </Container>
       {!disableCurrencySelect && onCurrencySelect && (
         <CurrencySearchModal
