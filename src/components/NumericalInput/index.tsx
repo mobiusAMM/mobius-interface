@@ -3,7 +3,13 @@ import styled from 'styled-components'
 
 import { escapeRegExp } from '../../utils'
 
-const StyledInput = styled.input<{ error?: boolean; white?: boolean; fontSize?: string; align?: string }>`
+const StyledInput = styled.input<{
+  error?: boolean
+  white?: boolean
+  fontSize?: string
+  align?: string
+  disabled?: boolean
+}>`
   color: ${({ error, theme }) => (error ? theme.red1 : theme.text1)};
   width: 0;
   position: relative;
@@ -16,6 +22,7 @@ const StyledInput = styled.input<{ error?: boolean; white?: boolean; fontSize?: 
   background-color: rgba(0, 0, 0, 0);
   font-size: ${({ fontSize }) => fontSize ?? '24px'};
   text-align: ${({ align }) => align && align};
+  cursor: ${({ disabled }) => disabled && 'not-allowed'};
   white-space: nowrap;
   overflow: hidden;
   padding: 0px;
@@ -45,12 +52,14 @@ export const Input = React.memo(function InnerInput({
   value,
   onUserInput,
   placeholder,
+  disabled,
   ...rest
 }: {
   value: string | number
   onUserInput: (input: string) => void
   error?: boolean
   fontSize?: string
+  disabled?: boolean
   align?: 'right' | 'left'
 } & Omit<React.HTMLProps<HTMLInputElement>, 'ref' | 'onChange' | 'as'>) {
   const enforcer = (nextUserInput: string) => {
@@ -72,6 +81,7 @@ export const Input = React.memo(function InnerInput({
       title="Token Amount"
       autoComplete="off"
       autoCorrect="off"
+      disabled={disabled}
       // text-specific options
       type="text"
       pattern="^[0-9]*[.,]?[0-9]*$"
