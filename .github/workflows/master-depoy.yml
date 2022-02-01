@@ -35,7 +35,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-modules-
       - run: yarn install
-      - run: yarn build:production
+      - run: yarn build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
