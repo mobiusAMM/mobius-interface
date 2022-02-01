@@ -1,0 +1,46 @@
+name: Deploy Master to Production
+
+on:
+  push:
+    branches: [staging]
+  pull_request:
+    branches:
+      - [staging]
+
+env:
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+  SENTRY_RELEASE: gh-${{ github.sha }}
+  GIT_COMMIT_SHA: ${{ github.sha }}
+  REACT_APP_SENTRY_RELEASE: gh-${{ github.sha }}
+  GH_PACKAGE_REGISTRY_PAT: ${{ secrets.GH_PACKAGE_REGISTRY_PAT }}
+
+jobs:
+  deploy-dist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          always-auth: true
+          node-version: '14'
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+      - name: Yarn Cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
+      - run: yarn install
+      - run: yarn build:production
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          deploy_key: ${{ secrets.DIST_DEPLOY_KEY }}
+          external_repository: mobiusAMM/mobius_interface_dist
+          publish_branch: staging
+          publish_dir: ./build/
