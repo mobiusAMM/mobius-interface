@@ -213,15 +213,6 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
     mobiRate && totalStakedAmount && !totalStakedAmount.equalTo(JSBI.BigInt(0))
       ? calcApy(rewardPerYear.add(rewardPerYearExternal), totalStakedAmount)
       : [undefined, undefined, undefined]
-  console.log(
-    poolInfo.name,
-    apy?.toFixed(0),
-    rewardPerYear.toFixed(0),
-    rewardPerYearExternal.toFixed(0),
-    rewardPerYear.add(rewardPerYearExternal).toFixed(0),
-    totalStakedAmount.toFixed(0),
-    coinPrice?.toFixed(0)
-  )
 
   const [boostedApyFraction, boostedApy, boostedDpy] =
     mobiRate && totalStakedAmount && !totalStakedAmount.equalTo(JSBI.BigInt(0))
