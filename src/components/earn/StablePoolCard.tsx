@@ -186,29 +186,17 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
   const mobi = useMobi()
   const priceOfMobi = useCUSDPrice(mobi) ?? new Price(mobi, cUSD[chainId], '100', '1')
   const userLP = poolInfo.amountDeposited
-  const { totalValueStaked, totalValueDeposited, valueOfDeposited } = getDepositValues(poolInfo, workingSupply)
-  if (!tokens) {
-    console.log({ name: poolInfo.name, tokens })
-  }
+  const { totalValueDeposited, valueOfDeposited } = getDepositValues(poolInfo, workingSupply)
   const coinPrice = tokens.reduce(
     (accum: Fraction | undefined, { address }) => accum ?? tokenPrices[address.toLowerCase()],
     undefined
   )
 
-  const totalStakedAmount = totalValueStaked
-    ? totalValueStaked.multiply(new Fraction(coinPrice?.numerator ?? '1', coinPrice?.denominator ?? '1'))
+  const totalStakedAmount = totalValueDeposited
+    ? totalValueDeposited.multiply(new Fraction(coinPrice?.numerator ?? '1', coinPrice?.denominator ?? '1'))
     : new Fraction(JSBI.BigInt(0))
   const totalMobiRate = new TokenAmount(mobi, mobiRate ?? JSBI.BigInt('0'))
-  // let userMobiRate = new TokenAmount(mobi, JSBI.BigInt('0'))
-  // if (account && mobiRate && totalStakedLPs && totalStakedLPs.greaterThan('0')) {
-  //   userMobiRate = new TokenAmount(mobi, poolInfo.workingPercentage.multiply(mobiRate ?? '0').toFixed(0))
-  // }
-  // let userExternalRates: TokenAmount[] = []
-  // if (account && poolInfo.externalRewardRates && totalStakedLPs && totalStakedLPs.greaterThan('0')) {
-  //   userExternalRates = poolInfo.externalRewardRates.map(
-  //     (rate) => new TokenAmount(rate.token, poolInfo.workingPercentage.multiply(rate.raw).toFixed(0))
-  //   )
-  // }
+
   const rewardPerYear = priceOfMobi.raw.multiply(totalMobiRate.multiply(BIG_INT_SECONDS_IN_YEAR))
   let rewardPerYearExternal = new Fraction('0', '1')
   for (let i = 0; i < 8; i++) {
@@ -225,6 +213,15 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
     mobiRate && totalStakedAmount && !totalStakedAmount.equalTo(JSBI.BigInt(0))
       ? calcApy(rewardPerYear.add(rewardPerYearExternal), totalStakedAmount)
       : [undefined, undefined, undefined]
+  console.log(
+    poolInfo.name,
+    apy?.toFixed(0),
+    rewardPerYear.toFixed(0),
+    rewardPerYearExternal.toFixed(0),
+    rewardPerYear.add(rewardPerYearExternal).toFixed(0),
+    totalStakedAmount.toFixed(0),
+    coinPrice?.toFixed(0)
+  )
 
   const [boostedApyFraction, boostedApy, boostedDpy] =
     mobiRate && totalStakedAmount && !totalStakedAmount.equalTo(JSBI.BigInt(0))
