@@ -129,7 +129,7 @@ export function useAllTokenBalances(): { [tokenAddress: string]: TokenAmount | u
   return balances ?? {}
 }
 
-// get the total owned, unclaimed, and unharvested UBE for account
+// get the total owned
 export function useAggregateUbeBalance(): TokenAmount | undefined {
   const { address, connected } = useWeb3Context()
 
