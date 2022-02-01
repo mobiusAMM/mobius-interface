@@ -12,6 +12,7 @@ import ENS_PUBLIC_RESOLVER_ABI from '../constants/abis/ens-public-resolver.json'
 import ERC20_ABI, { ERC20_BYTES32_ABI } from '../constants/abis/erc20'
 import ERC20_MOBI from '../constants/abis/ERC20MOBI.json'
 import EXCHANGE from '../constants/abis/Exchange.json'
+import FEE_DISTRIBUTOR_ABI from '../constants/abis/FeeDistributor.json'
 import GAUGE_CONTROLLER from '../constants/abis/GaugeController.json'
 import GOVERNOR_ABI from '../constants/abis/GovernorBravoDelegate.json'
 import LIQUIDITY_GAUGE_V3 from '../constants/abis/LiquidityGaugeV3.json'
@@ -20,11 +21,13 @@ import MINTER from '../constants/abis/Minter.json'
 import MOBIUS_STRIP from '../constants/abis/MobiusStrip.json'
 import DUAL_REWARDS_ABI from '../constants/abis/moola/MoolaStakingRewards.json'
 import POOL_MANAGER_ABI from '../constants/abis/pool-manager.json'
+import POOL_PROXY_ABI from '../constants/abis/PoolProxy.json'
 import RELEASE_UBE_ABI from '../constants/abis/ReleaseUbe.json'
 import STAKING_REWARDS_ABI from '../constants/abis/StakingRewards.json'
 import STABLE_SWAP from '../constants/abis/Swap.json'
 import VESTING_ABI from '../constants/abis/VestingEscrow.json'
 import VOTING_ESCROW from '../constants/abis/VotingEscrow.json'
+import { FEE_DISTRIBUTOR, POOL_PROXY } from '../constants/index'
 import { MULTICALL_ABI, MULTICALL_NETWORKS } from '../constants/multicall'
 import {
   BridgeRouter,
@@ -32,6 +35,7 @@ import {
   Erc20,
   ERC20MOBI,
   Exchange,
+  FeeDistributor,
   GaugeController,
   GovernorBravoDelegate,
   LiquidityGaugeV3,
@@ -39,6 +43,7 @@ import {
   MobiusStrip,
   MoolaStakingRewards,
   PoolManager,
+  PoolProxy,
   StakingRewards,
   Swap,
   VestingEscrow,
@@ -75,6 +80,14 @@ export function useENSRegistrarContract(withSignerIfPossible?: boolean): Contrac
 
 export function useLiquidityGaugeContract(address?: string, withSignerIfPossible?: boolean): LiquidityGaugeV3 | null {
   return useContract(address, LIQUIDITY_GAUGE_V3.abi, withSignerIfPossible) as LiquidityGaugeV3
+}
+
+export function useFeeDistributor(): FeeDistributor | null {
+  return useContract(FEE_DISTRIBUTOR, FEE_DISTRIBUTOR_ABI, true) as FeeDistributor | null
+}
+
+export function usePoolProxy(): PoolProxy | null {
+  return useContract(POOL_PROXY, POOL_PROXY_ABI, true) as PoolProxy | null
 }
 
 export function useBridgeRouterContract(address?: string, withSignerIfPossible?: boolean): BridgeRouter | null {

@@ -4,9 +4,9 @@ import { AutoColumn } from 'components/Column'
 import Loader from 'components/Loader'
 import { RowBetween, RowFixed } from 'components/Row'
 import { useActiveContractKit } from 'hooks'
-import { useStakingContract } from 'hooks/useContract'
+import { useFeeDistributor, useStakingContract } from 'hooks/useContract'
 import React, { useState } from 'react'
-import { useSNXRewardInfo } from 'state/staking/hooks'
+import { useFeeInformation, useSNXRewardInfo } from 'state/staking/hooks'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import styled from 'styled-components'
 import { TYPE } from 'theme'
@@ -117,12 +117,15 @@ const StyledButton = styled(ButtonEmpty)`
 
 export default function VeMobiRewards() {
   const { rewardToken, rewardRate, avgApr, userRewardRate, leftToClaim, snxAddress } = useSNXRewardInfo()
+  const { toClaim, totalFeesThisWeek } = useFeeInformation()
   const tokenColor = '#ab9325' //useColor(rewardToken)
   const { account } = useActiveContractKit()
   const stakingContract = useStakingContract(snxAddress)
   const addTransaction = useTransactionAdder()
   const [attempting, setAttempting] = useState(false)
+  const [attemptingFees, setAttemptingFees] = useState(false)
   const [hash, setHash] = useState<string>()
+  const feeDistributorContract = useFeeDistributor()
 
   async function onClaimReward() {
     if (stakingContract) {
@@ -138,6 +141,22 @@ export default function VeMobiRewards() {
         })
         .catch((error: any) => {
           setAttempting(false)
+          console.log(error)
+        })
+    }
+  }
+
+  async function claimFees() {
+    if (feeDistributorContract && account) {
+      setAttemptingFees(true)
+      await feeDistributorContract['claim(address)'](account)
+        .then((response: TransactionResponse) => {
+          addTransaction(response, {
+            summary: `Claimed allocated Mobi fees`,
+          })
+          response.wait().then(() => setAttemptingFees(false))
+        })
+        .catch((error: any) => {
           console.log(error)
         })
     }
@@ -220,6 +239,7 @@ export default function VeMobiRewards() {
             </StyledButton> */}
             <SecondSection>
               <TYPE.largeHeader>Available to Claim: </TYPE.largeHeader>
+
               {leftToClaim ? (
                 <TYPE.largeHeader>{`${leftToClaim.toSignificant(4, { groupSeparator: ',' })} ${
                   rewardToken.symbol
@@ -240,6 +260,40 @@ export default function VeMobiRewards() {
               </ButtonPrimary>
             </SecondSection>
           </>
+        </PositionWrapper>
+      </CardContainer>
+      <CardContainer>
+        <PositionWrapper>
+          <TopSection>
+            <RowFixed style={{ gap: '6px' }}>
+              <TYPE.black fontWeight={600} fontSize={[16, 24]}>
+                {`Mobi Rewards`}
+              </TYPE.black>
+            </RowFixed>
+          </TopSection>
+          <SecondSection>
+            <RowFixed style={{ marginTop: 10 }}>
+              <TYPE.darkGray fontWeight={450} fontSize={[15, 20]}>
+                {`Total Mobi Distributed this Week: `}
+              </TYPE.darkGray>
+            </RowFixed>
+
+            <TYPE.black textAlign="right" fontSize={[13, 16]} fontWeight={800} color={tokenColor}>
+              {totalFeesThisWeek
+                ? `${totalFeesThisWeek?.toSignificant(4, { groupSeparator: ',' })} ${totalFeesThisWeek.token.symbol}`
+                : '-'}
+            </TYPE.black>
+          </SecondSection>
+          <Divider />
+          <SecondSection style={{ marginTop: '1rem' }}>
+            <ButtonPrimary
+              onClick={claimFees}
+              disabled={attempting && !hash}
+              style={{ fontWeight: 700, fontSize: 18, marginBottom: '1rem' }}
+            >
+              {attemptingFees ? `Claiming MOBI...` : 'Claim my Share'}
+            </ButtonPrimary>
+          </SecondSection>
         </PositionWrapper>
       </CardContainer>
     </Wrapper>

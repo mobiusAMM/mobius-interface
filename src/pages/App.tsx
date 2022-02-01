@@ -17,6 +17,7 @@ import Popups from '../components/Popups'
 import DarkModeQueryParamReader from '../theme/DarkModeQueryParamReader'
 import { getMobileOperatingSystem, Mobile } from '../utils/mobile'
 import ApeViewer from './ApeViewer'
+import BurnPage from './Burn'
 import Charts from './Charts'
 import Claim from './Claim'
 import Mento from './Mento'
@@ -55,12 +56,10 @@ const BodyWrapper = styled.div`
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 10;
-
   ${({ theme }) => theme.mediaWidth.upToSmall`
     padding: 16px;
     padding-top: 2rem;
   `};
-
   z-index: 1;
 `
 
@@ -137,6 +136,7 @@ export default function App() {
               <Route exact strict path="/ape-mode" component={ApeViewer} />
               <Route exact strict path="/charts" component={Charts} />
               <Route exact strict path="/opensum" component={OpenSum} />
+              <Route exact strict path="/init-burn" component={BurnPage} />
               {/* <Route exact strict path="/optics" component={Optics} /> */}
             </Switch>
           </ErrorBoundary>
