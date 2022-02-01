@@ -4,8 +4,7 @@ on:
   push:
     branches: [staging]
   pull_request:
-    branches:
-      - [staging]
+    branches: [staging]
 
 env:
   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
