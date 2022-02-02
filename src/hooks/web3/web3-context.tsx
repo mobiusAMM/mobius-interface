@@ -1,6 +1,6 @@
 import { JsonRpcProvider, StaticJsonRpcProvider, Web3Provider } from '@ethersproject/providers'
 import WalletConnectProvider from '@walletconnect/web3-provider'
-import React, { ReactElement, useCallback, useContext, useMemo, useState } from 'react'
+import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Web3Modal from 'web3modal'
 
 import { CHAIN } from '../../constants'
@@ -90,7 +90,7 @@ export const switchNetwork = async () => {
 }
 
 // eslint-disable-next-line react/prop-types
-export const Web3ContextProvider: React.FC<{ children: ReactElement }> = ({ children }) => {
+export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [connected, setConnected] = useState(false)
   const [chainID, setChainID] = useState(CHAIN)
   const [providerChainID, setProviderChainID] = useState(CHAIN)
@@ -110,6 +110,21 @@ export const Web3ContextProvider: React.FC<{ children: ReactElement }> = ({ chil
             rpc: {
               [42220]: uri,
             },
+          },
+        },
+        ledger: {
+          display: {
+            logo: '',
+            name: 'Ledger',
+            description: 'Connect directly to ledger',
+          },
+          package: WalletConnectProvider,
+          connector: async (ProviderPackage, options) => {
+            const provider = new ProviderPackage(options)
+
+            await provider.enable()
+
+            return provider
           },
         },
       },
