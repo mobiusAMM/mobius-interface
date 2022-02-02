@@ -73,10 +73,7 @@ function CurrencyRow({
   isSelected: boolean
   style: CSSProperties
 }) {
-  // const { account } = useActiveContractKit()
   const key = currencyKey(currency)
-  // const selectedTokenList = useCombinedActiveList()
-  // const balance = useCurrencyBalance(account ?? undefined, currency)
   if (isSelected)
     currency = {
       ...currency,
@@ -97,9 +94,6 @@ function CurrencyRow({
         </Text>
       </Column>
       <TokenTags currency={currency} />
-      {/* <RowFixed style={{ justifySelf: 'flex-end' }}>
-        {balance ? <Balance balance={balance} /> : account ? <Loader /> : null}
-      </RowFixed> */}
     </MenuItem>
   )
 }

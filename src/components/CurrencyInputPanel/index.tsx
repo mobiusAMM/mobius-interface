@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import styled, { css, keyframes } from 'styled-components'
 
 import { ReactComponent as DropDown } from '../../assets/images/dropdown.svg'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import useTheme from '../../hooks/useTheme'
 import { useIsDarkMode } from '../../state/user/hooks'
 import { useCurrencyBalance } from '../../state/wallet/hooks'
@@ -231,8 +231,8 @@ export default function CurrencyInputPanel({
   const isDarkMode = useIsDarkMode()
 
   const [modalOpen, setModalOpen] = useState(false)
-  const { account } = useActiveContractKit()
-  const selectedCurrencyBalance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
+  const { address, connected } = useWeb3Context()
+  const selectedCurrencyBalance = useCurrencyBalance(connected ? address : undefined, currency ?? undefined)
   const theme = useTheme()
 
   const handleDismissSearch = useCallback(() => {
@@ -248,7 +248,7 @@ export default function CurrencyInputPanel({
               <TYPE.body color={theme.text2} fontWeight={500} fontSize={14}>
                 {label}
               </TYPE.body>
-              {account && (
+              {connected && (
                 <TYPE.body
                   onClick={onMax}
                   color={theme.text2}
@@ -270,7 +270,7 @@ export default function CurrencyInputPanel({
             isDarkMode={isDarkMode}
             bgColor={tokenSelectBackground}
             selected={!!currency}
-            walletConnected={!!account}
+            walletConnected={connected}
             pair={!!pair}
             className="open-currency-select-button"
             onClick={() => {
@@ -301,7 +301,8 @@ export default function CurrencyInputPanel({
               {!disableCurrencySelect && <StyledDropDown selected={!!currency} />}
             </Aligner>
           </CurrencySelect>
-          {false && account && currency && showMaxButton && label !== 'To' && (
+          {/* TODO: why always false */}
+          {false && connected && currency && showMaxButton && label !== 'To' && (
             <StyledBalanceMax onClick={onMax}>MAX</StyledBalanceMax>
           )}
           {/* </div> */}

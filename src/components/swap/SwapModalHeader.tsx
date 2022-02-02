@@ -19,7 +19,6 @@ import { ButtonPrimary } from '../Button'
 import { AutoColumn } from '../Column'
 import CurrencyLogo from '../CurrencyLogo'
 import { RowBetween, RowFixed } from '../Row'
-import { MoolaDirectTrade } from './routing/moola/MoolaDirectTrade'
 import { SwapShowAcceptChanges, TruncatedText } from './styleds'
 
 export default function SwapModalHeader({
@@ -110,27 +109,25 @@ export default function SwapModalHeader({
           </RowBetween>
         </SwapShowAcceptChanges>
       ) : null}
-      {!(trade instanceof MoolaDirectTrade) && (
-        <AutoColumn justify="flex-start" gap="sm" style={{ padding: '12px 0 0 0px' }}>
-          {trade.tradeType === TradeType.EXACT_INPUT ? (
-            <TYPE.italic textAlign="left" style={{ width: '100%' }}>
-              {`Output is estimated. You will receive at least `}
-              <b>
-                {slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(6)} {trade.output.currency.symbol}
-              </b>
-              {' or the transaction will revert.'}
-            </TYPE.italic>
-          ) : (
-            <TYPE.italic textAlign="left" style={{ width: '100%' }}>
-              {`Input is estimated. You will sell at most `}
-              <b>
-                {slippageAdjustedAmounts[Field.INPUT]?.toSignificant(6)} {trade.input.currency.symbol}
-              </b>
-              {' or the transaction will revert.'}
-            </TYPE.italic>
-          )}
-        </AutoColumn>
-      )}
+      <AutoColumn justify="flex-start" gap="sm" style={{ padding: '12px 0 0 0px' }}>
+        {trade.tradeType === TradeType.EXACT_INPUT ? (
+          <TYPE.italic textAlign="left" style={{ width: '100%' }}>
+            {`Output is estimated. You will receive at least `}
+            <b>
+              {slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(6)} {trade.output.currency.symbol}
+            </b>
+            {' or the transaction will revert.'}
+          </TYPE.italic>
+        ) : (
+          <TYPE.italic textAlign="left" style={{ width: '100%' }}>
+            {`Input is estimated. You will sell at most `}
+            <b>
+              {slippageAdjustedAmounts[Field.INPUT]?.toSignificant(6)} {trade.input.currency.symbol}
+            </b>
+            {' or the transaction will revert.'}
+          </TYPE.italic>
+        )}
+      </AutoColumn>
       {recipient !== null ? (
         <AutoColumn justify="flex-start" gap="sm" style={{ padding: '12px 0 0 0px' }}>
           <TYPE.main>

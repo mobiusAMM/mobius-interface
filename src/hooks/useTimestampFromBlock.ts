@@ -1,20 +1,20 @@
 import { useEffect, useState } from 'react'
 
-import { useActiveContractKit } from '.'
+import { useWeb3Context } from './web3'
 
 export function useTimestampFromBlock(block: number | undefined): number | undefined {
-  const { library } = useActiveContractKit()
+  const { provider } = useWeb3Context()
   const [timestamp, setTimestamp] = useState<number>()
   useEffect(() => {
     async function fetchTimestamp() {
       if (block) {
-        const blockData = await library?.getBlock(block)
+        const blockData = await provider?.getBlock(block)
         blockData && setTimestamp(blockData.timestamp)
       }
     }
     if (!timestamp) {
       fetchTimestamp()
     }
-  }, [block, library, timestamp])
+  }, [block, provider, timestamp])
   return timestamp
 }

@@ -4,7 +4,7 @@ import { Contract } from '@ethersproject/contracts'
 import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { useActiveContractKit } from '../../hooks'
+import { CHAIN } from '../../constants'
 import { useBlockNumber } from '../application/hooks'
 import { AppDispatch, AppState } from '../index'
 import {
@@ -51,7 +51,6 @@ export const NEVER_RELOAD: ListenerOptions = {
 
 // the lowest level call for subscribing to contract data
 function useCallsData(calls: (Call | undefined)[], options?: ListenerOptions): CallResult[] {
-  const { chainId } = useActiveContractKit()
   const callResults = useSelector<AppState, AppState['multicall']['callResults']>(
     (state) => state.multicall.callResults
   )
@@ -71,11 +70,11 @@ function useCallsData(calls: (Call | undefined)[], options?: ListenerOptions): C
   // update listeners when there is an actual change that persists for at least 100ms
   useEffect(() => {
     const callKeys: string[] = JSON.parse(serializedCallKeys)
-    if (!chainId || callKeys.length === 0) return undefined
+    if (callKeys.length === 0) return undefined
     const calls = callKeys.map((key) => parseCallKey(key))
     dispatch(
       addMulticallListeners({
-        chainId,
+        chainId: CHAIN,
         calls,
         options,
       })
@@ -84,20 +83,20 @@ function useCallsData(calls: (Call | undefined)[], options?: ListenerOptions): C
     return () => {
       dispatch(
         removeMulticallListeners({
-          chainId,
+          chainId: CHAIN,
           calls,
           options,
         })
       )
     }
-  }, [chainId, dispatch, options, serializedCallKeys])
+  }, [dispatch, options, serializedCallKeys])
 
   return useMemo(
     () =>
       calls.map<CallResult>((call) => {
-        if (!chainId || !call) return INVALID_RESULT
+        if (!call) return INVALID_RESULT
 
-        const result = callResults[chainId]?.[toCallKey(call)]
+        const result = callResults[CHAIN]?.[toCallKey(call)]
         let data
         if (result?.data && result?.data !== '0x') {
           data = result.data
@@ -105,7 +104,7 @@ function useCallsData(calls: (Call | undefined)[], options?: ListenerOptions): C
 
         return { valid: true, data, blockNumber: result?.blockNumber }
       }),
-    [callResults, calls, chainId]
+    [callResults, calls]
   )
 }
 

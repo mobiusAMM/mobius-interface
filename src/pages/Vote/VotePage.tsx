@@ -2,7 +2,6 @@ import { BigNumber } from '@ethersproject/bignumber'
 // eslint-disable-next-line no-restricted-imports
 import { TokenAmount } from '@ubeswap/sdk'
 import { CardNoise } from 'components/claim/styled'
-import { useActiveContractKit } from 'hooks'
 import useCurrentBlockTimestamp from 'hooks/useCurrentBlockTimestamp'
 import JSBI from 'jsbi'
 import { DateTime } from 'luxon/src/luxon'
@@ -18,6 +17,7 @@ import { AutoColumn } from '../../components/Column'
 import { CardSection, DataCard } from '../../components/earn/styled'
 import { RowBetween, RowFixed } from '../../components/Row'
 import VoteModal from '../../components/vote/VoteModal'
+import { CHAIN } from '../../constants'
 import {
   AVERAGE_BLOCK_TIME_IN_SECS,
   DEFAULT_AVERAGE_BLOCK_TIME_IN_SECS,
@@ -122,8 +122,6 @@ export default function VotePage({
     params: { id },
   },
 }: RouteComponentProps<{ governorIndex: string; id: string }>) {
-  const { chainId } = useActiveContractKit()
-
   // get data for this specific proposal
   const proposalData: ProposalData | undefined = useProposalData(id)
 
@@ -142,9 +140,9 @@ export default function VotePage({
       ? DateTime.fromSeconds(
           currentTimestamp
             .add(
-              BigNumber.from(
-                (chainId && AVERAGE_BLOCK_TIME_IN_SECS[chainId]) ?? DEFAULT_AVERAGE_BLOCK_TIME_IN_SECS
-              ).mul(BigNumber.from(proposalData.endBlock - currentBlock))
+              BigNumber.from(AVERAGE_BLOCK_TIME_IN_SECS[CHAIN] ?? DEFAULT_AVERAGE_BLOCK_TIME_IN_SECS).mul(
+                BigNumber.from(proposalData.endBlock - currentBlock)
+              )
             )
             .toNumber()
         )
@@ -173,7 +171,7 @@ export default function VotePage({
   // show links in propsoal details if content is an address
   // if content is contract with common name, replace address with common name
   const linkIfAddress = (content: string) => {
-    if (isAddress(content) && chainId) {
+    if (isAddress(content)) {
       const commonName = content === GOVERNANCE_ADDRESS ? 'Mobius Governance' : content
       return <ExternalLink href={`https://explorer.celo.org/address/${content}`}>{commonName}</ExternalLink>
     }
@@ -322,9 +320,7 @@ export default function VotePage({
               <TYPE.main>Proposer</TYPE.main>
             </TYPE.mediumHeader>
             <ProposerAddressLink
-              href={
-                proposalData?.proposer && chainId ? `https://explorer.celo.org/address/${proposalData?.proposer}` : ''
-              }
+              href={proposalData?.proposer ? `https://explorer.celo.org/address/${proposalData?.proposer}` : ''}
             >
               <ReactMarkdown source={proposalData?.proposer} />
             </ProposerAddressLink>

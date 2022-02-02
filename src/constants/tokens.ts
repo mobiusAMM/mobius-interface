@@ -12,7 +12,7 @@ const makeTokens = (
   })
 }
 
-export const UBE = makeTokens(
+export const MOBI = makeTokens(
   {
     [ChainId.MAINNET]: '0x73a210637f6F6B7005512677Ba6B3C96bb4AA44B',
     [ChainId.ALFAJORES]: '0x17a139f275102bBaB5BcbF1c4b7143F08B635EA2',

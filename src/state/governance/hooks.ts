@@ -6,11 +6,12 @@ import { formatUnits } from '@ethersproject/units'
 // eslint-disable-next-line no-restricted-imports
 import { TokenAmount } from '@ubeswap/sdk'
 import { abi as GOV_ABI } from '@uniswap/governance/build/GovernorAlpha.json'
-import { useActiveContractKit } from 'hooks'
+import { useWeb3Context } from 'hooks'
 import { useGovernanceContract, useVotingEscrowContract } from 'hooks/useContract'
 import { useCallback, useMemo } from 'react'
 import { calculateGasMargin } from 'utils/calculateGasMargin'
 
+import { CHAIN } from '../../constants'
 import { VEMOBI } from '../../constants/tokens'
 import { useLogs } from '../logs/hooks'
 import { useSingleCallResult, useSingleContractMultipleData } from '../multicall/hooks'
@@ -146,7 +147,6 @@ function countToIndices(count: number | undefined, skip = 0) {
 
 // get data for all past and active proposals
 export function useAllProposalData(): { data: ProposalData[]; loading: boolean } {
-  const { chainId } = useActiveContractKit()
   const gov = useGovernanceContract()
   const proposalCount = useProposalCount(gov)
 
@@ -195,7 +195,7 @@ export function useAllProposalData(): { data: ProposalData[]; loading: boolean }
       }),
       loading: false,
     }
-  }, [gov, proposalStates, proposals])
+  }, [formattedLogs, gov, proposalStates, proposals])
 }
 
 export function useProposalData(id: string): ProposalData | undefined {
@@ -205,26 +205,28 @@ export function useProposalData(id: string): ProposalData | undefined {
 
 // gets the users current votes
 export function useUserVotes(): { loading: boolean; votes: TokenAmount | undefined } {
-  const { account, chainId } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
   const veMOBIContract = useVotingEscrowContract()
 
   // check for available votes
-  const { result, loading } = useSingleCallResult(veMOBIContract, 'balanceOf(address)', [account ?? undefined])
+  const { result, loading } = useSingleCallResult(veMOBIContract, 'balanceOf(address)', [
+    connected ? address : undefined,
+  ])
   return useMemo(() => {
-    const veMOBI = chainId ? VEMOBI[chainId] : undefined
+    const veMOBI = VEMOBI[CHAIN]
     return { loading, votes: veMOBI && result ? new TokenAmount(veMOBI, result?.[0]) : undefined }
-  }, [chainId, loading, result])
+  }, [loading, result])
 }
 
 // fetch available votes as of block (usually proposal start block)
 export function useUserVotesAsOfBlock(block: number | undefined): TokenAmount | undefined {
-  const { account, chainId } = useActiveContractKit()
+  const { connected, address } = useWeb3Context()
   const veMOBIContract = useVotingEscrowContract()
 
   // check for available votes
-  const veMOBI = chainId ? VEMOBI[chainId] : undefined
+  const veMOBI = VEMOBI[CHAIN]
   const votes = useSingleCallResult(veMOBIContract, 'balanceOfAt(address, uint256)', [
-    account ?? undefined,
+    connected ? address : undefined,
     block ?? undefined,
   ])?.result?.[0]
   return votes && veMOBI ? new TokenAmount(veMOBI, votes) : undefined
@@ -233,7 +235,7 @@ export function useUserVotesAsOfBlock(block: number | undefined): TokenAmount | 
 export function useVoteCallback(): {
   voteCallback: (proposalId: string | undefined, voteOption: VoteOption) => undefined | Promise<string>
 } {
-  const { account, chainId } = useActiveContractKit()
+  const { connected } = useWeb3Context()
 
   const GovernanceContract = useGovernanceContract()
 
@@ -241,7 +243,7 @@ export function useVoteCallback(): {
 
   const voteCallback = useCallback(
     (proposalId: string | undefined, voteOption: VoteOption) => {
-      if (!account || !GovernanceContract || !proposalId || !chainId) return
+      if (!connected || !GovernanceContract || !proposalId) return
       return GovernanceContract.estimateGas
         .castVote(proposalId, voteOption === VoteOption.Against ? 0 : voteOption === VoteOption.For ? 1 : 2, {})
         .then((estimatedGasLimit) => {
@@ -261,7 +263,7 @@ export function useVoteCallback(): {
           })
         })
     },
-    [account, addTransaction, GovernanceContract, chainId]
+    [connected, GovernanceContract, addTransaction]
   )
   return { voteCallback }
 }
@@ -269,14 +271,14 @@ export function useVoteCallback(): {
 export function useCreateProposalCallback(): (
   createProposalData: CreateProposalData | undefined
 ) => undefined | Promise<string> {
-  const { account, chainId } = useActiveContractKit()
+  const { connected } = useWeb3Context()
 
   const GovernanceContract = useGovernanceContract()
   const addTransaction = useTransactionAdder()
 
   return useCallback(
     (createProposalData: CreateProposalData | undefined) => {
-      if (!account || !GovernanceContract || !createProposalData || !chainId) return undefined
+      if (!connected || !GovernanceContract || !createProposalData) return undefined
 
       return GovernanceContract.estimateGas
         .propose(
@@ -302,7 +304,7 @@ export function useCreateProposalCallback(): (
           })
         })
     },
-    [account, addTransaction, GovernanceContract, chainId]
+    [connected, GovernanceContract, addTransaction]
   )
 }
 
@@ -313,11 +315,9 @@ export function useLatestProposalId(address: string | undefined): string | undef
 }
 
 export function useProposalThreshold(): TokenAmount | undefined {
-  const { chainId } = useActiveContractKit()
-
   const GovernanceContract = useGovernanceContract()
   const res = useSingleCallResult(GovernanceContract, 'proposalThreshold')
-  const veMOBI = chainId ? VEMOBI[chainId] : undefined
+  const veMOBI = VEMOBI[CHAIN]
 
   if (res?.result?.[0] && veMOBI) {
     return new TokenAmount(veMOBI, res.result[0])

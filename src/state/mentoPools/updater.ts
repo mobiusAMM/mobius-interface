@@ -1,22 +1,27 @@
-import { CeloContract, StableToken } from '@celo/contractkit'
+import { Connection } from '@celo/connect'
+import { CeloContract, ContractKit, StableToken } from '@celo/contractkit'
 import { JSBI } from '@ubeswap/sdk'
 import { Exchange } from 'generated'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useBlockNumber } from 'state/application/hooks'
+import Web3 from 'web3'
 
+import { CHAIN } from '../../constants'
 import { MENTO_POOL_INFO } from '../../constants/StablePools'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { UseMentoContract } from '../../hooks/useContract'
 import { AppDispatch } from '../index'
 import { initPool } from './actions'
 import { MentoConstants } from './reducer'
 
 export function UpdateMento(): null {
-  const { library, chainId, account, kit } = useActiveContractKit()
+  const web3 = new Web3('https://forno.celo.org')
+  const kit = new ContractKit(new Connection(web3))
+  const { provider } = useWeb3Context()
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()
-  const pools: MentoConstants[] = MENTO_POOL_INFO[chainId]
+  const pools: MentoConstants[] = MENTO_POOL_INFO[CHAIN]
   const mentoContract = UseMentoContract('0x12364a15F52b822F12dd858FAeEdC49F472fbA57')
 
   useEffect(() => {
@@ -49,7 +54,7 @@ export function UpdateMento(): null {
       }
       updatePool(pool, mentoContract?.attach(address))
     })
-  }, [blockNumber, library, account, dispatch, pools, kit.contracts])
+  }, [blockNumber, provider, dispatch, pools, kit.contracts, mentoContract, kit.registry])
 
   return null
 }

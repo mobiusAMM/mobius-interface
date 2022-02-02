@@ -6,7 +6,7 @@ import { tryParseAmount } from 'state/swap/hooks'
 import styled from 'styled-components'
 
 import { weiScale } from '../../constants'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
 import { useStableSwapContract } from '../../hooks/useContract'
 import useTransactionDeadline from '../../hooks/useTransactionDeadline'
@@ -40,7 +40,7 @@ interface DepositModalProps {
 }
 
 export default function DepositModal({ isOpen, onDismiss, poolInfo }: DepositModalProps) {
-  const { account, network } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
   const { tokens, peggedTo, pegComesAfter, totalDeposited } = poolInfo
@@ -122,7 +122,7 @@ export default function DepositModal({ isOpen, onDismiss, poolInfo }: DepositMod
   }
 
   let error: string | undefined
-  if (!account) {
+  if (!connected) {
     error = 'Connect Wallet'
   }
   if (!poolInfo?.stakedAmount) {
@@ -308,9 +308,9 @@ const BalanceText = styled(TYPE.subHeader)`
 `
 
 const CurrencyRow = ({ tokenAmount, setInput, input, setUsingInsufficientFunds }: CurrencyRowProps) => {
-  const { account } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
   const currency = tokenAmount.currency
-  const tokenBalance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
+  const tokenBalance = useCurrencyBalance(connected ? address : undefined, currency ?? undefined)
   const TEN = JSBI.BigInt('10')
   const ZERO_TOK = new TokenAmount(currency, JSBI.BigInt('0'))
 

@@ -1,5 +1,5 @@
 import { StableToken } from '@celo/contractkit'
-import { ChainId, Fraction, JSBI, Token } from '@ubeswap/sdk'
+import { ChainId, JSBI, Token } from '@ubeswap/sdk'
 import { VestType } from 'state/claim/reducer'
 import { WrappedTokenInfo } from 'state/lists/hooks'
 import { MentoConstants } from 'state/mentoPools/reducer'
@@ -57,7 +57,7 @@ type StableSwapMathConstants = {
   swapFee: JSBI
 }
 type StableSwapConstants = StableSwapMathConstants & {
-  tokens: Token[]
+  tokens: WrappedTokenInfo[]
   tokenAddresses: string[]
   address: string
   gaugeAddress: string
@@ -220,7 +220,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: false,
       displayDecimals: 0,
       gaugeAddress: '0xc96AeeaFF32129da934149F6134Aa7bf291a754E',
-      totalMobiRate: JSBI.BigInt('1467123000000000000'),
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
       additionalRewardRate: ['23000000000000000'], // ['29552083330000000'], // ['36940104160000000'], // ['7302827380000000']
       displayChain: Chain.Ethereum,
@@ -273,7 +272,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: false,
       displayDecimals: 0,
       gaugeAddress: '0xE1f9D952EecC07cfEFa69df9fBB0cEF260957119',
-      totalMobiRate: JSBI.BigInt('1467123000000000000'),
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
       additionalRewardRate: ['13300000000000000'], // ['14776041660000000'], //['18468900000000000'], // ['7302827380000000']
       displayChain: Chain.Ethereum,
@@ -326,7 +324,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: true,
       displayDecimals: 2,
       gaugeAddress: '0x487c30CB18AA9Ced435911E2B414e0e85D7E52bB',
-      totalMobiRate: JSBI.BigInt('440137000000000000'),
       displayChain: Chain.Ethereum,
       coin: Coins.Ether,
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
@@ -379,7 +376,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: true,
       displayDecimals: 2,
       gaugeAddress: '0x127b524c74C2162Ee4BB2e42d8d2eB9050C0293E',
-      totalMobiRate: JSBI.BigInt('440137000000000000'),
       displayChain: Chain.Ethereum,
       coin: Coins.Bitcoin,
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
@@ -432,7 +428,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: false,
       displayDecimals: 0,
       gaugeAddress: '0x0A125D473cd3b1968e728DDF7d424c928C09222A',
-      totalMobiRate: JSBI.BigInt('1467123000000000000'),
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
       additionalRewardRate: ['3050000000000000'], // ['7388020830000000'], //['11080000000000000'], // ['2190848200000000'],
       displayChain: Chain.Polygon,
@@ -485,7 +480,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: false,
       displayDecimals: 0,
       gaugeAddress: '0xdAA2ab880b7f3D5697e6F85e63c28b9120AA9E07',
-      totalMobiRate: JSBI.BigInt('1467123000000000000'),
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
       additionalRewardRate: ['0'], // ['7302827380000000']
       displayChain: Chain.Ethereum,
@@ -539,7 +533,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: false,
       displayDecimals: 0,
       gaugeAddress: '0xF2ae5c2D2D2eD13dd324C0942163054fc4A3D4d9',
-      totalMobiRate: JSBI.BigInt('146712000000000000'),
       displayChain: Chain.Avax,
       coin: Coins.USD,
     },
@@ -591,7 +584,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: false,
       displayDecimals: 0,
       gaugeAddress: '0xE7195E651Cc47853f0054d85c8ADFc79D532929f',
-      totalMobiRate: JSBI.BigInt('1467123000000000000'),
       additionalRewards: ['0x00400FcbF0816bebB94654259de7273f4A05c762', '0x17700282592D6917F6A73D0bF8AcCf4D578c131e'],
       additionalRewardRate: ['6283068780000000', '16534391530000000'],
       displayChain: Chain.Celo,
@@ -645,7 +637,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: true,
       displayDecimals: 0,
       gaugeAddress: '0xD0d57a6689188F854F996BEAE0Cb1949FDB5FF86',
-      totalMobiRate: JSBI.BigInt('440137000000000000'),
       additionalRewards: ['0x00400FcbF0816bebB94654259de7273f4A05c762', '0x17700282592D6917F6A73D0bF8AcCf4D578c131e'],
       additionalRewardRate: ['6283068780000000', '8267195760000000'],
       // additionalRewards: [''],
@@ -1016,7 +1007,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: false,
       displayDecimals: 0,
       gaugeAddress: '0xe2d6095685248F38Ae9fef1b360D772b78Ea19D1',
-      totalMobiRate: JSBI.BigInt('146712000000000000'),
       displayChain: Chain.Ethereum,
       coin: Coins.USD,
     },
@@ -1067,7 +1057,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: false,
       displayDecimals: 0,
       gaugeAddress: '0xd1B3C05FE24bda6F52e704daf1ACBa8c440d8573',
-      totalMobiRate: JSBI.BigInt('440137000000000000'),
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
       additionalRewardRate: ['0'], //['730282730000000'],
       displayChain: Chain.Ethereum,
@@ -1121,7 +1110,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: true,
       displayDecimals: 0,
       gaugeAddress: '0x5489b2F0A1992b889F47601D71E068Fd15c63f26',
-      totalMobiRate: JSBI.BigInt('440137000000000000'),
       additionalRewards: ['0x00400FcbF0816bebB94654259de7273f4A05c762', '0x17700282592D6917F6A73D0bF8AcCf4D578c131e'],
       additionalRewardRate: ['0', '0'],
       // additionalRewards: [''],
@@ -1178,7 +1166,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: false,
       displayDecimals: 0,
       gaugeAddress: '0xCF34F4ec5DC9E09428A4f4a45475f6277694166c',
-      totalMobiRate: JSBI.BigInt('440137000000000000'),
       additionalRewards: ['0x00400FcbF0816bebB94654259de7273f4A05c762', '0x17700282592D6917F6A73D0bF8AcCf4D578c131e'],
       additionalRewardRate: ['0', '0'],
       // additionalRewards: [''],
@@ -1235,7 +1222,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: false,
       displayDecimals: 0,
       gaugeAddress: '0x1250D6dd3B51D20c14a8ECb10CC2dd713967767e',
-      totalMobiRate: JSBI.BigInt('1467123000000000000'),
       metaPool: 'USDC (Optics)',
       displayChain: Chain.Celo,
       coin: Coins.USD,
@@ -1243,179 +1229,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       isKilled: true,
     },
   ],
-  [ChainId.ALFAJORES]: [
-    {
-      name: 'Celo Pool',
-      tokenAddresses: ['0x2AaF20d89277BF024F463749045964D7e7d3A774', '0x3551d53C9CF91E222D9579A1Ac4B44117E8Ec609'],
-      tokens: [
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.ALFAJORES,
-            address: '0x2AaF20d89277BF024F463749045964D7e7d3A774',
-            decimals: 18,
-            symbol: 'cTC1',
-            name: 'Test Coin 1',
-            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_sCELO.png',
-          },
-          []
-        ),
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.ALFAJORES,
-            address: '0x3551d53C9CF91E222D9579A1Ac4B44117E8Ec609',
-            decimals: 18,
-            symbol: 'cTC2',
-            name: 'Test Coin 2',
-            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_rCELO.png',
-          },
-          []
-        ),
-      ],
-      address: '0xaAB4a154EE836fcDaa706da7BE3Cd36d116dcF84',
-      lpToken: new Token(
-        ChainId.ALFAJORES,
-        '0x5078111F81481C3583d6011355e69C44B3FF253d',
-        18,
-        'MobiLP',
-        'Mobius Celo LP'
-      ),
-      swapFee: JSBI.BigInt('50000000'),
-      rates: [JSBI.BigInt('1'), JSBI.BigInt('1')],
-      lendingPrecision: JSBI.BigInt('1'),
-      precision: JSBI.BigInt('18'),
-      feeDenominator: JSBI.BigInt('10000000000'),
-      precisionMul: [JSBI.BigInt('1'), JSBI.BigInt('1')],
-      feeIndex: 0,
-      decimals: [JSBI.BigInt('18'), JSBI.BigInt('18')],
-      peggedTo: 'CELO',
-      pegComesAfter: true,
-      gaugeAddress: '0x8222452cF3780825aA657B40C63D492F33F28bF6',
-      relativeGaugeWeight: new Fraction('1', '10'),
-      displayDecimals: 0,
-      additionalRewards: [
-        '0x2AaF20d89277BF024F463749045964D7e7d3A774',
-        '0x3551d53C9CF91E222D9579A1Ac4B44117E8Ec609',
-        '0xCC531BfBA46cA251D3D9f3aCc37ABD5DCF3ed0B3',
-      ],
-      additionalRewardRate: ['10000000000000000', '10000000000000000', '12312312312312312'],
-    },
-    {
-      name: 'USD Pool',
-      tokenAddresses: [
-        '0x7588110A070987ea0347Cf788226c28d1476d641',
-        '0x17Ec8dab839a9880D656c3cEF40cf4038657d168',
-        '0xCC531BfBA46cA251D3D9f3aCc37ABD5DCF3ed0B3',
-      ],
-      tokens: [
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.ALFAJORES,
-            address: '0x7588110A070987ea0347Cf788226c28d1476d641',
-            decimals: 18,
-            symbol: 'cUSD',
-            name: 'Celo Dollar',
-            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cUSD.png',
-          },
-          []
-        ),
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.ALFAJORES,
-            address: '0x17Ec8dab839a9880D656c3cEF40cf4038657d168',
-            decimals: 18,
-            symbol: 'USDT',
-            name: 'Tether',
-            logoURI: 'https://bit.ly/3AMrCyD',
-          },
-          []
-        ),
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.ALFAJORES,
-            address: '0xCC531BfBA46cA251D3D9f3aCc37ABD5DCF3ed0B3',
-            decimals: 18,
-            symbol: 'USDC',
-            name: 'US Dollar Coin',
-            logoURI: 'https://bit.ly/3CwGimW',
-          },
-          []
-        ),
-      ],
-      address: '0xFB80520416685420751B2CD8E2c305aCbd5F756E',
-      lpToken: new Token(
-        ChainId.ALFAJORES,
-        '0x18B1cC7ac290591853b9728BF0a88085EBc7F981',
-        18,
-        'MobiLP',
-        'Mobius USD LP'
-      ),
-      swapFee: JSBI.BigInt('10000000'),
-      rates: [JSBI.BigInt('1'), JSBI.BigInt('1'), JSBI.BigInt('1')],
-      lendingPrecision: JSBI.BigInt('1'),
-      precision: JSBI.BigInt('18'),
-      feeDenominator: JSBI.BigInt('10000000000'),
-      precisionMul: [JSBI.BigInt('1'), JSBI.BigInt('1'), JSBI.BigInt('1')],
-      feeIndex: 0,
-      decimals: [JSBI.BigInt('18'), JSBI.BigInt('18'), JSBI.BigInt('18')],
-      peggedTo: '$',
-      pegComesAfter: false,
-      displayDecimals: 0,
-      gaugeAddress: '0x9f2de5d953174bCfFA96f78d18a93b85BC5b8fc3',
-      relativeGaugeWeight: new Fraction('9', '10'),
-      additionalRewards: ['0x2AaF20d89277BF024F463749045964D7e7d3A774', '0x3551d53C9CF91E222D9579A1Ac4B44117E8Ec609'],
-      additionalRewardRate: ['10000000000000000', '10000000000000000'],
-    },
-    {
-      name: 'Test Meta Pool',
-      tokenAddresses: ['0x2AaF20d89277BF024F463749045964D7e7d3A774', '0x18B1cC7ac290591853b9728BF0a88085EBc7F981'],
-      tokens: [
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.ALFAJORES,
-            address: '0x2AaF20d89277BF024F463749045964D7e7d3A774',
-            decimals: 18,
-            symbol: 'cTC1',
-            name: 'Test Coin 1',
-            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_sCELO.png',
-          },
-          []
-        ),
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.ALFAJORES,
-            address: '0x18B1cC7ac290591853b9728BF0a88085EBc7F981',
-            decimals: 18,
-            symbol: 'MobiLP',
-            name: 'Mobius USD LP',
-            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_rCELO.png',
-          },
-          []
-        ),
-      ],
-      address: '0xf1C1a115628B8cFD3ecB0561f947308b160eb553',
-      lpToken: new Token(
-        ChainId.ALFAJORES,
-        '0x21b9213a56d29013B7138e3dB5f73CD0245fD0d6',
-        18,
-        'MobiLP',
-        'Mobius Celo LP'
-      ),
-      swapFee: JSBI.BigInt('50000000'),
-      rates: [JSBI.BigInt('1'), JSBI.BigInt('1')],
-      lendingPrecision: JSBI.BigInt('1'),
-      precision: JSBI.BigInt('18'),
-      feeDenominator: JSBI.BigInt('10000000000'),
-      precisionMul: [JSBI.BigInt('1'), JSBI.BigInt('1')],
-      feeIndex: 0,
-      decimals: [JSBI.BigInt('18'), JSBI.BigInt('18')],
-      peggedTo: 'CELO',
-      pegComesAfter: true,
-      gaugeAddress: '0x9f2de5d953174bCfFA96f78d18a93b85BC5b8fc3',
-      relativeGaugeWeight: new Fraction('1', '10'),
-      displayDecimals: 0,
-      metaPool: 'USD Pool',
-    },
-  ],
+  [ChainId.ALFAJORES]: [],
   [ChainId.BAKLAVA]: [],
 }
 
@@ -1480,87 +1294,8 @@ export const MENTO_POOL_INFO: { [K in ChainId]: MentoConstants[] } = {
   [ChainId.BAKLAVA]: [],
 }
 
-export const TOKENS: { [chain in ChainId]: { [address: string]: Token } } = {
-  [ChainId.MAINNET]: {
-    ['0x765DE816845861e75A25fCA122bb6898B8B1282a']: new WrappedTokenInfo(
-      {
-        chainId: ChainId.MAINNET,
-        address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
-        decimals: 18,
-        symbol: 'cUSD',
-        name: 'Celo Dollar',
-        logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cUSD.png',
-      },
-      []
-    ),
-    ['0x2A3684e9Dc20B857375EA04235F2F7edBe818FA7']: new WrappedTokenInfo(
-      {
-        chainId: ChainId.MAINNET,
-        address: '0x2A3684e9Dc20B857375EA04235F2F7edBe818FA7',
-        decimals: 6,
-        symbol: 'cUSDC',
-        name: 'US Dollar Coin (Optics Bridge)',
-        logoURI: 'https://bit.ly/3CwGimW',
-      },
-      []
-    ),
-    ['0xD629eb00dEced2a080B7EC630eF6aC117e614f1b']: new WrappedTokenInfo(
-      {
-        chainId: ChainId.MAINNET,
-        address: '0xD629eb00dEced2a080B7EC630eF6aC117e614f1b',
-        decimals: 18,
-        symbol: 'cBTC',
-        name: 'Wrapped Bitcoin',
-        logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cBTC.png',
-      },
-      []
-    ),
-    ['0xBe50a3013A1c94768A1ABb78c3cB79AB28fc1aCE']: new WrappedTokenInfo(
-      {
-        chainId: ChainId.MAINNET,
-        address: '0xBe50a3013A1c94768A1ABb78c3cB79AB28fc1aCE',
-        decimals: 8,
-        symbol: 'wBTC(O)',
-        name: 'Wrapped Bitcoin (Optics Bridge)',
-        logoURI: 'https://etherscan.io/token/images/wbtc_28.png?v=1',
-      },
-      []
-    ),
-    ['0xcFFfE0c89a779c09Df3DF5624f54cDf7EF5fDd5D']: new WrappedTokenInfo(
-      {
-        chainId: ChainId.MAINNET,
-        address: '0xcFFfE0c89a779c09Df3DF5624f54cDf7EF5fDd5D',
-        decimals: 18,
-        symbol: 'cUSDTm',
-        name: 'Tether (Moss Bridge)',
-        logoURI: 'https://bit.ly/3AMrCyD',
-      },
-      []
-    ),
-    ['0x93DB49bE12B864019dA9Cb147ba75cDC0506190e']: new WrappedTokenInfo(
-      {
-        chainId: ChainId.MAINNET,
-        address: '0x93DB49bE12B864019dA9Cb147ba75cDC0506190e',
-        decimals: 18,
-        symbol: 'cUSDCm',
-        name: 'US Dollar Coin (Moss Bridge)',
-        logoURI: 'https://bit.ly/3CwGimW',
-      },
-      []
-    ),
-  },
-  [ChainId.ALFAJORES]: {},
-  [ChainId.BAKLAVA]: {},
-}
-
 //todo: replace Mainnet and Baklava Pool Addresses
 type AddressMap = { [K in ChainId]: string }
-
-export const USD_POOL_ADDRESSES: AddressMap = {
-  [ChainId.MAINNET]: '',
-  [ChainId.ALFAJORES]: '0xe83e3750eeE33218586015Cf3a34c6783C0F63Ac',
-  [ChainId.BAKLAVA]: '',
-}
 
 export const LP_VEST_ADDRESSES: AddressMap = {
   [ChainId.MAINNET]: '0x74Fc71eF736feeaCfd58aeb2543c5fe4d33aDc14',

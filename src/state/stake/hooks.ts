@@ -3,8 +3,9 @@ import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import { MentoConstants } from 'state/mentoPools/reducer'
 import { StableSwapConstants } from 'state/stablePools/reducer'
 
+import { CHAIN } from '../../constants'
 import { MENTO_POOL_INFO, STATIC_POOL_INFO } from '../../constants/StablePools'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { tryParseAmount } from '../swap/hooks'
 
 export function useTokensTradeable(
@@ -14,20 +15,18 @@ export function useTokensTradeable(
   const tradeable: { [address: string]: Token } = {}
   const poolMap: { [name: string]: StableSwapConstants } = {}
   const pools: StableSwapConstants[][] | MentoConstants[][] = mento ? MENTO_POOL_INFO : STATIC_POOL_INFO
-  const { chainId } = useActiveContractKit()
 
   if (!tokenIn) return [{}]
 
-  if (!mento) pools[chainId].forEach((pool: StableSwapConstants) => (poolMap[pool.name] = pool))
+  if (!mento) pools[CHAIN].forEach((pool: StableSwapConstants) => (poolMap[pool.name] = pool))
 
-  pools[chainId]
-    .filter(
-      ({ tokens, disabled }) =>
-        tokens
-          .filter(({ name }) => name !== 'Mob LP')
-          .map(({ address }) => address)
-          .includes(tokenIn.address) && !disabled
-    )
+  pools[CHAIN].filter(
+    ({ tokens, disabled }) =>
+      tokens
+        .filter(({ name }) => name !== 'Mob LP')
+        .map(({ address }) => address)
+        .includes(tokenIn.address) && !disabled
+  )
     .flatMap(({ tokens }) => tokens)
     .forEach((token) => {
       if (token !== tokenIn) tradeable[token.address] = token
@@ -45,7 +44,7 @@ export function useDerivedStakeInfo(
   parsedAmount?: TokenAmount
   error?: string
 } {
-  const { account } = useActiveContractKit()
+  const { connected } = useWeb3Context()
 
   const parsedInput: TokenAmount | undefined = tryParseAmount(typedValue, stakingToken)
 
@@ -55,7 +54,7 @@ export function useDerivedStakeInfo(
       : undefined
 
   let error: string | undefined
-  if (!account) {
+  if (!connected) {
     error = 'Connect Wallet'
   }
   if (!parsedAmount) {

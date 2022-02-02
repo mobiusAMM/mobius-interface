@@ -1,9 +1,9 @@
-import { useContractKit, useGetConnectedSigner } from '@celo-tools/use-contractkit'
-import { ChainId } from '@ubeswap/sdk'
 import { BigNumber, BigNumberish, CallOverrides, Contract, ContractTransaction, PayableOverrides } from 'ethers'
 import { useCallback } from 'react'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { calculateGasMargin } from 'utils'
+
+import { useWeb3Context } from './web3'
 
 type Head<T extends any[]> = Required<T> extends [...infer H, any] ? H : never
 type Last<T extends Array<unknown>> = Required<T> extends [...unknown[], infer L] ? L : never
@@ -66,15 +66,10 @@ const estimateGas = async (call: ContractCall): Promise<BigNumber> => {
  */
 export const useDoTransaction = (): DoTransactionFn => {
   const addTransaction = useTransactionAdder()
-  const { network } = useContractKit()
-  const getConnectedSigner = useGetConnectedSigner()
-  const chainId = network.chainId as unknown as ChainId
+  const { provider } = useWeb3Context()
   return useCallback(
     async (contractDisconnected, methodName, args): Promise<ContractTransaction> => {
-      if (chainId === ChainId.BAKLAVA) {
-        throw new Error('baklava not supported')
-      }
-      const contract = contractDisconnected.connect(await getConnectedSigner())
+      const contract = contractDisconnected.connect(provider.getSigner())
       const call = { contract, methodName, args: args.args, value: args.overrides?.value }
       const gasEstimate = await estimateGas(call)
 
@@ -100,6 +95,6 @@ export const useDoTransaction = (): DoTransactionFn => {
         }
       }
     },
-    [addTransaction, chainId, getConnectedSigner]
+    [addTransaction, provider]
   )
 }

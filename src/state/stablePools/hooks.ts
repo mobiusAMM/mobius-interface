@@ -2,7 +2,7 @@
 import { JSBI, Percent, Token, TokenAmount } from '@ubeswap/sdk'
 import { TokenList } from '@uniswap/token-lists'
 import { Chain, Coins } from 'constants/StablePools'
-import { useActiveContractKit } from 'hooks'
+import { useWeb3Context } from 'hooks'
 import { useLiquidityGaugeContract, useStableSwapContract } from 'hooks/useContract'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -11,6 +11,7 @@ import { useDefaultTokenList, WrappedTokenInfo } from 'state/lists/hooks'
 import { useSingleContractMultipleData } from 'state/multicall/hooks'
 import { tryParseAmount } from 'state/swap/hooks'
 
+import { CHAIN } from '../../constants'
 import WARNINGS from '../../constants/PoolWarnings.json'
 import { StableSwapMath } from '../../utils/stableSwapMath'
 import { AppState } from '..'
@@ -147,29 +148,27 @@ export const getPoolInfo = (
 
 export function useStablePoolInfoByName(name: string): StablePoolInfo | undefined {
   const pool = useSelector<AppState, StableSwapPool>((state) => state.stablePools.pools[name.toLowerCase()]?.pool)
-  const { chainId } = useActiveContractKit()
-  const tokens = useDefaultTokenList()[chainId]
+  const tokens = useDefaultTokenList()[CHAIN]
   return !pool ? undefined : { ...getPoolInfo(pool, tokens) }
 }
 
 export function useStablePoolInfo(): readonly StablePoolInfo[] {
   const pools = usePools()
-  const { chainId } = useActiveContractKit()
-  const tokens = useDefaultTokenList()[chainId]
+  const tokens = useDefaultTokenList()[CHAIN]
   return pools.map((pool) => getPoolInfo(pool, tokens)).filter((el) => el)
 }
 
 export function useExpectedTokens(pool: StablePoolInfo, lpAmount: TokenAmount): TokenAmount[] {
   const contract = useStableSwapContract(pool.poolAddress)
   const { tokens } = pool
-  const { account } = useActiveContractKit()
+  const { address } = useWeb3Context()
   const [expectedOut, setExpectedOut] = useState<TokenAmount[]>(
     tokens.map((token) => new TokenAmount(token, JSBI.BigInt('0')))
   )
   useEffect(() => {
     const updateData = async () => {
       try {
-        const newTokenAmounts = await contract?.calculateRemoveLiquidity(account, lpAmount.raw.toString())
+        const newTokenAmounts = await contract?.calculateRemoveLiquidity(address, lpAmount.raw.toString())
         setExpectedOut(tokens.map((token, i) => new TokenAmount(token, JSBI.BigInt(newTokenAmounts[i].toString()))))
       } catch (e) {
         console.error(e)
@@ -177,7 +176,7 @@ export function useExpectedTokens(pool: StablePoolInfo, lpAmount: TokenAmount): 
       }
     }
     lpAmount && lpAmount.raw && updateData()
-  }, [account, lpAmount])
+  }, [address, contract, lpAmount, tokens])
   return expectedOut
 }
 
@@ -257,13 +256,13 @@ export function usePriceOfLp(address: string, amountOfLp: TokenAmount): TokenAmo
 export function useExternalRewards({ address }: { address: string }): TokenAmount[] {
   const pool = useSelector<AppState, StableSwapPool>((state) => state.stablePools.pools[address.toLowerCase()]?.pool)
   const gauge = useLiquidityGaugeContract(pool?.gaugeAddress ?? undefined)
-  const { account, chainId } = useActiveContractKit()
+  const { address: userAddress, connected } = useWeb3Context()
   gauge?.claimable_reward_write
-  const tokens = useDefaultTokenList()[chainId]
+  const tokens = useDefaultTokenList()[CHAIN]
   const claimableTokens = useSingleContractMultipleData(
     gauge,
     'claimable_reward_write',
-    pool?.additionalRewards?.map((token) => [account ?? undefined, token ?? undefined]) ?? undefined
+    pool?.additionalRewards?.map((token) => [connected ? userAddress : undefined, token ?? undefined]) ?? undefined
   )
   // console.log(claimableTokens)
   const externalRewards = claimableTokens?.map(

@@ -40,3 +40,4 @@ package-lock.json
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+yarn.lock

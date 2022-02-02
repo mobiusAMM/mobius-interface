@@ -20,7 +20,7 @@ import { ButtonConfirmed, ButtonError } from '../../components/Button'
 import Column from '../../components/Column'
 import { Input as NumericalInput } from '../../components/NumericalInput'
 import ProgressSteps from '../../components/ProgressSteps'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
 import { useVotingEscrowContract } from '../../hooks/useContract'
 import { tryParseAmount } from '../../state/swap/hooks'
@@ -40,13 +40,13 @@ interface LockProps {
 }
 
 export default function Lock({ setHash, setAttempting }: LockProps) {
-  const { library, account } = useActiveContractKit()
+  const { connected, address } = useWeb3Context()
 
   // monitor call to help UI loading state
   const stakingInfo = useMobiStakingInfo()
   const positions = stakingInfo.positions?.filter((pos) => pos.baseBalance.greaterThan('0')) ?? []
   const mobi = useMobi()
-  const balance = useCurrencyBalance(account, mobi)
+  const balance = useCurrencyBalance(connected ? address : undefined, mobi)
   const [approving, setApproving] = useState(false)
   const [input, setInput] = useState<string>('')
   const [showBoosts, setShowBoosts] = useState(false)
@@ -83,7 +83,7 @@ export default function Lock({ setHash, setAttempting }: LockProps) {
   }
 
   let error: string | undefined
-  if (!account) {
+  if (!connected) {
     error = 'Connect Wallet'
   }
 
@@ -237,7 +237,6 @@ const BalanceText = styled(TYPE.subHeader)`
 `
 
 const CurrencyRow = ({ val, token, setTokenAmount, balance, readOnly }: CurrencyRowProps) => {
-  const { account } = useActiveContractKit()
   const currency = token
   const tokenBalance = balance
   const TEN = JSBI.BigInt('10')

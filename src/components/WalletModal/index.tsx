@@ -1,4 +1,4 @@
-import { useContractKit } from '@celo-tools/use-contractkit'
+import { useWeb3Context } from 'hooks'
 import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import styled from 'styled-components'
@@ -101,7 +101,7 @@ export default function WalletModal({
   confirmedTransactions: string[] // hashes of confirmed
   ENSName?: string
 }) {
-  const { address } = useContractKit()
+  const { address } = useWeb3Context()
   // TODO(igm): get the errors
   const error = null
 

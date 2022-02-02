@@ -2,7 +2,7 @@ import { Contract } from '@ethersproject/contracts'
 import { useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { useActiveContractKit } from '../../hooks'
+import { CHAIN } from '../../constants'
 import { useMulticallContract } from '../../hooks/useContract'
 import useDebounce from '../../hooks/useDebounce'
 import chunkArray from '../../utils/chunkArray'
@@ -113,25 +113,23 @@ export default function Updater(): null {
   // wait for listeners to settle before triggering updates
   const debouncedListeners = useDebounce(state.callListeners, 100)
   const latestBlockNumber = useBlockNumber()
-  const { chainId } = useActiveContractKit()
   const multicallContract = useMulticallContract()
   const cancellations = useRef<{ blockNumber: number; cancellations: (() => void)[] }>()
 
   const listeningKeys: { [callKey: string]: number } = useMemo(() => {
-    return activeListeningKeys(debouncedListeners, chainId)
-  }, [debouncedListeners, chainId])
+    return activeListeningKeys(debouncedListeners, CHAIN)
+  }, [debouncedListeners])
 
   const unserializedOutdatedCallKeys = useMemo(() => {
-    return outdatedListeningKeys(state.callResults, listeningKeys, chainId, latestBlockNumber)
-  }, [chainId, state.callResults, listeningKeys, latestBlockNumber])
+    return outdatedListeningKeys(state.callResults, listeningKeys, CHAIN, latestBlockNumber)
+  }, [state.callResults, listeningKeys, latestBlockNumber])
 
   const serializedOutdatedCallKeys = useMemo(
     () => JSON.stringify(unserializedOutdatedCallKeys.sort()),
     [unserializedOutdatedCallKeys]
   )
-
   useEffect(() => {
-    if (!latestBlockNumber || !chainId || !multicallContract) return
+    if (!latestBlockNumber || !multicallContract) return
 
     const outdatedCallKeys: string[] = JSON.parse(serializedOutdatedCallKeys)
     if (outdatedCallKeys.length === 0) return
@@ -146,7 +144,7 @@ export default function Updater(): null {
     dispatch(
       fetchingMulticallResults({
         calls,
-        chainId,
+        chainId: CHAIN,
         fetchingBlockNumber: latestBlockNumber,
       })
     )
@@ -169,7 +167,7 @@ export default function Updater(): null {
 
             dispatch(
               updateMulticallResults({
-                chainId,
+                chainId: CHAIN,
                 results: outdatedCallKeys
                   .slice(firstCallKeyIndex, lastCallKeyIndex)
                   .reduce<{ [callKey: string]: string | null }>((memo, callKey, i) => {
@@ -185,7 +183,7 @@ export default function Updater(): null {
               console.debug('Cancelled fetch for blockNumber', latestBlockNumber)
               return
             }
-            console.error('Failed to fetch multicall chunk', chunk, chainId, error)
+            console.error('Failed to fetch multicall chunk', chunk, CHAIN, error)
             // dispatch(
             //   errorFetchingMulticallResults({
             //     calls: chunk,
@@ -197,7 +195,7 @@ export default function Updater(): null {
         return cancel
       }),
     }
-  }, [chainId, latestBlockNumber])
+  }, [latestBlockNumber])
 
   return null
 }

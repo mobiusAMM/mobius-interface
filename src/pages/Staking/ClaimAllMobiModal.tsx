@@ -1,7 +1,6 @@
 import { TransactionResponse } from '@ethersproject/providers'
 import { JSBI, TokenAmount } from '@ubeswap/sdk'
 import { useMobi } from 'hooks/Tokens'
-import { useDoTransaction } from 'hooks/useDoTransaction'
 import React, { useState } from 'react'
 import { GaugeSummary } from 'state/staking/hooks'
 import styled from 'styled-components'
@@ -11,7 +10,7 @@ import { AutoColumn } from '../../components/Column'
 import Modal from '../../components/Modal'
 import { LoadingView, SubmittedView } from '../../components/ModalViews'
 import { RowBetween } from '../../components/Row'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { useMobiMinterContract } from '../../hooks/useContract'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { CloseIcon, TYPE } from '../../theme'
@@ -31,14 +30,13 @@ export const getAllUnclaimedMobi = (summaries: GaugeSummary[]): JSBI =>
   summaries.reduce((accum, { unclaimedMobi }) => JSBI.add(accum, unclaimedMobi.raw), JSBI.BigInt(0))
 
 export default function ClaimAllMobiModal({ isOpen, onDismiss, summaries }: StakingModalProps) {
-  const { account, chainId } = useActiveContractKit()
+  const { connected } = useWeb3Context()
   const mobi = useMobi()
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
   const [hash, setHash] = useState<string | undefined>()
   const [attempting, setAttempting] = useState(false)
-  const doTransaction = useDoTransaction()
 
   function wrappedOnDismiss() {
     setHash(undefined)
@@ -72,7 +70,7 @@ export default function ClaimAllMobiModal({ isOpen, onDismiss, summaries }: Stak
   }
 
   let error: string | undefined
-  if (!account) {
+  if (!connected) {
     error = 'Connect Wallet'
   }
 

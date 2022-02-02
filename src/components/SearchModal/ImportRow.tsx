@@ -4,7 +4,6 @@ import { AutoColumn } from 'components/Column'
 import CurrencyLogo from 'components/CurrencyLogo'
 import ListLogo from 'components/ListLogo'
 import { AutoRow, RowFixed } from 'components/Row'
-import { useActiveContractKit } from 'hooks'
 import { useIsTokenActive, useIsUserAddedToken } from 'hooks/Tokens'
 import useTheme from 'hooks/useTheme'
 import React, { CSSProperties } from 'react'
@@ -12,6 +11,8 @@ import { CheckCircle } from 'react-feather'
 import { useCombinedInactiveList } from 'state/lists/hooks'
 import styled from 'styled-components'
 import { TYPE } from 'theme'
+
+import { CHAIN } from '../../constants'
 
 const TokenSection = styled.div<{ dim?: boolean }>`
   padding: 4px 20px;
@@ -54,12 +55,11 @@ export default function ImportRow({
   setImportToken: (token: Token) => void
 }) {
   // gloabls
-  const { chainId } = useActiveContractKit()
   const theme = useTheme()
 
   // check if token comes from list
   const inactiveTokenList = useCombinedInactiveList()
-  const list = chainId && inactiveTokenList?.[chainId]?.[token.address]?.list
+  const list = inactiveTokenList?.[CHAIN]?.[token.address]?.list
 
   // check if already active on list or local storage tokens
   const isAdded = useIsUserAddedToken(token)

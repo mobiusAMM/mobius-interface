@@ -13,8 +13,7 @@ import { Text } from 'rebass'
 import { useOpticsV1Tokens, useOpticsV2Tokens } from 'state/openSum/hooks'
 import styled from 'styled-components'
 
-import { useActiveContractKit, useChainId } from '../../hooks'
-import { useBridgeableTokens } from '../../hooks/optics'
+import { CHAIN } from '../../constants'
 import { useFoundOnInactiveList, useSwappableTokens, useToken } from '../../hooks/Tokens'
 import { useTokensTradeable } from '../../state/stake/hooks'
 import { CloseIcon, TYPE } from '../../theme'
@@ -71,8 +70,6 @@ export function CurrencySearch({
   tokenType,
 }: CurrencySearchProps) {
   const { t } = useTranslation()
-  const { chainId } = useActiveContractKit()
-  const actualChainId = useChainId()
   const theme = useTheme()
 
   // refs for fixed size lists
@@ -87,14 +84,10 @@ export function CurrencySearch({
   const isAddressSearch = isAddress(searchQuery)
   const searchToken = useToken(location.pathname.includes('mint'), searchQuery)
   const [tokensInSamePool] = useTokensTradeable(location.pathname.includes('mint'), otherSelectedCurrency)
-  const bridgeableTokens = useBridgeableTokens()
   const opticsV1 = useOpticsV1Tokens()
   const opticsV2 = useOpticsV2Tokens()
   let tokensToSelect = allTokens
   if (otherSelectedCurrency && !selectedCurrency) tokensToSelect = tokensInSamePool
-  if (location.pathname.includes('optics')) {
-    tokensToSelect = bridgeableTokens
-  }
   if (tokenType) {
     if (tokenType === TokenType.OpticsV1) {
       tokensToSelect = opticsV1
@@ -178,7 +171,7 @@ export function CurrencySearch({
       if (e.key === 'Enter') {
         const s = searchQuery.toLowerCase().trim()
         if (s === 'cusd') {
-          handleCurrencySelect(cUSD[chainId])
+          handleCurrencySelect(cUSD[CHAIN])
         } else if (filteredSortedTokens.length > 0) {
           if (
             filteredSortedTokens[0].symbol?.toLowerCase() === searchQuery.trim().toLowerCase() ||
@@ -189,7 +182,7 @@ export function CurrencySearch({
         }
       }
     },
-    [filteredSortedTokens, handleCurrencySelect, searchQuery, chainId]
+    [filteredSortedTokens, handleCurrencySelect, searchQuery]
   )
 
   // menu ui
@@ -232,7 +225,7 @@ export function CurrencySearch({
           </Row>
         )}
         {showCommonBases && (
-          <CommonBases chainId={chainId} onSelect={handleCurrencySelect} selectedCurrency={selectedCurrency} />
+          <CommonBases chainId={CHAIN} onSelect={handleCurrencySelect} selectedCurrency={selectedCurrency} />
         )}
       </PaddedColumn>
       <Separator />

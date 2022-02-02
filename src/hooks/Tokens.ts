@@ -1,37 +1,18 @@
 import { arrayify } from '@ethersproject/bytes'
 import { parseBytes32String } from '@ethersproject/strings'
 import { Token } from '@ubeswap/sdk'
-import { VEMOBI } from 'constants/tokens'
 import { useMemo } from 'react'
 
 import { filterTokens } from '../components/SearchModal/filtering'
+import { CHAIN } from '../constants'
 import { MENTO_POOL_INFO, MOBI_TOKEN, STATIC_POOL_INFO } from '../constants/StablePools'
+import { VEMOBI } from '../constants/tokens'
 import { NEVER_RELOAD, useSingleCallResult } from '../state/multicall/hooks'
 import { isAddress } from '../utils'
-import { TokenAddressMap } from './../state/lists/hooks'
-import { useActiveContractKit } from './index'
 import { useBytes32TokenContract, useTokenContract } from './useContract'
 
-// reduce token map into standard address <-> Token mapping, optionally include user added tokens
-function useTokensFromMap(tokenMap: TokenAddressMap, includeUserAdded: boolean): { [address: string]: Token } {
-  const { chainId } = useActiveContractKit()
-
-  return useMemo(() => {
-    if (!chainId) return {}
-
-    // reduce to just tokens
-    const mapWithoutUrls = Object.keys(tokenMap[chainId]).reduce<{ [address: string]: Token }>((newMap, address) => {
-      newMap[address] = tokenMap[chainId][address].token
-      return newMap
-    }, {})
-
-    return mapWithoutUrls
-  }, [chainId, tokenMap, includeUserAdded])
-}
-
 export function useSwappableTokens(mento?: boolean): { [address: string]: Token } {
-  const { chainId } = useActiveContractKit()
-  const pools = mento ? MENTO_POOL_INFO[chainId] ?? [] : STATIC_POOL_INFO[chainId] ?? []
+  const pools = mento ? MENTO_POOL_INFO[CHAIN] ?? [] : STATIC_POOL_INFO[CHAIN] ?? []
   const swappableTokens: { [address: string]: Token } = {}
   pools
     .flatMap(({ tokens, disabled }) => (disabled ? null : tokens))
@@ -71,17 +52,16 @@ export function useIsTokenActive(token: Token | undefined | null): boolean {
 
 // used to detect extra search results
 export function useFoundOnInactiveList(searchQuery: string): Token[] | undefined {
-  const { chainId } = useActiveContractKit()
   const inactiveTokens = useAllInactiveTokens()
 
   return useMemo(() => {
-    if (!chainId || searchQuery === '') {
+    if (searchQuery === '') {
       return undefined
     } else {
       const tokens = filterTokens(Object.values(inactiveTokens), searchQuery)
       return tokens
     }
-  }, [chainId, inactiveTokens, searchQuery])
+  }, [inactiveTokens, searchQuery])
 }
 
 // Check if currency is included in custom list from user storage
@@ -109,7 +89,6 @@ function parseStringOrBytes32(str: string | undefined, bytes32: string | undefin
 // null if loading
 // otherwise returns the token
 export function useToken(mento?: boolean, tokenAddress?: string): Token | undefined | null {
-  const { chainId } = useActiveContractKit()
   const tokens = useSwappableTokens(mento)
 
   const address = isAddress(tokenAddress)
@@ -131,11 +110,11 @@ export function useToken(mento?: boolean, tokenAddress?: string): Token | undefi
 
   return useMemo(() => {
     if (token) return token
-    if (!chainId || !address) return undefined
+    if (!address) return undefined
     if (decimals.loading || symbol.loading || tokenName.loading) return null
     if (decimals.result) {
       return new Token(
-        chainId as number,
+        CHAIN,
         address,
         decimals.result[0],
         parseStringOrBytes32(symbol.result?.[0], symbolBytes32.result?.[0], 'UNKNOWN'),
@@ -145,7 +124,6 @@ export function useToken(mento?: boolean, tokenAddress?: string): Token | undefi
     return undefined
   }, [
     address,
-    chainId,
     decimals.loading,
     decimals.result,
     symbol.loading,
@@ -164,11 +142,9 @@ export function useCurrency(mento: boolean, currencyId: string | undefined): Tok
 }
 
 export function useMobi(): Token | undefined {
-  const { chainId } = useActiveContractKit()
-  return MOBI_TOKEN[chainId]
+  return MOBI_TOKEN[CHAIN]
 }
 
 export function useVeMobi(): Token | undefined {
-  const { chainId } = useActiveContractKit()
-  return VEMOBI[chainId]
+  return VEMOBI[CHAIN]
 }

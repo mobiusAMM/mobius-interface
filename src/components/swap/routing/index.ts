@@ -2,7 +2,6 @@ import { Signer } from '@ethersproject/abstract-signer'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { CallOverrides, Contract, ContractTransaction, PayableOverrides } from '@ethersproject/contracts'
 import { ChainId, Trade } from '@ubeswap/sdk'
-import { useActiveContractKit } from 'hooks'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { calculateGasMargin } from 'utils'
 
@@ -78,11 +77,7 @@ const estimateGas = async (call: ContractCall): Promise<BigNumber> => {
  */
 export const useDoTransaction = (): DoTransactionFn => {
   const addTransaction = useTransactionAdder()
-  const { chainId } = useActiveContractKit()
   return async (contract, methodName, args): Promise<string> => {
-    if (chainId === ChainId.BAKLAVA) {
-      throw new Error('baklava not supported')
-    }
     const call = { contract, methodName, args: args.args, value: args.overrides?.value }
     const gasEstimate = await estimateGas(call)
 

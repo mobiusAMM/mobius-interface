@@ -8,7 +8,7 @@ import Loader from 'components/Loader'
 import { AutoRow, RowBetween } from 'components/Row'
 // import { SwitchLocaleLink } from 'components/SwitchLocaleLink'
 import ProposalEmptyState from 'components/vote/ProposalEmptyState'
-import { useActiveContractKit } from 'hooks'
+import { useWeb3Context } from 'hooks'
 import { darken } from 'polished'
 import React from 'react'
 import { Link } from 'react-router-dom'
@@ -18,6 +18,7 @@ import { useTokenBalance } from 'state/wallet/hooks'
 import styled from 'styled-components/macro'
 import { ExternalLink, TYPE } from 'theme'
 
+import { CHAIN } from '../../constants'
 import { VEMOBI } from '../../constants/tokens'
 import { ProposalStatus } from './styled'
 
@@ -73,17 +74,14 @@ const WrapSmall = styled(RowBetween)`
 `
 
 export default function Vote() {
-  const { account, chainId } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
 
   // get data to list all proposals
   const { data: allProposals, loading: loadingProposals } = useAllProposalData()
 
   // user data
   const { loading: loadingAvailableVotes, votes: availableVotes } = useUserVotes()
-  const uniBalance: TokenAmount | undefined = useTokenBalance(
-    account ?? undefined,
-    chainId ? VEMOBI[chainId] : undefined
-  )
+  const uniBalance: TokenAmount | undefined = useTokenBalance(connected ? address : undefined, VEMOBI[CHAIN])
 
   return (
     <>

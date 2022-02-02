@@ -1,6 +1,5 @@
 import { Token } from '@ubeswap/sdk'
 import Row, { RowBetween, RowFixed } from 'components/Row'
-import { useActiveContractKit } from 'hooks'
 import { useToken } from 'hooks/Tokens'
 import React, { RefObject, useCallback, useMemo, useRef, useState } from 'react'
 import { useRemoveUserAddedToken } from 'state/user/hooks'
@@ -8,6 +7,7 @@ import styled from 'styled-components'
 import { ButtonText, ExternalLink, ExternalLinkIcon, TrashIcon, TYPE } from 'theme'
 import { isAddress } from 'utils'
 
+import { CHAIN } from '../../constants'
 import { getExplorerLink } from '../../constants/NetworkInfo'
 import useTheme from '../../hooks/useTheme'
 import Card from '../Card'
@@ -43,8 +43,6 @@ export default function ManageTokens({
   setModalView: (view: CurrencyModalView) => void
   setImportToken: (token: Token) => void
 }) {
-  const { chainId } = useActiveContractKit()
-
   const [searchQuery, setSearchQuery] = useState<string>('')
   const theme = useTheme()
 
@@ -65,34 +63,31 @@ export default function ManageTokens({
   const removeToken = useRemoveUserAddedToken()
 
   const handleRemoveAll = useCallback(() => {
-    if (chainId && userAddedTokens) {
+    if (userAddedTokens) {
       userAddedTokens.map((token) => {
-        return removeToken(chainId, token.address)
+        return removeToken(CHAIN, token.address)
       })
     }
-  }, [removeToken, userAddedTokens, chainId])
+  }, [removeToken, userAddedTokens])
 
   const tokenList = useMemo(() => {
-    return (
-      chainId &&
-      userAddedTokens.map((token) => (
-        <RowBetween key={token.address} width="100%">
-          <RowFixed>
-            <CurrencyLogo currency={token} size={'20px'} />
-            <ExternalLink href={getExplorerLink(chainId, token.address, 'address')}>
-              <TYPE.main ml={'10px'} fontWeight={600}>
-                {token.symbol}
-              </TYPE.main>
-            </ExternalLink>
-          </RowFixed>
-          <RowFixed>
-            <TrashIcon onClick={() => removeToken(chainId, token.address)} />
-            <ExternalLinkIcon href={getExplorerLink(chainId, token.address, 'address')} />
-          </RowFixed>
-        </RowBetween>
-      ))
-    )
-  }, [userAddedTokens, chainId, removeToken])
+    return userAddedTokens.map((token) => (
+      <RowBetween key={token.address} width="100%">
+        <RowFixed>
+          <CurrencyLogo currency={token} size={'20px'} />
+          <ExternalLink href={getExplorerLink(CHAIN, token.address, 'address')}>
+            <TYPE.main ml={'10px'} fontWeight={600}>
+              {token.symbol}
+            </TYPE.main>
+          </ExternalLink>
+        </RowFixed>
+        <RowFixed>
+          <TrashIcon onClick={() => removeToken(CHAIN, token.address)} />
+          <ExternalLinkIcon href={getExplorerLink(CHAIN, token.address, 'address')} />
+        </RowFixed>
+      </RowBetween>
+    ))
+  }, [userAddedTokens, removeToken])
 
   return (
     <Wrapper>
