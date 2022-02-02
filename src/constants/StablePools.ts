@@ -1283,6 +1283,33 @@ export const MENTO_POOL_INFO: { [K in ChainId]: MentoConstants[] } = {
         ),
       ],
     },
+    {
+      stable: StableToken.cREAL,
+      tokens: [
+        new WrappedTokenInfo(
+          {
+            chainId: ChainId.MAINNET,
+            address: '0x471EcE3750Da237f93B8E339c536989b8978a438',
+            decimals: 18,
+            symbol: 'CELO',
+            name: 'Celo native asset',
+            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_CELO.png',
+          },
+          []
+        ),
+        new WrappedTokenInfo(
+          {
+            chainId: ChainId.MAINNET,
+            address: '0xe8537a3d056DA446677B9E9d6c5dB704EaAb4787',
+            decimals: 18,
+            symbol: 'cREAL',
+            name: 'Celo Brazilian Real',
+            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cREAL.png',
+          },
+          []
+        ),
+      ],
+    },
   ],
   [ChainId.ALFAJORES]: [],
   [ChainId.BAKLAVA]: [],
