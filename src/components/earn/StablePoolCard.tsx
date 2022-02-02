@@ -15,7 +15,7 @@ import { getCUSDPrices, useCUSDPrice } from 'utils/useCUSDPrice'
 
 import { BIG_INT_SECONDS_IN_WEEK, BIG_INT_SECONDS_IN_YEAR, CHAIN } from '../../constants'
 import { useColor, usePoolColor } from '../../hooks/useColor'
-import { useTokenPrices, useWalletModalToggle } from '../../state/application/hooks'
+import { useTokenPrices } from '../../state/application/hooks'
 import { StablePoolInfo } from '../../state/stablePools/hooks'
 import { theme, TYPE } from '../../theme'
 import { ButtonPrimary } from '../Button'
@@ -161,7 +161,7 @@ interface Props {
 }
 
 export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
-  const { connected } = useWeb3Context()
+  const { connect, connected } = useWeb3Context()
   const {
     tokens,
     peggedTo,
@@ -266,7 +266,6 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
   const formatNumber = (num: string) => {
     return num.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
   }
-  const toggleWalletModal = useWalletModalToggle()
 
   const totalDisplay = (amount: TokenAmount): string => {
     if (coin === Coins.Bitcoin || coin === Coins.Ether) {
@@ -481,7 +480,7 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
               <StyledButton
                 background={poolColor}
                 backgroundHover={poolColor}
-                onClick={connected ? () => (isStaking ? setOpenManage(true) : setOpenDeposit(true)) : toggleWalletModal}
+                onClick={connected ? () => (isStaking ? setOpenManage(true) : setOpenDeposit(true)) : connect}
                 eth={coin === Coins.Ether}
                 style={{
                   width: '10%',
@@ -502,7 +501,7 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
           <StyledButton
             background={poolColor}
             backgroundHover={poolColor}
-            onClick={connected ? () => setOpenDeposit(true) : toggleWalletModal}
+            onClick={connected ? () => setOpenDeposit(true) : connect}
             eth={coin === Coins.Ether}
             style={{ fontWeight: 700, fontSize: 18 }}
           >

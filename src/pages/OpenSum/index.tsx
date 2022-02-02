@@ -6,7 +6,6 @@ import { isMobile } from 'react-device-detect'
 import { ArrowDown } from 'react-feather'
 import ReactGA from 'react-ga'
 import { Text } from 'rebass'
-import { useWalletModalToggle } from 'state/application/hooks'
 import { getPairedToken, useOpenSumTrade } from 'state/openSum/hooks'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { useTokenBalance } from 'state/wallet/hooks'
@@ -43,11 +42,8 @@ const VoteCard = styled(DataCard)`
 export default function OpenSum() {
   const isDarkMode = useIsDarkMode()
 
-  const { address, connected } = useWeb3Context()
+  const { address, connect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)
-
-  // toggle wallet when disconnected
-  const toggleWalletModal = useWalletModalToggle()
 
   const [inputValue, setInputValue] = useState<string>()
   const [inputToken, setInputToken] = useState<Token>()
@@ -289,7 +285,7 @@ export default function OpenSum() {
           </AutoColumn>
           <BottomGrouping>
             {!connected ? (
-              <ButtonError disabledStyle={true} onClick={toggleWalletModal}>
+              <ButtonError disabledStyle={true} onClick={connect}>
                 Connect Wallet
               </ButtonError>
             ) : showApproveFlow ? (

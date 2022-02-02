@@ -27,7 +27,7 @@ import { INITIAL_ALLOWED_SLIPPAGE } from '../../constants'
 import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
-import { useToggleSettingsMenu, useWalletModalToggle } from '../../state/application/hooks'
+import { useToggleSettingsMenu } from '../../state/application/hooks'
 import { MentoTrade } from '../../state/mento/hooks'
 import { Field } from '../../state/swap/actions'
 import { useExpertModeManager, useIsDarkMode, useUserSlippageTolerance } from '../../state/user/hooks'
@@ -59,11 +59,10 @@ export default function Mento() {
 
   // dismiss warning if all imported tokens are in active lists
 
-  const { address, connected } = useWeb3Context()
+  const { connect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)
 
   // toggle wallet when disconnected
-  const toggleWalletModal = useWalletModalToggle()
 
   // for expert mode
   const toggleSettings = useToggleSettingsMenu()
@@ -325,7 +324,7 @@ export default function Mento() {
                 <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
               </ButtonPrimary>
             ) : !connected ? (
-              <ButtonError disabledStyle={true} onClick={toggleWalletModal}>
+              <ButtonError disabledStyle={true} onClick={connect}>
                 Connect Wallet
               </ButtonError>
             ) : noRoute && userHasSpecifiedInputOutput ? (

@@ -22,7 +22,6 @@ import { BIG_INT_SECONDS_IN_WEEK } from '../../constants'
 import { useWeb3Context } from '../../hooks'
 import { useColor } from '../../hooks/useColor'
 import usePrevious from '../../hooks/usePrevious'
-import { useWalletModalToggle } from '../../state/application/hooks'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { ExternalLinkIcon, TYPE } from '../../theme'
 
@@ -103,7 +102,7 @@ export default function Manage({
     params: { poolName },
   },
 }: RouteComponentProps<{ poolName: string }>) {
-  const { connected } = useWeb3Context()
+  const { connect, connected } = useWeb3Context()
   const mobi = useMobi()
   const externalRewards = useExternalRewards({ address: poolName })
 
@@ -188,15 +187,13 @@ export default function Manage({
   const countUpAmount = earnedMobi?.toFixed(6) ?? '0'
   const countUpAmountPrevious = usePrevious(countUpAmount) ?? '0'
 
-  const toggleWalletModal = useWalletModalToggle()
-
   const handleDepositClick = useCallback(() => {
     if (connected) {
       setShowStakingModal(true)
     } else {
-      toggleWalletModal()
+      connect()
     }
-  }, [connected, toggleWalletModal])
+  }, [connect, connected])
 
   return (
     <PageWrapper gap="lg" justify="center">

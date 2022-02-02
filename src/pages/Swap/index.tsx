@@ -25,7 +25,7 @@ import { INITIAL_ALLOWED_SLIPPAGE } from '../../constants'
 import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
-import { useToggleSettingsMenu, useWalletModalToggle } from '../../state/application/hooks'
+import { useToggleSettingsMenu } from '../../state/application/hooks'
 import { Field } from '../../state/swap/actions'
 import {
   MobiusTrade,
@@ -55,11 +55,8 @@ export default function Swap() {
     [loadedInputCurrency, loadedOutputCurrency]
   )
 
-  const { connected } = useWeb3Context()
+  const { connect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)
-
-  // toggle wallet when disconnected
-  const toggleWalletModal = useWalletModalToggle()
 
   // for expert mode
   const toggleSettings = useToggleSettingsMenu()
@@ -312,7 +309,7 @@ export default function Swap() {
                 <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
               </ButtonPrimary>
             ) : !connected ? (
-              <ButtonError disabledStyle={true} onClick={toggleWalletModal}>
+              <ButtonError disabledStyle={true} onClick={connect}>
                 Connect Wallet
               </ButtonError>
             ) : noRoute && userHasSpecifiedInputOutput ? (
