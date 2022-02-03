@@ -49,8 +49,10 @@ export function UpdateMento(): null {
       let address: string
       if (pool.stable === StableToken.cUSD) {
         address = await kit.registry.addressFor(CeloContract.Exchange)
-      } else {
+      } else if (pool.stable === StableToken.cEUR) {
         address = await kit.registry.addressFor(CeloContract.ExchangeEUR)
+      } else {
+        address = await kit.registry.addressFor(CeloContract.ExchangeBRL)
       }
       updatePool(pool, mentoContract?.attach(address))
     })
