@@ -102,7 +102,7 @@ export default function Manage({
     params: { poolName },
   },
 }: RouteComponentProps<{ poolName: string }>) {
-  const { connect, connected } = useWeb3Context()
+  const { connect, connected, address } = useWeb3Context()
   const mobi = useMobi()
   const externalRewards = useExternalRewards({ address: poolName })
 
@@ -165,7 +165,7 @@ export default function Manage({
   const decimalPlacesForLP = stakedAmount?.greaterThan('1') ? 6 : stakedAmount?.greaterThan('0') ? 12 : 2
 
   // detect existing unstaked LP position to show add button if none found
-  const userLiquidityUnstaked = useTokenBalance(account ?? undefined, stakingInfo?.lpToken)
+  const userLiquidityUnstaked = useTokenBalance(connected ? address : undefined, stakingInfo?.lpToken)
   const showAddLiquidityButton = Boolean(stakingInfo?.stakedAmount?.equalTo('0') && userLiquidityUnstaked?.equalTo('0'))
 
   // toggle for staking modal and unstaking modal
