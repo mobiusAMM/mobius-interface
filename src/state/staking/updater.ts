@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, AppState } from 'state'
 import { useSingleCallResult } from 'state/multicall/hooks'
 
+import { SECONDS_IN_WEEK } from '../../constants'
 import {
   useFeeDistributor,
   useGaugeControllerContract,
@@ -32,8 +33,11 @@ export default function StakingUpdater() {
   const snxRewardRate = useSingleCallResult(snxContract, 'rewardRate()')
   const snxToClaim = useSingleCallResult(snxContract, 'earned(address)', [account ?? undefined])
   const feesToClaim = useSingleCallResult(feeDistributorContract, 'claim()')
-  const totalFeesThisWeek = useSingleCallResult(feeDistributorContract, 'tokens_per_week', [
+  const totalFeesNextWeek = useSingleCallResult(feeDistributorContract, 'tokens_per_week', [
     (roundDate(Date.now()).valueOf() / 1000).toFixed(0),
+  ])
+  const totalFeesThisWeek = useSingleCallResult(feeDistributorContract, 'tokens_per_week', [
+    (roundDate(Date.now()).valueOf() / 1000 - SECONDS_IN_WEEK).toFixed(0),
   ])
 
   dispatch(
@@ -56,6 +60,7 @@ export default function StakingUpdater() {
         totalMobiLocked: JSBI.BigInt(totalMobiLocked?.result?.[0] ?? '0'),
         claimableFees: JSBI.BigInt(feesToClaim?.result?.[0] ?? '0'),
         feesThisWeek: JSBI.BigInt(totalFeesThisWeek?.result?.[0] ?? '0'),
+        feesNextWeek: JSBI.BigInt(totalFeesNextWeek?.result?.[0] ?? '0'),
       },
     })
   )

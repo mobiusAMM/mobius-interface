@@ -18,6 +18,7 @@ export type SnxRewardsInfo = {
 export type StakingState = {
   claimableFees?: JSBI
   feesThisWeek?: JSBI
+  feesNextWeek?: JSBI
   votingPower: JSBI
   totalVotingPower: JSBI
   snx?: SnxRewardsInfo

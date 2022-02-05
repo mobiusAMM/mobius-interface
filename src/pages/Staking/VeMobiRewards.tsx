@@ -117,7 +117,7 @@ const StyledButton = styled(ButtonEmpty)`
 
 export default function VeMobiRewards() {
   const { rewardToken, rewardRate, avgApr, userRewardRate, leftToClaim, snxAddress } = useSNXRewardInfo()
-  const { toClaim, totalFeesThisWeek } = useFeeInformation()
+  const { totalFeesThisWeek, totalFeesNextWeek } = useFeeInformation()
   const tokenColor = '#ab9325' //useColor(rewardToken)
   const { account } = useActiveContractKit()
   const stakingContract = useStakingContract(snxAddress)
@@ -284,6 +284,20 @@ export default function VeMobiRewards() {
                 : '-'}
             </TYPE.black>
           </SecondSection>
+          <SecondSection>
+            <RowFixed style={{ marginTop: 10 }}>
+              <TYPE.darkGray fontWeight={450} fontSize={[15, 20]}>
+                {`Mobi to be Distributed Next Week: `}
+              </TYPE.darkGray>
+            </RowFixed>
+
+            <TYPE.black textAlign="right" fontSize={[13, 16]} fontWeight={800} color={tokenColor}>
+              {totalFeesNextWeek
+                ? `${totalFeesNextWeek?.toSignificant(4, { groupSeparator: ',' })} ${totalFeesNextWeek.token.symbol}`
+                : '-'}
+            </TYPE.black>
+          </SecondSection>
+
           <Divider />
           <SecondSection style={{ marginTop: '1rem' }}>
             <ButtonPrimary

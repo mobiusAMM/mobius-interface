@@ -43,6 +43,7 @@ export type MobiStakingInfo = {
 export type FeeInfo = {
   toClaim?: TokenAmount
   totalFeesThisWeek?: TokenAmount
+  totalFeesNextWeek?: TokenAmount
 }
 
 export type SNXRewardInfo = {
@@ -184,14 +185,16 @@ export function useSNXRewardInfo(): SNXRewardInfo {
 }
 
 export function useFeeInformation(): FeeInfo {
-  const { claimable, total } = useSelector((state: AppState) => ({
+  const { claimable, total, nextWeek } = useSelector((state: AppState) => ({
     claimable: state.staking.claimableFees,
     total: state.staking.feesThisWeek,
+    nextWeek: state.staking.feesNextWeek,
   }))
   const mobi = useMobi()
 
   return {
     toClaim: claimable ? new TokenAmount(mobi, claimable) : undefined,
     totalFeesThisWeek: total ? new TokenAmount(mobi, total) : undefined,
+    totalFeesNextWeek: nextWeek ? new TokenAmount(mobi, nextWeek) : undefined,
   }
 }
