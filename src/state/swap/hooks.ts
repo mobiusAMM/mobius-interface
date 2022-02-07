@@ -287,7 +287,7 @@ function calcInputOutput(
   underlyingMath?: StableSwapMath,
   underlyingPool?: StableSwapPool
 ): readonly [TokenAmount | undefined, TokenAmount | undefined, TokenAmount | undefined] {
-  if (!input && !output) {
+  if ((!input && !output) || !parsedAmount) {
     return [undefined, undefined, undefined]
   }
   const { tokens } = poolInfo
