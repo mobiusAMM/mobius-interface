@@ -3,6 +3,7 @@ import { Fraction, Percent, Token } from '@ubeswap/sdk'
 import { NETWORK_CHAIN_ID } from 'connectors'
 import { Chain, Coins, STATIC_POOL_INFO } from 'constants/StablePools'
 import JSBI from 'jsbi'
+import { PairStableSwap } from 'utils/StablePairMath'
 import { StableSwapMath } from 'utils/stableSwapMath'
 
 import { updateExternalRewards, updateGauges, updatePools } from './actions'
@@ -94,6 +95,7 @@ export interface PoolState {
     [address: string]: {
       pool: StableSwapPool | StableSwapConstants
       math: StableSwapMath | undefined
+      pair?: PairStableSwap | undefined
     }
   }
 }
@@ -151,11 +153,20 @@ export default createReducer<PoolState>(initialState, (builder) =>
       info.forEach((pool) => {
         const cur = copiedState.pools[pool.id].pool as any as StableSwapPool
         const newPool = { ...cur, ...pool }
+        const { balances, aPrecise, swapFee, tokens } = newPool
 
         const math = new StableSwapMath(newPool)
+        const pair = new PairStableSwap(
+          balances.map((el) => el.toString()),
+          swapFee.toString(),
+          aPrecise.toString(),
+          tokens.map((t) => t.decimals)
+        )
+
         state.pools[pool.id] = {
           pool: newPool,
           math,
+          pair,
         }
       })
     })
