@@ -43,7 +43,7 @@ export function UpdateVariablePoolInfo(): null {
   const virtualPrices = useMultipleContractSingleData(poolAddresses, SwapInterface, 'getVirtualPrice')
   const balances = useMultipleContractSingleData(poolAddresses, SwapInterface, 'getBalances')
   const amplificationCoefficients = useMultipleContractSingleData(poolAddresses, SwapInterface, 'getAPrecise')
-
+  console.log(amplificationCoefficients)
   const query = gql`
     {
       swaps {
@@ -61,26 +61,26 @@ export function UpdateVariablePoolInfo(): null {
     }
   `
   const { data, loading, error } = useQuery(query)
-  const lpInfo: { [address: string]: { total: JSBI; user: JSBI; virtualPrice: JSBI; balances: JSBI[] } } =
-    lpTotalSupplies
-      .filter((total, i) => !(total?.loading || lpOwned_multiple[i]?.loading))
-      .map((total, i) => [
-        BigIntToJSBI((total?.result?.[0] as BigInt) ?? '0'),
-        BigIntToJSBI((lpOwned_multiple?.[i]?.result?.[0] as BigInt) ?? '0'),
-        BigIntToJSBI((virtualPrices?.[i]?.result?.[0] as BigInt) ?? '0'),
-        balances?.[i]?.result?.[0]
-          ? balances?.[i]?.result?.[0].map((amt: BigInt): JSBI => BigIntToJSBI(amt))
-          : undefined,
-        poolAddresses[i],
-        BigIntToJSBI((amplificationCoefficients?.[i]?.result?.[0] as BigInt) ?? '50'),
-      ])
-      .reduce(
-        (accum, [total, user, virtualPrice, balances, address, aPrecise]) => ({
-          ...accum,
-          [(address as any as string).toLowerCase()]: { total, user, balances, virtualPrice, aPrecise },
-        }),
-        {}
-      )
+  const lpInfo: {
+    [address: string]: { total: JSBI; user: JSBI; virtualPrice: JSBI; balances: JSBI[]; aPrecise: JSBI }
+  } = lpTotalSupplies
+    .filter((total, i) => !(total?.loading || lpOwned_multiple[i]?.loading))
+    .map((total, i) => [
+      BigIntToJSBI((total?.result?.[0] as BigInt) ?? '0'),
+      BigIntToJSBI((lpOwned_multiple?.[i]?.result?.[0] as BigInt) ?? '0'),
+      BigIntToJSBI((virtualPrices?.[i]?.result?.[0] as BigInt) ?? '0'),
+      balances?.[i]?.result?.[0] ? balances?.[i]?.result?.[0].map((amt: BigInt): JSBI => BigIntToJSBI(amt)) : undefined,
+      poolAddresses[i],
+      BigIntToJSBI((amplificationCoefficients?.[i]?.result?.[0] as BigInt) ?? '50'),
+    ])
+    .reduce(
+      (accum, [total, user, virtualPrice, balances, address, aPrecise]) => ({
+        ...accum,
+        [(address as any as string).toLowerCase()]: { total, user, balances, virtualPrice, aPrecise },
+      }),
+      {}
+    )
+  console.log(lpInfo)
   const inSubgraph: Set<string> =
     data?.swaps.reduce((accum: Set<string>, cur: any) => new Set([...accum, cur.id]), new Set()) ?? new Set()
   const poolsNotInSubgraph = poolAddresses.map((a) => a.toLowerCase()).filter((addr) => !inSubgraph.has(addr))
@@ -98,7 +98,7 @@ export function UpdateVariablePoolInfo(): null {
         },
         approxBalances: pool.balances.map((b: string) => JSBI.BigInt(b)),
         balances: lpInfo[pool.id].balances ? lpInfo[pool.id].balances : undefined,
-        amp: JSBI.BigInt(pool.A),
+        aPrecise: lpInfo[pool.id].aPrecise,
         virtualPrice: lpInfo[pool.id].virtualPrice,
         lpTotalSupply: lpInfo[pool.id].total,
         lpOwned: lpInfo[pool.id].user,

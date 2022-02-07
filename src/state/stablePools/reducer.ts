@@ -154,14 +154,21 @@ export default createReducer<PoolState>(initialState, (builder) =>
         const cur = copiedState.pools[pool.id].pool as any as StableSwapPool
         const newPool = { ...cur, ...pool }
         const { balances, aPrecise, swapFee, tokens } = newPool
-
+        // console.log(
+        //   balances?.map((el) => el.toString()) ?? ['0', '0'],
+        //   swapFee?.toString() ?? '0',
+        //   aPrecise?.toString() ?? '0'
+        // )
         const math = new StableSwapMath(newPool)
-        const pair = new PairStableSwap(
-          balances.map((el) => el.toString()),
-          swapFee.toString(),
-          aPrecise.toString(),
-          tokens.map((t) => t.decimals)
-        )
+        const pair =
+          balances && aPrecise && swapFee
+            ? new PairStableSwap(
+                balances?.map((el) => el.toString()) ?? ['0', '0'],
+                swapFee?.toString() ?? '0',
+                aPrecise?.toString() ?? '0',
+                tokens.map((t) => t.decimals)
+              )
+            : undefined
 
         state.pools[pool.id] = {
           pool: newPool,
