@@ -287,7 +287,7 @@ export function useWarning(
   return WARNINGS[warningType] as any as { warning: string; link?: string; modification?: WarningModifications }
 }
 
-export function usePairUtil(pool: StableSwapPool | string): PairStableSwap | undefined {
+export function usePairUtil(pool?: StableSwapPool | string): PairStableSwap | undefined {
   const name = !pool ? '' : typeof pool == 'string' ? pool : pool.address
   return useSelector<AppState, PairStableSwap | undefined>((state) => state.stablePools.pools[name.toLowerCase()]?.pair)
 }
