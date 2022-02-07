@@ -10,6 +10,7 @@ import { useEthBtcPrice } from 'state/application/hooks'
 import { useDefaultTokenList, WrappedTokenInfo } from 'state/lists/hooks'
 import { useSingleContractMultipleData } from 'state/multicall/hooks'
 import { tryParseAmount } from 'state/swap/hooks'
+import { PairStableSwap } from 'utils/StablePairMath'
 
 import WARNINGS from '../../constants/PoolWarnings.json'
 import { StableSwapMath } from '../../utils/stableSwapMath'
@@ -284,4 +285,9 @@ export function useWarning(
   )
   if (!warningType) return undefined
   return WARNINGS[warningType] as any as { warning: string; link?: string; modification?: WarningModifications }
+}
+
+export function usePairUtil(pool: StableSwapPool | string): PairStableSwap | undefined {
+  const name = !pool ? '' : typeof pool == 'string' ? pool : pool.address
+  return useSelector<AppState, PairStableSwap | undefined>((state) => state.stablePools.pools[name.toLowerCase()]?.pair)
 }
