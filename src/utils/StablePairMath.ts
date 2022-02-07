@@ -48,8 +48,9 @@ export class PairStableSwap {
     return d1.minus(d0).multipliedBy(this.lpTotalSupply).dividedBy(d0)
   }
 
-  public outputAmount(tokenIndexFrom: number, tokenIndexTo: number, inputAmount: BigNumber): [JSBI, JSBI] {
+  public outputAmount(tokenIndexFrom: number, tokenIndexTo: number, input: JSBI): [JSBI, JSBI] {
     // See: https://github.com/mobiusAMM/mobiusV1/blob/master/contracts/SwapUtils.sol#L617
+    const inputAmount = new BigNumber(input.toString())
     const x = inputAmount
       .multipliedBy(this.tokenPrecisionMultipliers[tokenIndexFrom])
       .plus(this.balancesWithAdjustedPrecision[tokenIndexFrom])

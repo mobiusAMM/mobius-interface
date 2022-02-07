@@ -7,6 +7,7 @@ import { ParsedQs } from 'qs'
 import { useCallback, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { StableSwapPool } from 'state/stablePools/reducer'
+import { PairStableSwap } from 'utils/StablePairMath'
 import { StableSwapMath } from 'utils/stableSwapMath'
 
 import { ROUTER_ADDRESS } from '../../constants'
@@ -17,7 +18,7 @@ import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress } from '../../utils'
 import { computeSlippageAdjustedAmounts } from '../../utils/prices'
 import { AppDispatch, AppState } from '../index'
-import { useCurrentPool, useMathUtil, usePools, useUnderlyingPool } from '../stablePools/hooks'
+import { useCurrentPool, useMathUtil, usePairUtil, usePools, useUnderlyingPool } from '../stablePools/hooks'
 import { useUserSlippageTolerance } from '../user/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
 import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
@@ -281,7 +282,7 @@ function calcInputOutput(
   output: Token | undefined,
   isExactIn: boolean,
   parsedAmount: TokenAmount | undefined,
-  math: StableSwapMath,
+  math: PairStableSwap,
   poolInfo: StableSwapPool,
   underlyingMath?: StableSwapMath,
   underlyingPool?: StableSwapPool
@@ -297,9 +298,8 @@ function calcInputOutput(
     return [undefined, parsedAmount, undefined]
   }
 
-  let indexFrom = tokens.map(({ address }) => address).indexOf(input.address)
-  let indexTo = tokens.map(({ address }) => address).indexOf(output.address)
-  const isMeta = indexFrom === -1 || indexTo === -1
+  const indexFrom = tokens.map(({ address }) => address).indexOf(input.address)
+  const indexTo = tokens.map(({ address }) => address).indexOf(output.address)
 
   const details: [TokenAmount | undefined, TokenAmount | undefined, TokenAmount | undefined] = [
     undefined,
@@ -307,70 +307,9 @@ function calcInputOutput(
     undefined,
   ]
 
-  if (underlyingPool && underlyingMath && isMeta) {
-    const underTokens = underlyingPool.tokens
-    if (indexFrom === -1) {
-      if (isExactIn) {
-        const lpInput = underTokens.map(({ address }) =>
-          address === input.address ? parsedAmount?.raw ?? JSBI.BigInt(0) : JSBI.BigInt(0)
-        )
-        const lpIndexFrom = poolInfo.tokenAddresses.indexOf(underlyingPool?.lpToken.address)
-
-        const metaexpectedOut = underlyingMath.calculateTokenAmount(lpInput, true)
-        details[0] = parsedAmount
-        const [expectedOut, fee] = math.calculateSwap(lpIndexFrom, indexTo, metaexpectedOut, math.calc_xp())
-        details[1] = new TokenAmount(output, expectedOut)
-        details[2] = new TokenAmount(input, fee)
-      } else {
-        const lpIndex = tokens.map(({ address }) => address).indexOf(underlyingPool.lpToken.address)
-        const requiredLP = math.get_dx(lpIndex, indexTo, parsedAmount.raw, math.calc_xp())
-        //withdraw single sided
-        const outIndex = underTokens.map(({ address }) => address).indexOf(input.address)
-        const [expectedIn, fee] = underlyingMath.calculateWithdrawOneToken(outIndex, requiredLP)
-        details[0] = new TokenAmount(input, expectedIn)
-        details[1] = parsedAmount
-        details[2] = new TokenAmount(input, fee)
-      }
-    } else if (indexTo === -1) {
-      if (isExactIn) {
-        const lpIndexTo = poolInfo.tokenAddresses.indexOf(underlyingPool?.lpToken.address)
-        const [metaExpectedOut, metaFee] = math.calculateSwap(indexFrom, lpIndexTo, parsedAmount.raw, math.calc_xp())
-
-        const metaIndexOut = underTokens.map(({ address }) => address).indexOf(output.address)
-        const [expectedOut, fee] = underlyingMath.calculateWithdrawOneToken(metaIndexOut, metaExpectedOut)
-        details[0] = parsedAmount
-        details[1] = new TokenAmount(output, expectedOut)
-        details[2] = new TokenAmount(
-          input,
-          JSBI.divide(
-            JSBI.multiply(parsedAmount?.raw, JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt('7'))),
-            (JSBI.BigInt('10'), JSBI.BigInt('10'))
-          )
-        )
-      } else {
-        const lpInput = underTokens.map(({ address }) =>
-          address === output.address ? parsedAmount?.raw ?? JSBI.BigInt(0) : JSBI.BigInt(0)
-        )
-        const lpExpectedOut = underlyingMath.calculateTokenAmount(lpInput, true)
-        indexTo = tokens.map(({ address }) => address).indexOf(underlyingPool?.lpToken.address)
-        const requiredIn = math.get_dx(indexFrom, indexTo, lpExpectedOut, math.calc_xp())
-        details[0] = new TokenAmount(input, requiredIn)
-        details[1] = parsedAmount
-        details[2] = new TokenAmount(input, JSBI.BigInt('0'))
-      }
-    }
-    return details
-  }
-
-  if (indexFrom == -1) {
-    indexFrom = tokens.length - 1
-  } else if (indexTo == -1) {
-    indexTo = tokens.length - 1
-  }
-
   if (isExactIn) {
     details[0] = parsedAmount
-    const [expectedOut, fee] = math.calculateSwap(indexFrom, indexTo, parsedAmount.raw, math.calc_xp())
+    const [expectedOut, fee] = math.outputAmount(indexFrom, indexTo, parsedAmount.raw)
     details[1] = new TokenAmount(output, expectedOut)
     details[2] = new TokenAmount(input, fee)
   } else {
@@ -406,7 +345,7 @@ export function useMobiusTradeInfo(): {
   const poolsLoading = pools.length === 0
   const [pool] = useCurrentPool(inputCurrency?.address, outputCurrency?.address)
   const underlyingMath = useMathUtil(pool?.metaPool ?? '')
-  const mathUtil = useMathUtil(pool)
+  const mathUtil = usePairUtil(pool)
   const underlyingPool = useUnderlyingPool(pool?.name ?? '')
 
   const to: string | null = (recipient === null ? account : recipientLookup.address) ?? null
