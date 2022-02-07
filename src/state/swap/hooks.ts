@@ -307,17 +307,10 @@ function calcInputOutput(
     undefined,
   ]
 
-  if (isExactIn) {
-    details[0] = parsedAmount
-    const [expectedOut, fee] = math.outputAmount(indexFrom, indexTo, parsedAmount.raw)
-    details[1] = new TokenAmount(output, expectedOut)
-    details[2] = new TokenAmount(input, fee)
-  } else {
-    details[1] = parsedAmount
-    const requiredIn = math.get_dx(indexFrom, indexTo, parsedAmount.raw, math.calc_xp())
-    details[0] = new TokenAmount(input, requiredIn)
-    details[2] = new TokenAmount(input, JSBI.BigInt('0'))
-  }
+  details[0] = parsedAmount
+  const [expectedOut, fee] = math.outputAmount(indexFrom, indexTo, parsedAmount.raw)
+  details[1] = new TokenAmount(output, expectedOut)
+  details[2] = new TokenAmount(input, fee)
   return details
 }
 
