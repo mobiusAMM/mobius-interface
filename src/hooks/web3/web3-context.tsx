@@ -164,11 +164,25 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
     setProviderChainID(network)
   }
 
+  const handleLedgerConnector = async (ledgerConnector: AbstractConnector) => {
+    const { account, provider: rawProvider, chainId } = await ledgerConnector?.activate()
+    if (!account || !chainId || !rawProvider) throw Error('Ledger connection failed')
+
+    _initListeners(rawProvider)
+
+    const provider = new Web3Provider(rawProvider, 'any')
+    setAddress(account)
+    setChainID(chainId as unknown as number)
+    setProvider(provider)
+    setConnected(true)
+    return provider
+  }
+
   const connect = useCallback(
     async (ledgerConnector?: AbstractConnector) => {
-      await ledgerConnector?.activate()
+      if (ledgerConnector) return handleLedgerConnector(ledgerConnector)
 
-      const rawProvider = await (ledgerConnector?.getProvider() ?? web3Modal.connect())
+      const rawProvider = await web3Modal.connect()
 
       _initListeners(rawProvider)
 

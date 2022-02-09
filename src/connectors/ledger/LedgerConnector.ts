@@ -40,16 +40,17 @@ export class LedgerConnector extends AbstractConnector {
   private kit: LedgerKit | null = null
   private index: number | null = null
 
-  constructor(connectedKit?: { kit?: LedgerKit; index: number }) {
+  constructor(connectedKit?: { kit: LedgerKit; index: number }) {
     super({ supportedChainIds: [NETWORK_CHAIN_ID] })
     if (connectedKit) {
-      this.kit = connectedKit.kit ?? null
+      this.kit = connectedKit.kit
       this.index = connectedKit.index
     }
   }
 
   public async activate(): Promise<ConnectorUpdate> {
     if (this.kit && this.index !== null) {
+      console.log(this.kit.wallet.getAccounts()[this.index])
       return {
         provider: this.kit.kit.web3.currentProvider,
         chainId: NETWORK_CHAIN_ID,

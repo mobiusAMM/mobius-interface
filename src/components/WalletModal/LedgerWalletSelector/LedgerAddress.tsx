@@ -19,9 +19,10 @@ export const LedgerAddress = ({ address, kit, tryActivation, index }: Props) => 
   const cusdBalance = useTokenBalance(address, cUSD[NETWORK_CHAIN_ID])
   return (
     <InfoCard
-      onClick={() => {
+      onClick={async () => {
         const connector = new LedgerConnector({ kit, index })
-        connector.activate()
+        console.log(index)
+        console.log(await connector.getAccount())
         tryActivation(connector)
       }}
     >
