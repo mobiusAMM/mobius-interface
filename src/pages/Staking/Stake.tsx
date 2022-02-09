@@ -106,7 +106,7 @@ export default function Stake({ stakingInfo }: PropTypes) {
               gap: '1rem',
             }}
           >
-            {Date.now() > (lockEnd?.valueOf() ?? 0) ? (
+            {Date.now() > (lockEnd?.valueOf() ?? 0) && mobiLocked && mobiLocked.greaterThan('0') ? (
               <ButtonPrimary
                 onClick={onClaim}
                 style={{ fontWeight: 700, fontSize: 18, backgroundColor: theme(false).celoRed }}
