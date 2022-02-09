@@ -40,10 +40,10 @@ export class LedgerConnector extends AbstractConnector {
   private kit: LedgerKit | null = null
   private index: number | null = null
 
-  constructor(connectedKit?: { kit: LedgerKit; index: number }) {
+  constructor(connectedKit?: { kit?: LedgerKit; index: number }) {
     super({ supportedChainIds: [NETWORK_CHAIN_ID] })
     if (connectedKit) {
-      this.kit = connectedKit.kit
+      this.kit = connectedKit.kit ?? null
       this.index = connectedKit.index
     }
   }
