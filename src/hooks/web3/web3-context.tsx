@@ -1,5 +1,6 @@
 import { JsonRpcProvider, StaticJsonRpcProvider, Web3Provider } from '@ethersproject/providers'
 import WalletConnectProvider from '@walletconnect/web3-provider'
+import { LedgerConnector } from 'connectors/ledger/LedgerConnector'
 import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Web3Modal from 'web3modal'
 
@@ -163,32 +164,43 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
     setProviderChainID(network)
   }
 
-  const connect = useCallback(async () => {
-    const rawProvider = await web3Modal.connect()
+  async function getLedgerConnector(useLedger?: boolean, ledgerIndex?: number): Promise<LedgerConnector | undefined> {
+    if (!useLedger) return undefined
+    const connector = new LedgerConnector({ kit: undefined, index: ledgerIndex ?? 0 })
+    await connector.activate()
+    return connector
+  }
 
-    _initListeners(rawProvider)
+  const connect = useCallback(
+    async (useLedger = false, ledgerIndex = 0) => {
+      const possibleLedgerConnector = await getLedgerConnector(useLedger, ledgerIndex)
+      const rawProvider = await (possibleLedgerConnector?.getProvider() ?? web3Modal.connect())
 
-    const connectedProvider = new Web3Provider(rawProvider, 'any')
+      _initListeners(rawProvider)
 
-    const chainId = await connectedProvider.getNetwork().then((network) => Number(network.chainId))
-    const connectedAddress = await connectedProvider.getSigner()?.getAddress()
+      const connectedProvider = new Web3Provider(rawProvider, 'any')
 
-    setAddress(connectedAddress)
+      const chainId = await connectedProvider.getNetwork().then((network) => Number(network.chainId))
+      const connectedAddress = await connectedProvider.getSigner()?.getAddress()
 
-    setProviderChainID(chainId)
+      setAddress(connectedAddress)
 
-    if (chainId === CHAIN) {
-      setProvider(connectedProvider)
-    } else {
-      //TODO: is it possible to connecte wallet after?
-      await switchNetwork()
-      window.location.reload()
-    }
+      setProviderChainID(chainId)
 
-    setConnected(true)
+      if (chainId === CHAIN) {
+        setProvider(connectedProvider)
+      } else {
+        //TODO: is it possible to connecte wallet after?
+        await switchNetwork()
+        window.location.reload()
+      }
 
-    return connectedProvider
-  }, [web3Modal, _initListeners])
+      setConnected(true)
+
+      return connectedProvider
+    },
+    [web3Modal, _initListeners]
+  )
 
   const checkWrongNetwork = async (): Promise<boolean> => {
     if (providerChainID !== CHAIN) {
@@ -221,6 +233,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
       web3Modal,
       providerChainID,
       checkWrongNetwork,
+      setProvider,
     }),
     [connect, disconnect, hasCachedProvider, provider, connected, address, chainID, web3Modal, providerChainID]
   )
