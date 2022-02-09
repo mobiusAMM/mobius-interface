@@ -1,3 +1,4 @@
+import WalletModal from 'components/WalletModal'
 import { useWeb3Context } from 'hooks'
 import { darken, lighten } from 'polished'
 import React, { useMemo } from 'react'
@@ -14,6 +15,7 @@ import { ButtonSecondary } from '../Button'
 import Identicon from '../Identicon'
 import Loader from '../Loader'
 import { RowBetween } from '../Row'
+import { WalletPrecheckModal } from './WalletPrecheckModal'
 
 const Web3StatusGeneric = styled(ButtonSecondary)`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -107,6 +109,7 @@ function Web3StatusInner() {
   const { t } = useTranslation()
   const { connect, address, connected, providerChainID, checkWrongNetwork } = useWeb3Context()
   const allTransactions = useAllTransactions()
+  const [openConnectModal, setOpenConnectModal] = React.useState(false)
 
   const sortedRecentTransactions = useMemo(() => {
     const txs = Object.values(allTransactions)
@@ -151,9 +154,12 @@ function Web3StatusInner() {
     }
   } else {
     return (
-      <Web3StatusConnect id="connect-wallet" onClick={() => connect().catch(console.warn)} faded={!address}>
-        <Text>{t('Connect to a wallet')}</Text>
-      </Web3StatusConnect>
+      <>
+        <WalletPrecheckModal open={openConnectModal} onClose={() => setOpenConnectModal(false)} />
+        <Web3StatusConnect id="connect-wallet" onClick={() => setOpenConnectModal(true)} faded={!address}>
+          <Text>{t('Connect to a wallet')}</Text>
+        </Web3StatusConnect>
+      </>
     )
   }
 }
@@ -179,7 +185,7 @@ export default function Web3Status() {
   return (
     <>
       <Web3StatusInner />
-      {/* <WalletModal ENSName={undefined} pendingTransactions={pending} confirmedTransactions={confirmed} /> */}
+      <WalletModal ENSName={undefined} pendingTransactions={pending} confirmedTransactions={confirmed} />
     </>
   )
 }

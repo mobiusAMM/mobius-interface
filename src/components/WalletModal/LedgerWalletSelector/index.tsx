@@ -1,15 +1,17 @@
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import Loader from 'components/Loader'
+import { RowBetween } from 'components/Row'
 import { darken } from 'polished'
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { TYPE } from 'theme'
 
 import { NETWORK_CHAIN_ID } from '../../../connectors'
 import { LedgerKit } from '../../../connectors/ledger/LedgerConnector'
 import { LedgerAddress } from './LedgerAddress'
 
 interface Props {
-  tryActivation: (connector: AbstractConnector | undefined) => Promise<void>
+  tryActivation: (connector: AbstractConnector | undefined) => Promise<any>
 }
 
 const ADDRESSES_PER_PAGE = 5
@@ -62,9 +64,10 @@ export const LedgerWalletSelector: React.FC<Props> = ({ tryActivation }: Props) 
           <p>Please select a wallet below.</p>
           {addresses === null || kit === null ? (
             <InfoCard>
-              <span>
-                Loading wallets... <Loader />
-              </span>
+              <RowBetween>
+                <TYPE.main>Loading wallets...</TYPE.main>
+                <Loader />
+              </RowBetween>
             </InfoCard>
           ) : (
             <OptionsGrid>

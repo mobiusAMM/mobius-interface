@@ -1,13 +1,13 @@
 import { JsonRpcProvider, StaticJsonRpcProvider, Web3Provider } from '@ethersproject/providers'
 import WalletConnectProvider from '@walletconnect/web3-provider'
-import { LedgerConnector } from 'connectors/ledger/LedgerConnector'
+import { AbstractConnector } from '@web3-react/abstract-connector'
 import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Web3Modal from 'web3modal'
 
 import { CHAIN } from '../../constants'
 
 type onChainProvider = {
-  connect: () => Promise<Web3Provider>
+  connect: (connector?: AbstractConnector) => Promise<Web3Provider>
   disconnect: () => void
   checkWrongNetwork: () => Promise<boolean>
   provider: JsonRpcProvider
@@ -164,17 +164,11 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
     setProviderChainID(network)
   }
 
-  async function getLedgerConnector(useLedger?: boolean, ledgerIndex?: number): Promise<LedgerConnector | undefined> {
-    if (!useLedger) return undefined
-    const connector = new LedgerConnector({ kit: undefined, index: ledgerIndex ?? 0 })
-    await connector.activate()
-    return connector
-  }
-
   const connect = useCallback(
-    async (useLedger = false, ledgerIndex = 0) => {
-      const possibleLedgerConnector = await getLedgerConnector(useLedger, ledgerIndex)
-      const rawProvider = await (possibleLedgerConnector?.getProvider() ?? web3Modal.connect())
+    async (ledgerConnector?: AbstractConnector) => {
+      await ledgerConnector?.activate()
+
+      const rawProvider = await (ledgerConnector?.getProvider() ?? web3Modal.connect())
 
       _initListeners(rawProvider)
 

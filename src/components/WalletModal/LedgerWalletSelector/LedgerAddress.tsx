@@ -12,7 +12,7 @@ interface Props {
   index: number
   address: string
   kit: LedgerKit
-  tryActivation: (connector: AbstractConnector | undefined) => Promise<void>
+  tryActivation: (connector: AbstractConnector | undefined) => Promise<any>
 }
 
 export const LedgerAddress = ({ address, kit, tryActivation, index }: Props) => {
@@ -21,6 +21,7 @@ export const LedgerAddress = ({ address, kit, tryActivation, index }: Props) => 
     <InfoCard
       onClick={() => {
         const connector = new LedgerConnector({ kit, index })
+        connector.activate()
         tryActivation(connector)
       }}
     >
