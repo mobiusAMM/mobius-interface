@@ -217,16 +217,6 @@ export default function ApeViewer() {
   return (
     <Container>
       <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-        {/* <ButtonPrimary
-          onClick={async () => {
-            const connector = new LedgerConnector()
-            console.log(connector)
-            const result = await connector.activate()
-            console.log(result)
-          }}
-        >
-          Ledger!
-        </ButtonPrimary> */}
         <InputApes>
           <Input
             value={id}
