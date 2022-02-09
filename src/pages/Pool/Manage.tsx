@@ -102,7 +102,7 @@ export default function Manage({
     params: { poolName },
   },
 }: RouteComponentProps<{ poolName: string }>) {
-  const { connect, connected } = useWeb3Context()
+  const { connect, connected, address: account } = useWeb3Context()
   const mobi = useMobi()
   const externalRewards = useExternalRewards({ address: poolName })
 
