@@ -14,6 +14,7 @@ import { getMobileOperatingSystem, Mobile } from '../utils/mobile'
 import ApeViewer from './ApeViewer'
 import Charts from './Charts'
 import Claim from './Claim'
+import CreateProposal from './CreateProposal'
 import Mento from './Mento'
 import OpenSum from './OpenSum'
 import Pool from './Pool'
@@ -119,6 +120,7 @@ export default function App() {
                 <Redirect to="/swap" />
               </Route>
               <Route exact strict path="/vote" component={Vote} />
+              <Route exact strict path="/vote/create-proposal" component={CreateProposal} />
               <Route exact strict path="/vote/:id" component={VotePage} />
               <Route exact strict path="/swap" component={Swap} />
               <Route exact path="/mint" component={Mento} />

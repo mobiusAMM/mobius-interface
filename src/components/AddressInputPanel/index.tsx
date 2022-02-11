@@ -65,10 +65,12 @@ const Input = styled.input<{ error?: boolean }>`
 
 export default function AddressInputPanel({
   id,
+  label,
   value,
   onChange,
 }: {
   id?: string
+  label?: string
   // the typed string value
   value: string
   // triggers whenever the typed value changes
@@ -96,7 +98,7 @@ export default function AddressInputPanel({
           <AutoColumn gap="md">
             <RowBetween>
               <TYPE.black color={theme.text2} fontWeight={500} fontSize={14}>
-                Recipient
+                {label ?? 'To'}
               </TYPE.black>
               {address && (
                 <ExternalLink href={getExplorerLink(CHAIN, name ?? address, 'address')} style={{ fontSize: '14px' }}>
@@ -111,7 +113,7 @@ export default function AddressInputPanel({
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck="false"
-              placeholder="Wallet Address or ENS name"
+              placeholder="Address"
               error={error}
               pattern="^(0x[a-fA-F0-9]{40})$"
               onChange={handleInput}

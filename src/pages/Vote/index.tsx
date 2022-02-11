@@ -1,12 +1,11 @@
 import { TokenAmount } from '@ubeswap/sdk'
+import { ButtonPrimary } from 'components/Button'
 import { CardNoise } from 'components/claim/styled'
-// import { ButtonPrimary } from 'components/Button'
 import { AutoColumn } from 'components/Column'
 import { CardSection, DataCard } from 'components/earn/styled'
 import FormattedCurrencyAmount from 'components/FormattedCurrencyAmount'
 import Loader from 'components/Loader'
 import { AutoRow, RowBetween } from 'components/Row'
-// import { SwitchLocaleLink } from 'components/SwitchLocaleLink'
 import ProposalEmptyState from 'components/vote/ProposalEmptyState'
 import { useWeb3Context } from 'hooks'
 import { darken } from 'polished'
@@ -124,14 +123,14 @@ export default function Vote() {
                 </TYPE.main>
               </TYPE.body>
 
-              {/* <ButtonPrimary
+              <ButtonPrimary
                 as={Link}
-                to="/create-proposal"
+                to="/vote/create-proposal"
                 style={{ width: 'fit-content', borderRadius: '8px' }}
                 padding="8px"
               >
                 <TYPE.main>Create Proposal</TYPE.main>
-              </ButtonPrimary> */}
+              </ButtonPrimary>
             </AutoRow>
           </WrapSmall>
           {allProposals?.length === 0 && <ProposalEmptyState />}

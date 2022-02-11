@@ -113,6 +113,12 @@ export const GAUGE_CONTROLLER: { [K in ChainId]: string } = {
   [ChainId.BAKLAVA]: '',
 }
 
+export const GAUGE_PROXY: { [K in ChainId]: string } = {
+  [ChainId.MAINNET]: '0x21d0420ccF3bC756F9b01669667A26d83837D8b3',
+  [ChainId.ALFAJORES]: '',
+  [ChainId.BAKLAVA]: '',
+}
+
 export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
   [ChainId.MAINNET]: [
     {
