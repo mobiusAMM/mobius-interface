@@ -6,7 +6,6 @@ import React, { useCallback, useState } from 'react'
 import { StablePoolInfo } from 'state/stablePools/hooks'
 import styled from 'styled-components'
 
-import { useActiveContractKit } from '../../hooks'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
 import { useLiquidityGaugeContract, usePairContract } from '../../hooks/useContract'
 import useTransactionDeadline from '../../hooks/useTransactionDeadline'
@@ -48,7 +47,6 @@ const calcNewRewardRate = (totalMobiRate: JSBI, totalStaked: JSBI, stakedByUser:
   new TokenAmount(token, JSBI.multiply(totalMobiRate, JSBI.divide(stakedByUser, totalStaked)))
 
 export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiquidityUnstaked }: StakingModalProps) {
-  const { chainId, library, account } = useActiveContractKit()
   const addTransaction = useTransactionAdder()
   const mobi = useMobi()
 
@@ -123,7 +121,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
   }, [maxAmountInput, onUserInput])
 
   async function onAttemptToApprove() {
-    if (!pairContract || !library || !deadline) throw new Error('missing dependencies')
+    if (!pairContract || !deadline) throw new Error('missing dependencies')
     const liquidityAmount = parsedAmount
     if (!liquidityAmount) throw new Error('missing liquidity amount')
 

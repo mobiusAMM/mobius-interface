@@ -1,19 +1,13 @@
 import React, { useContext, useRef, useState } from 'react'
 import { Settings, X } from 'react-feather'
 import { Text } from 'rebass'
-import { useUserAllowMoolaWithdrawal, useUserDisableSmartRouting, useUserMinApprove } from 'state/user/hooks'
+import { useUserMinApprove } from 'state/user/hooks'
 import styled, { ThemeContext } from 'styled-components'
 
 import { useOnClickOutside } from '../../hooks/useOnClickOutside'
 import { ApplicationModal } from '../../state/application/actions'
 import { useModalOpen, useToggleSettingsMenu } from '../../state/application/hooks'
-import {
-  useExpertModeManager,
-  useIsDarkMode,
-  useUserSingleHopOnly,
-  useUserSlippageTolerance,
-  useUserTransactionTTL,
-} from '../../state/user/hooks'
+import { useExpertModeManager, useUserSlippageTolerance, useUserTransactionTTL } from '../../state/user/hooks'
 import { TYPE } from '../../theme'
 import { ButtonError } from '../Button'
 import { AutoColumn } from '../Column'
@@ -133,16 +127,10 @@ export default function SettingsTab() {
   const theme = useContext(ThemeContext)
   const [userSlippageTolerance, setUserslippageTolerance] = useUserSlippageTolerance()
   const [minApprove, setMinApprove] = useUserMinApprove()
-  const [allowMoolaWithdrawal, setAllowMoolaWithdrawal] = useUserAllowMoolaWithdrawal()
-  const [disableSmartRouting, setDisableSmartRouting] = useUserDisableSmartRouting()
-  const useUbeswap = false
-  const isDarkMode = useIsDarkMode()
 
   const [ttl, setTtl] = useUserTransactionTTL()
 
   const [expertMode, toggleExpertMode] = useExpertModeManager()
-
-  const [singleHopOnly, setSingleHopOnly] = useUserSingleHopOnly()
 
   // show confirmation view before turning on
   const [showConfirmation, setShowConfirmation] = useState(false)
@@ -224,46 +212,6 @@ export default function SettingsTab() {
               <Toggle id="toggle-expert-mode-button" isActive={useUbeswap} toggle={() => setUseUbeswap(!useUbeswap)} />
             </RowBetween> */}
 
-            {useUbeswap && (
-              <>
-                <RowBetween>
-                  <RowFixed>
-                    <TYPE.black fontWeight={400} fontSize={14} color={theme.text2}>
-                      Toggle Expert Mode
-                    </TYPE.black>
-                    <QuestionHelper text="Bypasses confirmation modals and allows high slippage trades. Use at your own risk." />
-                  </RowFixed>
-                  <Toggle
-                    id="toggle-expert-mode-button"
-                    isActive={expertMode}
-                    toggle={
-                      expertMode
-                        ? () => {
-                            toggleExpertMode()
-                            setShowConfirmation(false)
-                          }
-                        : () => {
-                            toggle()
-                            setShowConfirmation(true)
-                          }
-                    }
-                  />
-                </RowBetween>
-                <RowBetween>
-                  <RowFixed>
-                    <TYPE.black fontWeight={400} fontSize={14} color={theme.text2}>
-                      Disable Multihops
-                    </TYPE.black>
-                    <QuestionHelper text="Restricts swaps to direct pairs only." />
-                  </RowFixed>
-                  <Toggle
-                    id="toggle-disable-multihop-button"
-                    isActive={singleHopOnly}
-                    toggle={() => (singleHopOnly ? setSingleHopOnly(false) : setSingleHopOnly(true))}
-                  />
-                </RowBetween>{' '}
-              </>
-            )}
             <Text fontWeight={600} fontSize={14}>
               Routing Settings
             </Text>
@@ -276,31 +224,6 @@ export default function SettingsTab() {
               </RowFixed>
               <Toggle isActive={minApprove} toggle={() => (minApprove ? setMinApprove(false) : setMinApprove(true))} />
             </RowBetween>
-            {useUbeswap && (
-              <>
-                <RowBetween>
-                  <RowFixed>
-                    <TYPE.black fontWeight={400} fontSize={14} color={theme.text2}>
-                      Disable smart routing
-                    </TYPE.black>
-                    <QuestionHelper text="Disable using advanced routing techniques to optimize your trade execution price." />
-                  </RowFixed>
-                  <Toggle isActive={disableSmartRouting} toggle={() => setDisableSmartRouting(!disableSmartRouting)} />
-                </RowBetween>
-                <RowBetween>
-                  <RowFixed>
-                    <TYPE.black fontWeight={400} fontSize={14} color={theme.text2}>
-                      Allow Moola withdrawal
-                    </TYPE.black>
-                    <QuestionHelper text="Enables withdrawing collateral from Moola. This can cause you to get liquidated-- be careful!" />
-                  </RowFixed>
-                  <Toggle
-                    isActive={allowMoolaWithdrawal}
-                    toggle={() => setAllowMoolaWithdrawal(!allowMoolaWithdrawal)}
-                  />
-                </RowBetween>{' '}
-              </>
-            )}
           </AutoColumn>
         </MenuFlyout>
       )}

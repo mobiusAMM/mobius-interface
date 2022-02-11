@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea for improving the UX of the Ubeswap Interface
+about: Suggest an idea for improving the UX of the Mobius Interface
 title: ''
 labels: 'improvement'
 assignees: ''

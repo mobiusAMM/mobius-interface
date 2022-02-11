@@ -17,7 +17,8 @@ import { ExternalLink } from 'theme/components'
 import { CountUp } from 'use-count-up'
 
 import Logo from '../../assets/svg/mobius.svg'
-import { useActiveContractKit } from '../../hooks'
+import { CHAIN } from '../../constants'
+import { useWeb3Context } from '../../hooks'
 import useTheme from '../../hooks/useTheme'
 import { useDarkModeManager } from '../../state/user/hooks'
 import Menu from '../Menu'
@@ -271,10 +272,10 @@ export const StyledMenuButton = styled.button`
 // }
 
 export default function Header() {
-  const { account, chainId } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
   const { t } = useTranslation()
   const theme = useTheme()
-  const userCELOBalance = useTokenBalance(account ?? undefined, CELO[chainId])
+  const userCELOBalance = useTokenBalance(connected ? address : undefined, CELO[CHAIN])
   const [darkMode, toggleDarkMode] = useDarkModeManager()
   const [showUbeBalanceModal, setShowUbeBalanceModal] = useState<boolean>(false)
   const [toggleMenu, setToggleMenu] = useState<boolean>(false)
@@ -341,9 +342,6 @@ export default function Header() {
               <StyledNavLink id={`vote-nav-link`} to={'/vote'}>
                 {t('Vote')}
               </StyledNavLink>
-              <StyledExternalLink id="bridge-nav-link" target="_self" href="https://bridge.mobius.money/#/">
-                {t('Bridge')}
-              </StyledExternalLink>
               <StyledNavLink id={`swap-nav-link`} to={'/risk'}>
                 {t('Risks')}
               </StyledNavLink>
@@ -355,8 +353,8 @@ export default function Header() {
         <HeaderElement>
           {aggregateBalance && (
             <UBEWrapper onClick={() => setShowUbeBalanceModal(true)}>
-              <UBEAmount active={!!account} style={{ pointerEvents: 'auto' }}>
-                {account && (
+              <UBEAmount active={connected} style={{ pointerEvents: 'auto' }}>
+                {connected && (
                   <HideSmall>
                     <TYPE.white
                       style={{
@@ -380,8 +378,8 @@ export default function Header() {
             </UBEWrapper>
           )}
 
-          <AccountElement active={!!account} style={{ pointerEvents: 'auto' }}>
-            {account && userCELOBalance ? (
+          <AccountElement active={connected} style={{ pointerEvents: 'auto' }}>
+            {connected && userCELOBalance ? (
               <BalanceText style={{ flexShrink: 0 }} pl="0.75rem" pr="0.5rem" fontWeight={500}>
                 {userCELOBalance?.toFixed(2, { groupSeparator: ',' }) ?? '0.00'} CELO
               </BalanceText>

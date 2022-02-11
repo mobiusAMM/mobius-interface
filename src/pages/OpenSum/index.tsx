@@ -6,7 +6,6 @@ import { isMobile } from 'react-device-detect'
 import { ArrowDown } from 'react-feather'
 import ReactGA from 'react-ga'
 import { Text } from 'rebass'
-import { useWalletModalToggle } from 'state/application/hooks'
 import { getPairedToken, useOpenSumTrade } from 'state/openSum/hooks'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { useTokenBalance } from 'state/wallet/hooks'
@@ -25,7 +24,8 @@ import ConfirmSwapModal from '../../components/swap/ConfirmSwapModal'
 import { ArrowWrapper, BottomGrouping, InfoWrapper, Wrapper } from '../../components/swap/styleds'
 import SwapHeader from '../../components/swap/SwapHeader'
 import TradePrice from '../../components/swap/TradePrice'
-import { useActiveContractKit } from '../../hooks'
+import { CHAIN } from '../../constants'
+import { useWeb3Context } from '../../hooks'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
 import { MentoTrade } from '../../state/mento/hooks'
 import { useIsDarkMode } from '../../state/user/hooks'
@@ -42,11 +42,8 @@ const VoteCard = styled(DataCard)`
 export default function OpenSum() {
   const isDarkMode = useIsDarkMode()
 
-  const { account, chainId } = useActiveContractKit()
+  const { address, connect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)
-
-  // toggle wallet when disconnected
-  const toggleWalletModal = useWalletModalToggle()
 
   const [inputValue, setInputValue] = useState<string>()
   const [inputToken, setInputToken] = useState<Token>()
@@ -82,7 +79,7 @@ export default function OpenSum() {
     }
   }, [approval, approvalSubmitted])
 
-  const maxAmountInput: TokenAmount | undefined = useTokenBalance(account, inputToken)
+  const maxAmountInput: TokenAmount | undefined = useTokenBalance(connected ? address : null, inputToken)
   const atMaxAmountInput = Boolean(maxAmountInput && input?.equalTo(maxAmountInput))
   const swapContract = useConstantSumContract(poolAddress)
   const deadline = useTransactionDeadline()
@@ -131,7 +128,18 @@ export default function OpenSum() {
           txHash: undefined,
         })
       })
-  }, [tradeToConfirm, showConfirm, account, trade])
+  }, [
+    tradeToConfirm,
+    showConfirm,
+    doTrade,
+    addTransaction,
+    inputValue,
+    inputToken?.symbol,
+    outputToken?.symbol,
+    input?.currency?.symbol,
+    output?.currency?.symbol,
+  ])
+  // TODO: check for endless loop
 
   // errors
   const [showInverted, setShowInverted] = useState<boolean>(false)
@@ -164,9 +172,9 @@ export default function OpenSum() {
     (inputCurrency: Token) => {
       setApprovalSubmitted(false) // reset 2 step UI for approvals
       setInputToken(inputCurrency)
-      setOutputToken(getPairedToken(inputCurrency.address, chainId))
+      setOutputToken(getPairedToken(inputCurrency.address, CHAIN))
     },
-    [setInputToken, setOutputToken, setApprovalSubmitted, chainId]
+    [setInputToken, setOutputToken, setApprovalSubmitted]
   )
 
   const handleMaxInput = useCallback(() => {
@@ -179,9 +187,9 @@ export default function OpenSum() {
   const handleOutputSelect = useCallback(
     (outputCurrency: Token) => {
       setOutputToken(outputCurrency)
-      setInputToken(getPairedToken(outputCurrency.address, chainId))
+      setInputToken(getPairedToken(outputCurrency.address, CHAIN))
     },
-    [setInputToken, setOutputToken, chainId]
+    [setInputToken, setOutputToken]
   )
 
   const actionLabel = 'Swap'
@@ -276,8 +284,8 @@ export default function OpenSum() {
             </Card>
           </AutoColumn>
           <BottomGrouping>
-            {!account ? (
-              <ButtonError disabledStyle={true} onClick={toggleWalletModal}>
+            {!connected ? (
+              <ButtonError disabledStyle={true} onClick={connect}>
                 Connect Wallet
               </ButtonError>
             ) : showApproveFlow ? (

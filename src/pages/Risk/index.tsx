@@ -173,18 +173,6 @@ export default function RiskPage() {
       </TYPE.body>
       <Divider />
       <TYPE.largeHeader fontWeight={1000} fontSize={[24, 30]}>
-        Admin keys
-      </TYPE.largeHeader>
-      <br />
-      <TYPE.body fontSize={[16, 22]}>
-        Mobius admin keys are controlled by a 3/4 multisig. The signers are Dylan Mooers, Kyle Scott, Robert Leifke, and
-        Eric Cuellar. This multisig has capabilities to pause new deposits and trades in case of technical emergencies.
-        Users will always be able to withdraw their funds regardless of new deposits being paused. The multisig can also
-        change the swap fees.
-      </TYPE.body>
-      <Divider />
-
-      <TYPE.largeHeader fontWeight={1000} fontSize={[24, 30]}>
         Permanent loss of a peg
       </TYPE.largeHeader>
       <br />

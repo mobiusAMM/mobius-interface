@@ -3,7 +3,13 @@ import styled from 'styled-components'
 
 import { escapeRegExp } from '../../utils'
 
-const StyledInput = styled.input<{ error?: boolean; white?: boolean; fontSize?: string; align?: string }>`
+const StyledInput = styled.input<{
+  error?: boolean
+  white?: boolean
+  fontSize?: string
+  align?: string
+  disabled?: boolean
+}>`
   color: ${({ error, theme }) => (error ? theme.red1 : theme.text1)};
   width: 0;
   position: relative;
@@ -19,6 +25,7 @@ const StyledInput = styled.input<{ error?: boolean; white?: boolean; fontSize?: 
   white-space: nowrap;
   overflow: hidden;
   padding: 0px;
+  cursor: ${({ disabled }) => disabled && 'not-allowed'};
   -webkit-appearance: textfield;
 
   ::-webkit-search-decoration {
@@ -45,11 +52,13 @@ export const Input = React.memo(function InnerInput({
   value,
   onUserInput,
   placeholder,
+  disabled,
   ...rest
 }: {
   value: string | number
   onUserInput: (input: string) => void
   error?: boolean
+  disabled?: boolean
   fontSize?: string
   align?: 'right' | 'left'
 } & Omit<React.HTMLProps<HTMLInputElement>, 'ref' | 'onChange' | 'as'>) {
@@ -74,6 +83,7 @@ export const Input = React.memo(function InnerInput({
       autoCorrect="off"
       // text-specific options
       type="text"
+      disabled={disabled}
       pattern="^[0-9]*[.,]?[0-9]*$"
       placeholder={placeholder || '0.0'}
       minLength={1}

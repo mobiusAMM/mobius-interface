@@ -2,7 +2,7 @@
 import { JSBI, Percent, Token, TokenAmount } from '@ubeswap/sdk'
 import { TokenList } from '@uniswap/token-lists'
 import { Chain, Coins } from 'constants/StablePools'
-import { useActiveContractKit } from 'hooks'
+import { useWeb3Context } from 'hooks'
 import { useLiquidityGaugeContract, useStableSwapContract } from 'hooks/useContract'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -11,11 +11,14 @@ import { useDefaultTokenList, WrappedTokenInfo } from 'state/lists/hooks'
 import { useSingleContractMultipleData } from 'state/multicall/hooks'
 import { tryParseAmount } from 'state/swap/hooks'
 
+import { CHAIN } from '../../constants'
 import WARNINGS from '../../constants/PoolWarnings.json'
 import { StableSwapMath } from '../../utils/stableSwapMath'
 import { AppState } from '..'
 import { StableSwapConstants, StableSwapPool, WarningType } from './reducer'
 import { BigIntToJSBI } from './updater'
+
+export type WarningModifications = 'require-equal-deposit' | 'none'
 
 export interface StablePoolInfo {
   readonly name: string
@@ -47,7 +50,7 @@ export interface StablePoolInfo {
   readonly displayChain: Chain
   readonly coin: Coins
   readonly isDisabled?: boolean
-  readonly weeklyVolume: TokenAmount
+  readonly weeklyVolume?: TokenAmount
   readonly poolLoading: boolean
   readonly gaugeLoading: boolean
   readonly isKilled?: boolean
@@ -58,7 +61,6 @@ export function useCurrentPool(tok1: string, tok2: string): readonly [StableSwap
     Object.values(state.stablePools.pools).map(({ pool }) => {
       if (!pool.metaPool || pool.disabled) return pool
       const underlying = state.stablePools.pools[pool.metaPool]?.pool
-      console.log(pool)
       return {
         ...pool,
         tokenAddresses: pool.tokenAddresses.concat(underlying.tokenAddresses),
@@ -90,9 +92,9 @@ export const getPoolInfo = (
       list: TokenList
     }
   } = {}
-): StablePoolInfo | Record<string, never> =>
+): StablePoolInfo | Record<string, never> | undefined =>
   !pool.lpTotalSupply
-    ? {}
+    ? undefined
     : {
         name: pool.name,
         poolAddress: pool.address,
@@ -115,9 +117,11 @@ export const getPoolInfo = (
           )
         ),
         workingSupply: pool.workingLiquidity,
-        balances: pool.tokens.map((token, i) => new TokenAmount(token, pool.balances[i] ?? '0')),
+        balances: pool.tokens.map(
+          (token, i) => new TokenAmount(token, pool.balances?.[i] ?? pool.approxBalances?.[i] ?? '0')
+        ),
         pegComesAfter: pool.pegComesAfter,
-        mobiRate: pool.totalMobiRate,
+        mobiRate: pool.isKilled ? JSBI.BigInt('0') : pool.totalMobiRate,
         pendingMobi: pool.pendingMobi,
         gaugeAddress: pool.gaugeAddress,
         displayDecimals: pool.displayDecimals,
@@ -136,36 +140,35 @@ export const getPoolInfo = (
         coin: pool.coin,
         isDisabled: pool.disabled,
         isKilled: pool.isKilled,
-        weeklyVolume: tryParseAmount(pool.volume.week.toFixed(6), pool.lpToken) ?? new TokenAmount(pool.lpToken, '0'),
+        weeklyVolume: pool.volume ? tryParseAmount(pool.volume.week.toFixed(6), pool.lpToken) : undefined,
+        totalVolume: pool.volume ? tryParseAmount(pool.volume.total?.toFixed(6), pool.lpToken) : undefined,
         poolLoading: pool.loadingPool,
         gaugeLoading: pool.loadingGauge,
       }
 
 export function useStablePoolInfoByName(name: string): StablePoolInfo | undefined {
   const pool = useSelector<AppState, StableSwapPool>((state) => state.stablePools.pools[name.toLowerCase()]?.pool)
-  const { chainId } = useActiveContractKit()
-  const tokens = useDefaultTokenList()[chainId]
+  const tokens = useDefaultTokenList()[CHAIN]
   return !pool ? undefined : { ...getPoolInfo(pool, tokens) }
 }
 
 export function useStablePoolInfo(): readonly StablePoolInfo[] {
   const pools = usePools()
-  const { chainId } = useActiveContractKit()
-  const tokens = useDefaultTokenList()[chainId]
-  return pools.map((pool) => getPoolInfo(pool, tokens))
+  const tokens = useDefaultTokenList()[CHAIN]
+  return pools.map((pool) => getPoolInfo(pool, tokens)).filter((el) => el)
 }
 
 export function useExpectedTokens(pool: StablePoolInfo, lpAmount: TokenAmount): TokenAmount[] {
   const contract = useStableSwapContract(pool.poolAddress)
   const { tokens } = pool
-  const { account } = useActiveContractKit()
+  const { address } = useWeb3Context()
   const [expectedOut, setExpectedOut] = useState<TokenAmount[]>(
     tokens.map((token) => new TokenAmount(token, JSBI.BigInt('0')))
   )
   useEffect(() => {
     const updateData = async () => {
       try {
-        const newTokenAmounts = await contract?.calculateRemoveLiquidity(account, lpAmount.raw.toString())
+        const newTokenAmounts = await contract?.calculateRemoveLiquidity(address, lpAmount.raw.toString())
         setExpectedOut(tokens.map((token, i) => new TokenAmount(token, JSBI.BigInt(newTokenAmounts[i].toString()))))
       } catch (e) {
         console.error(e)
@@ -173,7 +176,7 @@ export function useExpectedTokens(pool: StablePoolInfo, lpAmount: TokenAmount): 
       }
     }
     lpAmount && lpAmount.raw && updateData()
-  }, [account, lpAmount])
+  }, [address, contract, lpAmount, tokens])
   return expectedOut
 }
 
@@ -253,13 +256,13 @@ export function usePriceOfLp(address: string, amountOfLp: TokenAmount): TokenAmo
 export function useExternalRewards({ address }: { address: string }): TokenAmount[] {
   const pool = useSelector<AppState, StableSwapPool>((state) => state.stablePools.pools[address.toLowerCase()]?.pool)
   const gauge = useLiquidityGaugeContract(pool?.gaugeAddress ?? undefined)
-  const { account, chainId } = useActiveContractKit()
+  const { address: userAddress, connected } = useWeb3Context()
   gauge?.claimable_reward_write
-  const tokens = useDefaultTokenList()[chainId]
+  const tokens = useDefaultTokenList()[CHAIN]
   const claimableTokens = useSingleContractMultipleData(
     gauge,
     'claimable_reward_write',
-    pool?.additionalRewards?.map((token) => [account ?? undefined, token ?? undefined]) ?? undefined
+    pool?.additionalRewards?.map((token) => [connected ? userAddress : undefined, token ?? undefined]) ?? undefined
   )
   // console.log(claimableTokens)
   const externalRewards = claimableTokens?.map(
@@ -272,10 +275,12 @@ export function useExternalRewards({ address }: { address: string }): TokenAmoun
   return externalRewards
 }
 
-export function useWarning(pool: string | undefined): { warning: string; link?: string } | undefined {
+export function useWarning(
+  pool: string | undefined
+): { warning: string; link?: string; modification?: WarningModifications } | undefined {
   const warningType = useSelector<AppState, WarningType | undefined>(
     (state) => state.stablePools.pools[pool?.toLowerCase() ?? '']?.pool?.warningType ?? undefined
   )
   if (!warningType) return undefined
-  return WARNINGS[warningType] as any as { warning: string; link?: string }
+  return WARNINGS[warningType] as any as { warning: string; link?: string; modification?: WarningModifications }
 }

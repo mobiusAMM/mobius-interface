@@ -2,7 +2,7 @@ import Jazzicon from 'jazzicon'
 import React, { useEffect, useRef } from 'react'
 import styled from 'styled-components'
 
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 
 const StyledIdenticonContainer = styled.div`
   height: 1rem;
@@ -14,14 +14,14 @@ const StyledIdenticonContainer = styled.div`
 export default function Identicon() {
   const ref = useRef<HTMLDivElement>()
 
-  const { account } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
 
   useEffect(() => {
-    if (account && ref.current) {
+    if (connected && ref.current) {
       ref.current.innerHTML = ''
-      ref.current.appendChild(Jazzicon(16, parseInt(account.slice(2, 10), 16)))
+      ref.current.appendChild(Jazzicon(16, parseInt(address.slice(2, 10), 16)))
     }
-  }, [account])
+  }, [address, connected])
 
   // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/30451
   return <StyledIdenticonContainer ref={ref as any} />

@@ -5,11 +5,11 @@ import { AutoColumn } from 'components/Column'
 import CurrencyLogo from 'components/CurrencyLogo'
 import Modal from 'components/Modal'
 import { AutoRow, RowBetween } from 'components/Row'
-import { useActiveContractKit } from 'hooks'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { CloseIcon, ExternalLink, TYPE } from 'theme'
 
+import { CHAIN } from '../../constants'
 import { getExplorerLink } from '../../constants/NetworkInfo'
 import { useUnsupportedTokens } from '../../hooks/Tokens'
 
@@ -45,7 +45,6 @@ export default function UnsupportedCurrencyFooter({
   show: boolean
   currencies: (Token | undefined)[]
 }) {
-  const { chainId } = useActiveContractKit()
   const [showDetails, setShowDetails] = useState(false)
 
   const tokens = currencies
@@ -73,11 +72,9 @@ export default function UnsupportedCurrencyFooter({
                         <CurrencyLogo currency={token} size={'24px'} />
                         <TYPE.body fontWeight={500}>{token.symbol}</TYPE.body>
                       </AutoRow>
-                      {chainId && (
-                        <ExternalLink href={getExplorerLink(chainId, token.address, 'address')}>
-                          <AddressText>{token.address}</AddressText>
-                        </ExternalLink>
-                      )}
+                      <ExternalLink href={getExplorerLink(CHAIN, token.address, 'address')}>
+                        <AddressText>{token.address}</AddressText>
+                      </ExternalLink>
                     </AutoColumn>
                   </OutlineCard>
                 )

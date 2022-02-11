@@ -1,12 +1,11 @@
-import { useContractKit, WalletTypes } from '@celo-tools/use-contractkit'
-import { ChainId } from '@ubeswap/sdk'
+import { useWeb3Context } from 'hooks'
 import React, { useCallback, useContext } from 'react'
 import { ExternalLink as LinkIcon } from 'react-feather'
 import { useDispatch } from 'react-redux'
-import { useCloseModals } from 'state/application/hooks'
 import styled, { ThemeContext } from 'styled-components'
 
 import { ReactComponent as Close } from '../../assets/images/x.svg'
+import { CHAIN } from '../../constants'
 import { getExplorerLink } from '../../constants/NetworkInfo'
 import { AppDispatch } from '../../state'
 import { clearAllTransactions } from '../../state/transactions/actions'
@@ -206,35 +205,21 @@ export default function AccountDetails({
   confirmedTransactions,
   ENSName,
 }: AccountDetailsProps) {
-  const { connect, destroy, address, walletType, network } = useContractKit()
-  const chainId = network.chainId as unknown as ChainId
-  const closeModals = useCloseModals()
+  const { address, disconnect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)
   const dispatch = useDispatch<AppDispatch>()
 
-  function formatConnectorName() {
-    if (walletType === WalletTypes.Unauthenticated) {
-      return null
-    }
-    // TODO(igm): should be valora??
-    // const name = walletType === WalletTypes.? SupportedProviders.Valora : SupportedProviders[walletType]
-    return <WalletName>Connected with {walletType}</WalletName>
-  }
-
   function getStatusIcon() {
-    if (walletType === WalletTypes.MetaMask) {
-      return (
-        <IconWrapper size={16}>
-          <Identicon />
-        </IconWrapper>
-      )
-    }
-    return null
+    return (
+      <IconWrapper size={16}>
+        <Identicon />
+      </IconWrapper>
+    )
   }
 
   const clearAllTransactionsCallback = useCallback(() => {
-    if (chainId) dispatch(clearAllTransactions({ chainId }))
-  }, [dispatch, chainId])
+    dispatch(clearAllTransactions({ chainId: CHAIN }))
+  }, [dispatch])
 
   return (
     <>
@@ -247,92 +232,42 @@ export default function AccountDetails({
           <YourAccount>
             <InfoCard>
               <AccountGroupingRow>
-                {formatConnectorName()}
+                <WalletName>Connected to Celo Network</WalletName>
                 <div>
-                  {walletType !== WalletTypes.Injected && walletType !== WalletTypes.MetaMask && (
-                    <WalletAction
-                      style={{ fontSize: '.825rem', fontWeight: 400, marginRight: '8px' }}
-                      onClick={destroy}
-                    >
-                      Disconnect
-                    </WalletAction>
-                  )}
                   <WalletAction
-                    style={{ fontSize: '.825rem', fontWeight: 400 }}
-                    onClick={() => {
-                      closeModals()
-                      connect()
-                    }}
+                    style={{ fontSize: '.825rem', fontWeight: 400, marginRight: '8px' }}
+                    onClick={disconnect}
                   >
-                    Change
+                    Disconnect
                   </WalletAction>
                 </div>
               </AccountGroupingRow>
               <AccountGroupingRow id="web3-account-identifier-row">
                 <AccountControl>
-                  {ENSName ? (
-                    <>
-                      <div>
-                        {getStatusIcon()}
-                        <p> {ENSName}</p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div>
-                        {getStatusIcon()}
-                        <p> {address && shortenAddress(address)}</p>
-                      </div>
-                    </>
-                  )}
+                  <div>
+                    {getStatusIcon()}
+                    <p> {address && shortenAddress(address)}</p>
+                  </div>
                 </AccountControl>
               </AccountGroupingRow>
               <AccountGroupingRow>
-                {ENSName ? (
-                  <>
-                    <AccountControl>
-                      <div>
-                        {address && (
-                          <Copy toCopy={address}>
-                            <span style={{ marginLeft: '4px' }}>Copy Address</span>
-                          </Copy>
-                        )}
-                        {chainId && address && (
-                          <AddressLink
-                            hasENS={!!ENSName}
-                            isENS={true}
-                            href={chainId ? getExplorerLink(chainId, ENSName, 'address') : ''}
-                          >
-                            <LinkIcon size={16} />
-                            <span style={{ marginLeft: '4px' }}>View on Celo Explorer</span>
-                          </AddressLink>
-                        )}
-                      </div>
-                    </AccountControl>
-                  </>
-                ) : (
-                  <>
-                    <AccountControl>
-                      <div>
-                        {address && (
-                          <Copy toCopy={address}>
-                            <span style={{ marginLeft: '4px' }}>Copy Address</span>
-                          </Copy>
-                        )}
-                        {chainId && address && (
-                          <AddressLink
-                            hasENS={!!ENSName}
-                            isENS={false}
-                            href={getExplorerLink(chainId, address, 'address')}
-                          >
-                            <LinkIcon size={16} />
-                            <span style={{ marginLeft: '4px' }}>View on Celo Explorer</span>
-                          </AddressLink>
-                        )}
-                      </div>
-                    </AccountControl>
-                  </>
-                )}
+                <>
+                  <AccountControl>
+                    <div>
+                      {address && (
+                        <Copy toCopy={address}>
+                          <span style={{ marginLeft: '4px' }}>Copy Address</span>
+                        </Copy>
+                      )}
+                      {connected && (
+                        <AddressLink hasENS={false} isENS={false} href={getExplorerLink(CHAIN, address, 'address')}>
+                          <LinkIcon size={16} />
+                          <span style={{ marginLeft: '4px' }}>View on Celo Explorer</span>
+                        </AddressLink>
+                      )}
+                    </div>
+                  </AccountControl>
+                </>
               </AccountGroupingRow>
             </InfoCard>
           </YourAccount>

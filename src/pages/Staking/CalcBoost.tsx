@@ -16,7 +16,7 @@ import { calcEstimatedBoost, calcVotesForMaxBoost } from 'utils/calcExpectedVeMo
 import { ReactComponent as DropDown } from '../../assets/images/dropdown.svg'
 import DoubleCurrencyLogo from '../../components/DoubleLogo'
 import CurrencySearchModal from '../../components/PoolSearchModal/CurrencySearchModal'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { StablePoolInfo, useStablePoolInfo } from '../../state/stablePools/hooks'
 import { useIsDarkMode } from '../../state/user/hooks'
 import ClaimAllMobiModal from './ClaimAllMobiModal'
@@ -134,7 +134,7 @@ type PositionsProps = {
 }
 export default function CalcBoost({ stakingInfo }: PositionsProps) {
   const stablePools = useStablePoolInfo()
-  const { account } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
   const { positions = [] } = stakingInfo
   const loading = positions.length === 0
   const greaterThanZero = positions.filter(({ baseBalance }) => baseBalance.greaterThan('0'))
@@ -145,7 +145,7 @@ export default function CalcBoost({ stakingInfo }: PositionsProps) {
   const [veInput, setVEInput] = useState<string>('')
   const [pool, setPool] = useState<StablePoolInfo | undefined>(stablePools[0] ?? undefined)
   const lpBalance = pool ? pool.amountDeposited : new TokenAmount(mobi, JSBI.BigInt(0))
-  const veBalance = useCurrencyBalance(account, vemobi)
+  const veBalance = useCurrencyBalance(connected ? address : undefined, vemobi)
   const isDarkMode = useIsDarkMode()
   const color = useColor()
   const staking = useMobiStakingInfo()
@@ -190,7 +190,7 @@ export default function CalcBoost({ stakingInfo }: PositionsProps) {
           isDarkMode={isDarkMode}
           bgColor={color}
           selected={true}
-          walletConnected={!!account}
+          walletConnected={!connected}
           pair={false}
           className="open-currency-select-button"
           onClick={() => {

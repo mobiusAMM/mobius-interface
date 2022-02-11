@@ -1,6 +1,5 @@
 import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import { describeTrade } from 'components/swap/routing/describeTrade'
-import { MoolaDirectTrade } from 'components/swap/routing/moola/MoolaDirectTrade'
 import { useTradeCallback } from 'components/swap/routing/useTradeCallback'
 import { useIsTransactionUnsupported } from 'hooks/Trades'
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
@@ -23,10 +22,10 @@ import { ArrowWrapper, BottomGrouping, SwapCallbackError, Wrapper } from '../../
 import SwapHeader from '../../components/swap/SwapHeader'
 import TradePrice from '../../components/swap/TradePrice'
 import { INITIAL_ALLOWED_SLIPPAGE } from '../../constants'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
-import { useToggleSettingsMenu, useWalletModalToggle } from '../../state/application/hooks'
+import { useToggleSettingsMenu } from '../../state/application/hooks'
 import { Field } from '../../state/swap/actions'
 import {
   MobiusTrade,
@@ -56,11 +55,8 @@ export default function Swap() {
     [loadedInputCurrency, loadedOutputCurrency]
   )
 
-  const { account } = useActiveContractKit()
+  const { connect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)
-
-  // toggle wallet when disconnected
-  const toggleWalletModal = useWalletModalToggle()
 
   // for expert mode
   const toggleSettings = useToggleSettingsMenu()
@@ -114,10 +110,7 @@ export default function Swap() {
 
   const formattedAmounts = {
     [independentField]: typedValue,
-    [dependentField]:
-      (trade instanceof MoolaDirectTrade
-        ? parsedAmounts[dependentField]?.toExact()
-        : parsedAmounts[dependentField]?.toSignificant(6)) ?? '',
+    [dependentField]: parsedAmounts[dependentField]?.toSignificant(6) ?? '',
   }
 
   const userHasSpecifiedInputOutput = Boolean(
@@ -181,8 +174,7 @@ export default function Swap() {
     !swapInputError &&
     (approval === ApprovalState.NOT_APPROVED ||
       approval === ApprovalState.PENDING ||
-      (approvalSubmitted && approval === ApprovalState.APPROVED)) &&
-    !(priceImpactSeverity > 3 && !isExpertMode)
+      (approvalSubmitted && approval === ApprovalState.APPROVED))
 
   const handleConfirmDismiss = useCallback(() => {
     setSwapState({ showConfirm: false, tradeToConfirm, attemptingTxn, swapErrorMessage, txHash })
@@ -267,6 +259,7 @@ export default function Swap() {
                 label={independentField === Field.INPUT && trade ? `To${isEstimate ? ' (estimated)' : ''}` : 'To'}
                 showMaxButton={false}
                 currency={currencies[Field.OUTPUT]}
+                disableInput={true}
                 onCurrencySelect={handleOutputSelect}
                 otherCurrency={currencies[Field.INPUT]}
                 id="swap-currency-output"
@@ -276,16 +269,26 @@ export default function Swap() {
             <Card padding={'0px'} borderRadius={'8px'}>
               <AutoColumn gap="8px" style={{ padding: '0 8px' }}>
                 {Boolean(trade) && (
-                  <RowBetween align="center">
-                    <Text fontWeight={500} fontSize={14} color={theme.text2}>
-                      Price
-                    </Text>
-                    <TradePrice
-                      price={trade?.executionPrice}
-                      showInverted={showInverted}
-                      setShowInverted={setShowInverted}
-                    />
-                  </RowBetween>
+                  <>
+                    <RowBetween align="center">
+                      <Text fontWeight={500} fontSize={14} color={theme.text2}>
+                        Price
+                      </Text>
+                      <TradePrice
+                        price={trade?.executionPrice}
+                        showInverted={showInverted}
+                        setShowInverted={setShowInverted}
+                      />
+                    </RowBetween>
+                    <RowBetween>
+                      <Text fontWeight={500} fontSize={14} color={theme.text2}>
+                        PriceImpact
+                      </Text>
+                      <Text fontWeight={500} fontSize={14} color={theme.text2}>
+                        {`${trade?.priceImpact.toFixed(4)}%`}
+                      </Text>
+                    </RowBetween>
+                  </>
                 )}
                 {allowedSlippage !== INITIAL_ALLOWED_SLIPPAGE && (
                   <RowBetween align="center">
@@ -305,8 +308,8 @@ export default function Swap() {
               <ButtonPrimary disabled={true}>
                 <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
               </ButtonPrimary>
-            ) : !account ? (
-              <ButtonError disabledStyle={true} onClick={toggleWalletModal}>
+            ) : !connected ? (
+              <ButtonError disabledStyle={true} onClick={connect}>
                 Connect Wallet
               </ButtonError>
             ) : noRoute && userHasSpecifiedInputOutput ? (

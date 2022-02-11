@@ -220,10 +220,8 @@ export class StableSwapMath {
   }
 
   calculateSwap(indexFrom: number, indexTo: number, dx: JSBI, xp: JSBI[]): [JSBI, JSBI] {
-    console.log({ indexFrom, dx })
     const x = JSBI.add(xp[indexFrom], JSBI.multiply(this.tokenPrecisionMultipliers[indexFrom], dx))
     const y = this.getY(indexFrom, indexTo, x, xp)
-    console.log({ xp, indexTo, y, ONE })
     let dy = JSBI.subtract(JSBI.subtract(xp[indexTo], y), ONE)
     const dyFee = JSBI.divide(JSBI.multiply(dy, this.swapFee), this.FEE_DENOMINATOR)
     dy = JSBI.divide(JSBI.subtract(dy, dyFee), this.tokenPrecisionMultipliers[indexTo])
@@ -255,7 +253,6 @@ export class StableSwapMath {
     const newY = this.getYD(preciseA, index, xp, d1)
     const xpReduced: JSBI[] = new Array(xp.length).fill(JSBI.BigInt('0'))
     const feePerToken = this._feePerToken(this.swapFee, JSBI.BigInt(xp.length))
-    console.log(feePerToken.toString(), this.FEE_DENOMINATOR.toString())
     for (let i = 0; i < xp.length; i++) {
       const xpi = xp[i]
       const toSubtract =

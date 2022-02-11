@@ -1,6 +1,5 @@
 import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import { describeTrade } from 'components/swap/routing/describeTrade'
-import { MoolaDirectTrade } from 'components/swap/routing/moola/MoolaDirectTrade'
 import { useMentoTradeCallback } from 'components/swap/routing/useMentoTradeCallback'
 import { useIsTransactionUnsupported } from 'hooks/Trades'
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
@@ -25,18 +24,13 @@ import { ArrowWrapper, BottomGrouping, InfoWrapper, SwapCallbackError, Wrapper }
 import SwapHeader from '../../components/swap/SwapHeader'
 import TradePrice from '../../components/swap/TradePrice'
 import { INITIAL_ALLOWED_SLIPPAGE } from '../../constants'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
-import { useToggleSettingsMenu, useWalletModalToggle } from '../../state/application/hooks'
+import { useToggleSettingsMenu } from '../../state/application/hooks'
 import { MentoTrade } from '../../state/mento/hooks'
 import { Field } from '../../state/swap/actions'
-import {
-  useExpertModeManager,
-  useIsDarkMode,
-  useUserSingleHopOnly,
-  useUserSlippageTolerance,
-} from '../../state/user/hooks'
+import { useExpertModeManager, useIsDarkMode, useUserSlippageTolerance } from '../../state/user/hooks'
 import { ExternalLink, TYPE } from '../../theme'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { computeMentoTradePriceBreakdown, warningSeverity } from '../../utils/prices'
@@ -65,11 +59,10 @@ export default function Mento() {
 
   // dismiss warning if all imported tokens are in active lists
 
-  const { account } = useActiveContractKit()
+  const { connect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)
 
   // toggle wallet when disconnected
-  const toggleWalletModal = useWalletModalToggle()
 
   // for expert mode
   const toggleSettings = useToggleSettingsMenu()
@@ -121,10 +114,7 @@ export default function Mento() {
 
   const formattedAmounts = {
     [independentField]: typedValue,
-    [dependentField]:
-      (trade instanceof MoolaDirectTrade
-        ? parsedAmounts[dependentField]?.toExact()
-        : parsedAmounts[dependentField]?.toSignificant(6)) ?? '',
+    [dependentField]: parsedAmounts[dependentField]?.toSignificant(6) ?? '',
   }
 
   const userHasSpecifiedInputOutput = Boolean(
@@ -151,8 +141,6 @@ export default function Mento() {
   const { callback: swapCallback, error: swapCallbackError } = useMentoTradeCallback(trade, allowedSlippage, null)
   const { priceImpactWithoutFee } = computeMentoTradePriceBreakdown(trade)
 
-  const [singleHopOnly] = useUserSingleHopOnly()
-
   const handleSwap = useCallback(() => {
     setSwapState({ attemptingTxn: true, tradeToConfirm, showConfirm, swapErrorMessage: undefined, txHash: undefined })
     swapCallback()
@@ -164,11 +152,6 @@ export default function Mento() {
           action: 'Swap',
           label: [trade?.input?.currency?.symbol, trade?.output?.currency?.symbol].join('/'),
         })
-
-        ReactGA.event({
-          category: 'Routing',
-          action: singleHopOnly ? 'Swap with multihop disabled' : 'Swap with multihop enabled',
-        })
       })
       .catch((error) => {
         setSwapState({
@@ -179,7 +162,7 @@ export default function Mento() {
           txHash: undefined,
         })
       })
-  }, [swapCallback, tradeToConfirm, showConfirm, account, trade, singleHopOnly])
+  }, [swapCallback, tradeToConfirm, showConfirm, trade])
 
   // errors
   const [showInverted, setShowInverted] = useState<boolean>(false)
@@ -244,7 +227,7 @@ export default function Mento() {
               <RowBetween>
                 <TYPE.white
                   fontSize={14}
-                >{`Mint cUSD and cEUR by depositing CELO to the Celo Reserve. This exchange includes a 0.5% fee that is collected by the Celo Reserve.`}</TYPE.white>
+                >{`Mint cUSD, cEUR, and cREAL by depositing CELO to the Celo Reserve. This exchange includes a 0.25% fee that is collected by the Celo Reserve.`}</TYPE.white>
               </RowBetween>
               <ExternalLink
                 style={{ color: 'white', textDecoration: 'underline' }}
@@ -340,8 +323,8 @@ export default function Mento() {
               <ButtonPrimary disabled={true}>
                 <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
               </ButtonPrimary>
-            ) : !account ? (
-              <ButtonError disabledStyle={true} onClick={toggleWalletModal}>
+            ) : !connected ? (
+              <ButtonError disabledStyle={true} onClick={connect}>
                 Connect Wallet
               </ButtonError>
             ) : noRoute && userHasSpecifiedInputOutput ? (

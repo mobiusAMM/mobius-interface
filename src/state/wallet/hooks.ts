@@ -1,10 +1,11 @@
 import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
-import { UBE } from 'constants/tokens'
 import { useEffect, useMemo, useState } from 'react'
 import { useBlockNumber } from 'state/application/hooks'
 
+import { CHAIN } from '../../constants'
 import ERC20_INTERFACE from '../../constants/abis/erc20'
-import { useActiveContractKit } from '../../hooks'
+import { MOBI } from '../../constants/tokens'
+import { useWeb3Context } from '../../hooks'
 import { useAllTokens } from '../../hooks/Tokens'
 import { useTokenContract } from '../../hooks/useContract'
 import { isAddress } from '../../utils'
@@ -121,20 +122,20 @@ export function useCurrencyBalance(account?: string, currency?: Token): TokenAmo
 
 // mimics useAllBalances
 export function useAllTokenBalances(): { [tokenAddress: string]: TokenAmount | undefined } {
-  const { account } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
   const allTokens = useAllTokens()
   const allTokensArray = useMemo(() => Object.values(allTokens ?? {}), [allTokens])
-  const balances = useTokenBalances(account ?? undefined, allTokensArray)
+  const balances = useTokenBalances(connected ? address : undefined, allTokensArray)
   return balances ?? {}
 }
 
-// get the total owned, unclaimed, and unharvested UBE for account
+// get the total owned
 export function useAggregateUbeBalance(): TokenAmount | undefined {
-  const { account, chainId } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
 
-  const ube = chainId ? UBE[chainId] : undefined
+  const ube = MOBI[CHAIN]
 
-  const ubeBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, ube)
+  const ubeBalance: TokenAmount | undefined = useTokenBalance(connected ? address : undefined, ube)
 
   if (!ube) return undefined
 

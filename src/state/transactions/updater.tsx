@@ -1,8 +1,8 @@
-import { useContractKit, useProvider } from '@celo-tools/use-contractkit'
-import { ChainId } from '@ubeswap/sdk'
-import { useEffect, useMemo } from 'react'
+import { useWeb3Context } from 'hooks'
+import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { CHAIN } from '../../constants'
 import { useAddPopup, useBlockNumber } from '../application/hooks'
 import { AppDispatch, AppState } from '../index'
 import { checkedTransaction, finalizeTransaction } from './actions'
@@ -29,33 +29,30 @@ export function shouldCheck(
 }
 
 export default function Updater(): null {
-  const { network } = useContractKit()
-  const chainId = network.chainId as unknown as ChainId
-  const library = useProvider()
+  const { provider } = useWeb3Context()
 
   const lastBlockNumber = useBlockNumber()
 
   const dispatch = useDispatch<AppDispatch>()
   const state = useSelector<AppState, AppState['transactions']>((state) => state.transactions)
 
-  const transactions = useMemo(() => (chainId ? state[chainId] ?? {} : {}), [chainId, state])
-
   // show popup on confirm
   const addPopup = useAddPopup()
 
   useEffect(() => {
-    if (!chainId || !library || !lastBlockNumber) return
+    if (!provider || !lastBlockNumber) return
+    const transactions = state[CHAIN] ?? {}
 
     Object.keys(transactions)
       .filter((hash) => shouldCheck(lastBlockNumber, transactions[hash]))
       .forEach((hash) => {
-        library
+        provider
           .getTransactionReceipt(hash)
           .then((receipt) => {
             if (receipt) {
               dispatch(
                 finalizeTransaction({
-                  chainId,
+                  chainId: CHAIN,
                   hash,
                   receipt: {
                     blockHash: receipt.blockHash,
@@ -81,14 +78,14 @@ export default function Updater(): null {
                 hash
               )
             } else {
-              dispatch(checkedTransaction({ chainId, hash, blockNumber: lastBlockNumber }))
+              dispatch(checkedTransaction({ chainId: CHAIN, hash, blockNumber: lastBlockNumber }))
             }
           })
           .catch((error) => {
             console.error(`failed to check transaction hash: ${hash}`, error)
           })
       })
-  }, [chainId, library, transactions, lastBlockNumber, dispatch, addPopup])
+  }, [lastBlockNumber, dispatch, addPopup, provider, state])
 
   return null
 }

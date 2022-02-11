@@ -1,9 +1,10 @@
 import { ApolloClient, gql, InMemoryCache, useQuery } from '@apollo/client'
-import { useContractKit, useProvider } from '@celo-tools/use-contractkit'
 import axios from 'axios'
+import { useWeb3Context } from 'hooks'
 import { useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 
+import { CHAIN } from '../../constants'
 import useDebounce from '../../hooks/useDebounce'
 import useIsWindowVisible from '../../hooks/useIsWindowVisible'
 import { addPrices, btcEthPrice, updateBlockNumber } from './actions'
@@ -46,13 +47,12 @@ export function PriceData(): null {
 }
 
 export default function Updater(): null {
-  const library = useProvider()
-  const { network } = useContractKit()
-  const chainId = network.chainId
+  const { provider } = useWeb3Context()
+
   const dispatch = useDispatch()
   const windowVisible = useIsWindowVisible()
   const [state, setState] = useState<{ chainId: number | undefined; blockNumber: number | null }>({
-    chainId,
+    chainId: CHAIN,
     blockNumber: null,
   })
   fetchEthBtcPrices(dispatch)
@@ -60,32 +60,32 @@ export default function Updater(): null {
   const blockNumberCallback = useCallback(
     (blockNumber: number) => {
       setState((state) => {
-        if (chainId === state.chainId) {
-          if (typeof state.blockNumber !== 'number') return { chainId, blockNumber }
-          return { chainId, blockNumber: Math.max(blockNumber, state.blockNumber) }
+        if (CHAIN === state.chainId) {
+          if (typeof state.blockNumber !== 'number') return { chainId: CHAIN, blockNumber }
+          return { chainId: CHAIN, blockNumber: Math.max(blockNumber, state.blockNumber) }
         }
         return state
       })
     },
-    [chainId, setState]
+    [setState]
   )
 
   // attach/detach listeners
   useEffect(() => {
-    if (!library || !chainId || !windowVisible) return undefined
+    if (!provider || !windowVisible) return undefined
 
-    setState({ chainId, blockNumber: null })
+    setState({ chainId: CHAIN, blockNumber: null })
 
-    library
+    provider
       .getBlockNumber()
       .then(blockNumberCallback)
-      .catch((error) => console.error(`Failed to get block number for chainId: ${chainId}`, error))
+      .catch((error) => console.error(`Failed to get block number for chainId: ${CHAIN}`, error))
 
-    library.on('block', blockNumberCallback)
+    provider.on('block', blockNumberCallback)
     return () => {
-      library.removeListener('block', blockNumberCallback)
+      provider.removeListener('block', blockNumberCallback)
     }
-  }, [dispatch, chainId, library, blockNumberCallback, windowVisible])
+  }, [dispatch, provider, blockNumberCallback, windowVisible])
 
   const debouncedState = useDebounce(state, 100)
 

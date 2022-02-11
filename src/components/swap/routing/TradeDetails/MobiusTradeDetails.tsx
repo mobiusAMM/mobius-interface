@@ -52,7 +52,7 @@ export const MobiusTradeDetails: React.FC<Props> = ({ trade, allowedSlippage, me
           </TYPE.black>
           <QuestionHelper text="The difference between the market price and estimated price due to trade size." />
         </RowFixed>
-        <FormattedPriceImpact priceImpact={priceImpactWithoutFee} />
+        <FormattedPriceImpact priceImpact={trade.priceImpact} />
       </RowBetween>
 
       <RowBetween>

@@ -19,10 +19,9 @@ import { CardBGImage, CardNoise, CardSection, DataCard } from '../../components/
 import UnstakingModal from '../../components/earn/UnstakingModal'
 import { AutoRow, RowBetween, RowFixed } from '../../components/Row'
 import { BIG_INT_SECONDS_IN_WEEK } from '../../constants'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { useColor } from '../../hooks/useColor'
 import usePrevious from '../../hooks/usePrevious'
-import { useWalletModalToggle } from '../../state/application/hooks'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { ExternalLinkIcon, TYPE } from '../../theme'
 
@@ -103,7 +102,7 @@ export default function Manage({
     params: { poolName },
   },
 }: RouteComponentProps<{ poolName: string }>) {
-  const { account, chainId } = useActiveContractKit()
+  const { connect, connected } = useWeb3Context()
   const mobi = useMobi()
   const externalRewards = useExternalRewards({ address: poolName })
 
@@ -139,7 +138,7 @@ export default function Manage({
   }
   let userExternalRates: TokenAmount[] = []
   if (
-    account &&
+    connected &&
     stakingInfo &&
     stakingInfo.externalRewardRates &&
     totalStakedAmount &&
@@ -188,23 +187,13 @@ export default function Manage({
   const countUpAmount = earnedMobi?.toFixed(6) ?? '0'
   const countUpAmountPrevious = usePrevious(countUpAmount) ?? '0'
 
-  const toggleWalletModal = useWalletModalToggle()
-
-  // const test = async () => {
-  //   stakingInfo?.externalRewardRates?.forEach(async (rate) => {
-  //     const amount = await gauge?.claimable_reward_write(account, rate.token.address, { gasLimit: 350000 })
-  //     console.log(amount)
-  //   })
-  // }
-  // test()
-
   const handleDepositClick = useCallback(() => {
-    if (account) {
+    if (connected) {
       setShowStakingModal(true)
     } else {
-      toggleWalletModal()
+      connect()
     }
-  }, [account, toggleWalletModal])
+  }, [connect, connected])
 
   return (
     <PageWrapper gap="lg" justify="center">

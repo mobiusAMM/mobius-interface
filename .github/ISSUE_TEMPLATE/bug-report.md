@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Describe an issue in the Ubeswap Interface
+about: Describe an issue in the Mobius Interface
 title: ''
 labels: bug
 assignees: ''

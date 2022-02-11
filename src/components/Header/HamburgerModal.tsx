@@ -131,9 +131,9 @@ export default function HamburgerModal({ isOpen, onDismiss }: { isOpen: boolean;
         <StyledNavLink id={`vote-nav-link`} to={'/vote'} onClick={onDismiss}>
           {t('Vote')}
         </StyledNavLink>
-        <StyledExternalLink id="bridge-nav-link" target="_self" href="https://bridge.mobius.money/#/">
+        {/* <StyledExternalLink id="bridge-nav-link" target="_self" href="https://bridge.mobius.money/#/">
           {t('Bridge')}
-        </StyledExternalLink>
+        </StyledExternalLink> */}
         <StyledNavLink id={`swap-nav-link`} to={'/risk'} onClick={onDismiss}>
           {t('Risks')}
         </StyledNavLink>

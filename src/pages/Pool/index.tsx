@@ -3,7 +3,6 @@ import { cUSD, JSBI, TokenAmount } from '@ubeswap/sdk'
 import QuestionHelper from 'components/QuestionHelper'
 import { RowFixed } from 'components/Row'
 import { Chain, Coins, PRICE } from 'constants/StablePools'
-import { useActiveContractKit } from 'hooks'
 import { useMobi } from 'hooks/Tokens'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
@@ -16,6 +15,7 @@ import { CardNoise, CardSection, DataCard } from '../../components/earn/styled'
 import Loader from '../../components/Loader'
 import { Row, RowBetween } from '../../components/Row'
 import { InfoWrapper } from '../../components/swap/styleds'
+import { CHAIN } from '../../constants'
 import { StablePoolInfo, useStablePoolInfo } from '../../state/stablePools/hooks'
 import { Sel, TYPE } from '../../theme'
 
@@ -58,21 +58,19 @@ const HeaderLinks = styled(Row)`
   align-items: center;
 `
 
+const OtherChains = new Set<Chain>([Chain.Avax, Chain.Polygon, Chain.Celo])
+
 export default function Pool() {
-  const { chainId } = useActiveContractKit()
-
   const stablePools = useStablePoolInfo()
-
   const [selection, setSelection] = React.useState<Chain>(Chain.All)
   const [showDeprecated, setShowDeprecated] = React.useState(false)
-
   const tvl = stablePools
     .filter((pool) => pool && pool.virtualPrice)
     .reduce((accum, poolInfo) => {
       const price =
-        poolInfo.poolAddress === '0x19260b9b573569dDB105780176547875fE9fedA3'
+        poolInfo.coin === Coins.Bitcoin
           ? JSBI.BigInt(PRICE[Coins.Bitcoin])
-          : poolInfo.poolAddress === '0xE0F2cc70E52f05eDb383313393d88Df2937DA55a'
+          : poolInfo.coin === Coins.Ether
           ? JSBI.BigInt(PRICE[Coins.Ether])
           : JSBI.BigInt(PRICE[Coins.USD])
       const lpPrice = JSBI.divide(
@@ -82,20 +80,24 @@ export default function Pool() {
       const priceDeposited = JSBI.multiply(poolInfo?.totalDeposited?.raw ?? JSBI.BigInt('0'), lpPrice)
       return JSBI.add(accum, priceDeposited)
     }, JSBI.BigInt('0'))
-  const tvlAsTokenAmount = new TokenAmount(cUSD[chainId], tvl)
+  const tvlAsTokenAmount = new TokenAmount(cUSD[CHAIN], tvl)
   const mobiprice = useCUSDPrice(useMobi())
-
   const sortCallback = (pool1: StablePoolInfo, pool2: StablePoolInfo) => {
     if (!pool1 || !pool2) return true
-    const isStaking1 = pool1.amountDeposited?.greaterThan(JSBI.BigInt('0')) || pool1.stakedAmount.greaterThan('0')
-    const isStaking2 = pool2.amountDeposited?.greaterThan(JSBI.BigInt('0')) || pool2.stakedAmount.greaterThan('0')
+    const isStaking1 = pool1.amountDeposited?.greaterThan(JSBI.BigInt('0')) || pool1.stakedAmount?.greaterThan('0')
+    const isStaking2 = pool2.amountDeposited?.greaterThan(JSBI.BigInt('0')) || pool2.stakedAmount?.greaterThan('0')
     if (isStaking1 && !isStaking2) return false
     return true
   }
 
   const sortedFilterdPools = stablePools
     ?.sort(sortCallback)
-    .filter((pool) => selection === Chain.All || selection === pool.displayChain)
+    .filter(
+      (pool) =>
+        selection === Chain.All ||
+        selection === pool.displayChain ||
+        (selection === Chain.Other && OtherChains.has(pool.displayChain))
+    )
 
   return (
     <PageWrapper gap="lg" justify="center" style={{ marginTop: isMobile ? '-1rem' : '3rem' }}>
@@ -110,20 +112,17 @@ export default function Pool() {
           <Sel onClick={() => setSelection(Chain.All)} selected={selection === Chain.All}>
             ALL
           </Sel>
-          <Sel onClick={() => setSelection(Chain.Celo)} selected={selection === Chain.Celo}>
-            CELO
-          </Sel>
           <Sel onClick={() => setSelection(Chain.Ethereum)} selected={selection === Chain.Ethereum}>
             ETH
-          </Sel>
-          <Sel onClick={() => setSelection(Chain.Polygon)} selected={selection === Chain.Polygon}>
-            POLY
           </Sel>
           <Sel onClick={() => setSelection(Chain.Solana)} selected={selection === Chain.Solana}>
             SOL
           </Sel>
-          <Sel onClick={() => setSelection(Chain.Avax)} selected={selection === Chain.Avax}>
-            AVAX
+          <Sel onClick={() => setSelection(Chain.Terra)} selected={selection === Chain.Terra}>
+            TERRA
+          </Sel>
+          <Sel onClick={() => setSelection(Chain.Other)} selected={selection === Chain.Other}>
+            OTHER
           </Sel>
         </HeaderLinks>
         <InfoWrapper mobile={true} style={{ maxWidth: '640px' }}>
@@ -133,13 +132,13 @@ export default function Pool() {
               <AutoColumn gap="md">
                 <RowBetween>
                   <TYPE.white fontWeight={600} fontSize={20}>
-                    Celo Rewards Paused
+                    Liquidity Pools
                   </TYPE.white>
                 </RowBetween>
                 <RowBetween>
                   <TYPE.white
                     fontSize={16}
-                  >{`Celo rewards for the Optics V2 pools and veMOBI stakers are temporarily paused while we wait for the Celo foundation to provide the next tranche of rewards.  Celo rewards are expected to resume January 3rd.`}</TYPE.white>
+                  >{`Please use caution when providing liquidity into pools. Do your own research to understand the stablility mechanisms behind each token--Mobius does not guarantee the value of any asset.`}</TYPE.white>
                 </RowBetween>
               </AutoColumn>
             </CardSection>

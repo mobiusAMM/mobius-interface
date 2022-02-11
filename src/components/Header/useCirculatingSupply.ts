@@ -1,10 +1,11 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
-import { UBE } from 'constants/tokens'
-import { useActiveContractKit } from 'hooks/index'
+import { MOBI } from 'constants/tokens'
 import { useMobiContract } from 'hooks/useContract'
 import { useEffect, useState } from 'react'
 import { useSingleContractMultipleData } from 'state/multicall/hooks'
+
+import { CHAIN } from '../../constants'
 
 // Addresses that do not contribute to circulating supply
 
@@ -20,8 +21,7 @@ const nonCirculatingAddresses = {
  * Fetches the circulating supply
  */
 export const useCirculatingSupply = (): { supply: TokenAmount; staked: Percent } | undefined => {
-  const { chainId } = useActiveContractKit()
-  const mobi = chainId ? UBE[chainId] : undefined
+  const mobi = MOBI[CHAIN]
   const mobiContract = useMobiContract()
 
   // compute amount that is locked up

@@ -4,7 +4,7 @@ import CurrencyLogo from 'components/CurrencyLogo'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
 import { useStableSwapContract } from '../../hooks/useContract'
 import useTransactionDeadline from '../../hooks/useTransactionDeadline'
@@ -29,13 +29,13 @@ interface WithdrawModalProps {
 }
 
 export default function WithdrawTokens({ poolInfo, setHash, setAttempting }: WithdrawModalProps) {
-  const { library, account } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
   const { tokens, lpToken } = poolInfo
   const [approving, setApproving] = useState(false)
-  const lpBalance = useTokenBalance(account, lpToken)
+  const lpBalance = useTokenBalance(connected ? address : undefined, lpToken)
 
   const [selectedAmounts, setSelectedAmounts] = useState<TokenAmount[]>(
     tokens.map((t) => new TokenAmount(t, JSBI.BigInt('0')))
@@ -69,7 +69,7 @@ export default function WithdrawTokens({ poolInfo, setHash, setAttempting }: Wit
   }
 
   let error: string | undefined
-  if (!account) {
+  if (!connected) {
     error = 'Connect Wallet'
   }
   if (!poolInfo?.stakedAmount) {
@@ -180,9 +180,9 @@ const BalanceText = styled(TYPE.subHeader)`
 `
 
 const CurrencyRow = ({ tokenAmount, setTokenAmount, readOnly }: CurrencyRowProps) => {
-  const { account } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
   const currency = tokenAmount.currency
-  const tokenBalance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
+  const tokenBalance = useCurrencyBalance(connected ? address : undefined, currency ?? undefined)
   const TEN = JSBI.BigInt('10')
   const ZERO_TOK = new TokenAmount(currency, JSBI.BigInt('0'))
 

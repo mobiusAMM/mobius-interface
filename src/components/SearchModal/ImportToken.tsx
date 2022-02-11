@@ -6,7 +6,6 @@ import CurrencyLogo from 'components/CurrencyLogo'
 import ListLogo from 'components/ListLogo'
 import { AutoRow, RowBetween, RowFixed } from 'components/Row'
 import { SectionBreak } from 'components/swap/styleds'
-import { useActiveContractKit } from 'hooks'
 import useTheme from 'hooks/useTheme'
 import { transparentize } from 'polished'
 import React, { useState } from 'react'
@@ -16,6 +15,7 @@ import { useAddUserToken } from 'state/user/hooks'
 import styled from 'styled-components'
 import { CloseIcon, TYPE } from 'theme'
 
+import { CHAIN } from '../../constants'
 import { getExplorerLink } from '../../constants/NetworkInfo'
 import { ExternalLink } from '../../theme/components'
 import { Checkbox, PaddedColumn } from './styleds'
@@ -50,8 +50,6 @@ interface ImportProps {
 export function ImportToken({ tokens, onBack, onDismiss, handleCurrencySelect }: ImportProps) {
   const theme = useTheme()
 
-  const { chainId } = useActiveContractKit()
-
   const [confirmed, setConfirmed] = useState(false)
 
   const addToken = useAddUserToken()
@@ -61,8 +59,7 @@ export function ImportToken({ tokens, onBack, onDismiss, handleCurrencySelect }:
 
   // higher warning severity if either is not on a list
   const fromLists =
-    (chainId && inactiveTokenList?.[chainId]?.[tokens[0]?.address]?.list) ||
-    (chainId && inactiveTokenList?.[chainId]?.[tokens[1]?.address]?.list)
+    inactiveTokenList?.[CHAIN]?.[tokens[0]?.address]?.list || inactiveTokenList?.[CHAIN]?.[tokens[1]?.address]?.list
 
   return (
     <Wrapper>
@@ -76,7 +73,7 @@ export function ImportToken({ tokens, onBack, onDismiss, handleCurrencySelect }:
       <SectionBreak />
       <PaddedColumn gap="md">
         {tokens.map((token) => {
-          const list = chainId ? inactiveTokenList?.[chainId]?.[token.address]?.list : undefined
+          const list = inactiveTokenList?.[CHAIN]?.[token.address]?.list
           return (
             <Card backgroundColor={theme.bg2} key={'import' + token.address} className=".token-warning-container">
               <AutoColumn gap="10px">
@@ -87,11 +84,9 @@ export function ImportToken({ tokens, onBack, onDismiss, handleCurrencySelect }:
                   </TYPE.body>
                   <TYPE.darkGray fontWeight={300}>{token.name}</TYPE.darkGray>
                 </AutoRow>
-                {chainId && (
-                  <ExternalLink href={getExplorerLink(chainId, token.address, 'address')}>
-                    <AddressText>{token.address}</AddressText>
-                  </ExternalLink>
-                )}
+                <ExternalLink href={getExplorerLink(CHAIN, token.address, 'address')}>
+                  <AddressText>{token.address}</AddressText>
+                </ExternalLink>
                 {list !== undefined ? (
                   <RowFixed>
                     {list.logoURI && <ListLogo logoURI={list.logoURI} size="12px" />}

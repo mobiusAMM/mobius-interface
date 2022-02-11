@@ -1,6 +1,7 @@
 {
   "poof": {
     "warning": "Depositing to the Poof Private Pools is considered highly risky. We recommend users take the time to understand how pTokens (pUSD, pEUR, pCELO) can be minted/burned and who is eligible to do so. Specifically, we highly encourage LPs to mint their own pTokens instead of buying them on Mobius. Remember that Mobius cannot guarantee the peg of an asset. To learn more, read our article.",
-    "link": "https://medium.com/@mobiusmoney/new-private-pools-on-mobius-making-poof-migration-proof-a5a7a8128cd3"
+    "link": "https://medium.com/@mobiusmoney/new-private-pools-on-mobius-making-poof-migration-proof-a5a7a8128cd3",
+    "modification": "require-equal-deposit"
   }
 }

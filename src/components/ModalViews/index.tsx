@@ -3,8 +3,8 @@ import { ArrowUpCircle } from 'react-feather'
 import styled, { ThemeContext } from 'styled-components'
 
 import Circle from '../../assets/images/blue-loader.svg'
+import { CHAIN } from '../../constants'
 import { getExplorerLink } from '../../constants/NetworkInfo'
-import { useActiveContractKit } from '../../hooks'
 import { CloseIcon, CustomLightSpinner, TYPE } from '../../theme'
 import { ExternalLink } from '../../theme/components'
 import { AutoColumn, ColumnCenter } from '../Column'
@@ -47,7 +47,6 @@ export function SubmittedView({
   hash: string | undefined
 }) {
   const theme = useContext(ThemeContext)
-  const { chainId } = useActiveContractKit()
 
   return (
     <ConfirmOrLoadingWrapper>
@@ -60,8 +59,8 @@ export function SubmittedView({
       </ConfirmedIcon>
       <AutoColumn gap="100px" justify={'center'}>
         {children}
-        {chainId && hash && (
-          <ExternalLink href={getExplorerLink(chainId, hash, 'transaction')} style={{ marginLeft: '4px' }}>
+        {hash && (
+          <ExternalLink href={getExplorerLink(CHAIN, hash, 'transaction')} style={{ marginLeft: '4px' }}>
             <TYPE.subHeader>View transaction on Celo Explorer</TYPE.subHeader>
           </ExternalLink>
         )}

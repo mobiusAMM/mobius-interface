@@ -10,11 +10,12 @@ import {
   useSingleContractMultipleData,
 } from 'state/multicall/hooks'
 
+import { CHAIN } from '../../constants'
 import GAUGE_V3 from '../../constants/abis/LiquidityGaugeV3.json'
 import LP from '../../constants/abis/LPToken.json'
 import SWAP from '../../constants/abis/Swap.json'
 import { STATIC_POOL_INFO } from '../../constants/StablePools'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { useGaugeControllerContract, useMobiContract } from '../../hooks/useContract'
 import { AppDispatch } from '../index'
 import { updateGauges, updatePools } from './actions'
@@ -30,15 +31,15 @@ export const BigIntToJSBI = (num: BigInt | undefined, fallBack = '0') => {
 }
 
 export function UpdateVariablePoolInfo(): null {
-  const { library, chainId, account } = useActiveContractKit()
+  const { connected, address } = useWeb3Context()
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()
-  const pools: StableSwapConstants[] = STATIC_POOL_INFO[chainId] ?? []
+  const pools: StableSwapConstants[] = STATIC_POOL_INFO[CHAIN] ?? []
   const poolAddresses = pools.map(({ address }) => address)
   const lpTokenAddresses = pools.map(({ lpToken: { address } }) => address)
   const lpTotalSupplies = useMultipleContractSingleData(lpTokenAddresses, lpInterface, 'totalSupply')
   const lpOwned_multiple = useMultipleContractSingleData(lpTokenAddresses, lpInterface, 'balanceOf', [
-    account ?? undefined,
+    connected ? address : undefined,
   ])
   const virtualPrices = useMultipleContractSingleData(poolAddresses, SwapInterface, 'getVirtualPrice')
   const balances = useMultipleContractSingleData(poolAddresses, SwapInterface, 'getBalances')
@@ -50,13 +51,10 @@ export function UpdateVariablePoolInfo(): null {
         A
         balances
         virtualPrice
-        hourlyVolumes(first: 2) {
+        dailyVolumes(orderBy: timestamp, orderDirection: desc) {
           volume
         }
-        dailyVolumes(first: 2) {
-          volume
-        }
-        weeklyVolumes(first: 2) {
+        weeklyVolumes(first: 2, orderBy: timestamp, orderDirection: desc) {
           volume
         }
       }
@@ -76,12 +74,15 @@ export function UpdateVariablePoolInfo(): null {
         poolAddresses[i],
       ])
       .reduce(
-        (accum, [total, user, virtualPrice, balance, address]) => ({
+        (accum, [total, user, virtualPrice, balances, address]) => ({
           ...accum,
-          [(address as any as string).toLowerCase()]: { total, user, balance, virtualPrice },
+          [(address as any as string).toLowerCase()]: { total, user, balances, virtualPrice },
         }),
         {}
       )
+  const inSubgraph: Set<string> =
+    data?.swaps.reduce((accum: Set<string>, cur: any) => new Set([...accum, cur.id]), new Set()) ?? new Set()
+  const poolsNotInSubgraph = poolAddresses.map((a) => a.toLowerCase()).filter((addr) => !inSubgraph.has(addr))
   return useMemo(() => {
     if (error) console.log(error)
     if (loading) return null
@@ -90,37 +91,60 @@ export function UpdateVariablePoolInfo(): null {
       .map((pool) => ({
         id: pool.id,
         volume: {
+          total: pool.dailyVolumes.reduce((accum: number, el: string) => accum + parseFloat(el.volume), 0),
           day: parseFloat(pool.dailyVolumes[0]?.volume ?? '0'),
-          week: parseFloat(pool.weeklyVolumes[1]?.volume ?? '0'),
+          week: parseFloat(pool.weeklyVolumes[0]?.volume ?? '0'),
         },
-        balances: lpInfo[pool.id].balances ?? pool?.balances?.map((b: string) => JSBI.BigInt(b)),
+        approxBalances: pool.balances.map((b: string) => JSBI.BigInt(b)),
+        balances: lpInfo[pool.id].total ? lpInfo[pool.id].balances : undefined,
         amp: JSBI.BigInt(pool.A),
         aPrecise: JSBI.BigInt(parseInt(pool.A) * 100),
         virtualPrice: lpInfo[pool.id].virtualPrice,
         lpTotalSupply: lpInfo[pool.id].total,
         lpOwned: lpInfo[pool.id].user,
+        loadingPool: !lpInfo[pool.id].total,
       }))
-    dispatch(updatePools({ info: poolInfo }))
+
+    dispatch(
+      updatePools({
+        info:
+          poolsNotInSubgraph.length > 0
+            ? poolInfo.concat(
+                poolsNotInSubgraph.map((id) => ({
+                  id,
+                  volume: undefined,
+                  balances: lpInfo[id]?.total ? lpInfo[id].balances : undefined,
+                  amp: JSBI.BigInt(50),
+                  aPrecise: JSBI.BigInt(50 * 100),
+                  virtualPrice: lpInfo[id]?.virtualPrice,
+                  lpTotalSupply: lpInfo[id]?.total ?? JSBI.BigInt('1'),
+                  lpOwned: lpInfo[id]?.user ?? JSBI.BigInt('0'),
+                  loadingPool: !lpInfo[id]?.total,
+                }))
+              )
+            : poolInfo,
+      })
+    )
     return null
-  }, [data, loading, error, dispatch, blockNumber, library, chainId, account, lpInfo])
+  }, [data, loading, error, dispatch, blockNumber, lpInfo])
 }
 
 export function BatchUpdateGauges(): null {
-  const { library, chainId, account } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()
-  const pools: StableSwapConstants[] = STATIC_POOL_INFO[chainId] ?? []
+  const pools: StableSwapConstants[] = STATIC_POOL_INFO[CHAIN] ?? []
   const gaugeAddresses = pools.map(({ gaugeAddress }) => gaugeAddress)
   const gaugeController = useGaugeControllerContract()
   const mobiContract = useMobiContract()
 
   const totalStakedAmount_multi = useMultipleContractSingleData(gaugeAddresses, gaugeInterface, 'totalSupply')
   const lpStaked_multi = useMultipleContractSingleData(gaugeAddresses, gaugeInterface, 'balanceOf', [
-    account ?? undefined,
+    connected ? address : undefined,
   ])
   const workingLiquidityMulti = useMultipleContractSingleData(gaugeAddresses, gaugeInterface, 'working_supply')
   const pendingMobi_multi = useMultipleContractSingleData(gaugeAddresses, gaugeInterface, 'claimable_tokens', [
-    account ?? undefined,
+    connected ? address : undefined,
   ])
   const mobiRate: JSBI = BigIntToJSBI(useSingleCallResult(mobiContract, 'rate')?.result?.[0] ?? '0')
   const weights = useSingleContractMultipleData(
@@ -137,19 +161,19 @@ export function BatchUpdateGauges(): null {
   const lastClaims = useMultipleContractSingleData(gaugeAddresses, gaugeInterface, 'last_claim')
 
   const effectiveBalances = useMultipleContractSingleData(gaugeAddresses, gaugeInterface, 'working_balances', [
-    account ?? undefined,
+    connected ? address : undefined,
   ])
   const totalEffectiveBalances = useMultipleContractSingleData(gaugeAddresses, gaugeInterface, 'working_supply')
   const lastUserVotes = useSingleContractMultipleData(
     gaugeController,
     'last_user_vote',
-    gaugeAddresses.map((a) => [account ?? a, a])
+    gaugeAddresses.map((a) => [connected ? address : a, a])
   )
   // vote_user_slopes
   const slopes = useSingleContractMultipleData(
     gaugeController,
     'vote_user_slopes',
-    gaugeAddresses.map((a) => [account ?? a, a])
+    gaugeAddresses.map((a) => [connected ? address : a, a])
   )
 
   useMemo(() => {
@@ -198,6 +222,6 @@ export function BatchUpdateGauges(): null {
           }),
       })
     )
-  }, [blockNumber, library, account, dispatch])
+  }, [blockNumber, dispatch])
   return null
 }

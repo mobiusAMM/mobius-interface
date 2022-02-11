@@ -1,10 +1,10 @@
 import { ChainId } from '@ubeswap/sdk'
-import { useActiveContractKit } from 'hooks'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
 import { AlertTriangle, X } from 'react-feather'
 import styled from 'styled-components'
 
+import { CHAIN } from '../../constants'
 import { useURLWarningToggle, useURLWarningVisible } from '../../state/user/hooks'
 
 const PhishAlert = styled.div<{ isActive: any }>`
@@ -33,13 +33,12 @@ const appURL: { [id in ChainId]: string } = {
 export default function URLWarning() {
   const toggleURLWarning = useURLWarningToggle()
   const showURLWarning = useURLWarningVisible()
-  const { chainId } = useActiveContractKit()
 
   return isMobile ? (
     <PhishAlert isActive={showURLWarning}>
       <div style={{ display: 'flex' }}>
         <AlertTriangle style={{ marginRight: 6 }} size={12} /> Make sure the URL is
-        <code style={{ padding: '0 4px', display: 'inline', fontWeight: 'bold' }}>{appURL[chainId]}</code>
+        <code style={{ padding: '0 4px', display: 'inline', fontWeight: 'bold' }}>{appURL[CHAIN]}</code>
       </div>
       <StyledClose size={12} onClick={toggleURLWarning} />
     </PhishAlert>
@@ -47,7 +46,7 @@ export default function URLWarning() {
     <PhishAlert isActive={showURLWarning}>
       <div style={{ display: 'flex' }}>
         <AlertTriangle style={{ marginRight: 6 }} size={12} /> Always make sure the URL is
-        <code style={{ padding: '0 4px', display: 'inline', fontWeight: 'bold' }}>{appURL[chainId]}</code> - bookmark it
+        <code style={{ padding: '0 4px', display: 'inline', fontWeight: 'bold' }}>{appURL[CHAIN]}</code> - bookmark it
         to be safe.
       </div>
       <StyledClose size={12} onClick={toggleURLWarning} />
