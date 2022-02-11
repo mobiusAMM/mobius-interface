@@ -14,7 +14,7 @@ const makeTokens = (
 
 export const MOBI = makeTokens(
   {
-    [ChainId.MAINNET]: '0xA04E399d9b42F1B8F3b11f0685282BfA41912a0a',
+    [ChainId.MAINNET]: '0x73a210637f6F6B7005512677Ba6B3C96bb4AA44B',
     [ChainId.ALFAJORES]: '0x17a139f275102bBaB5BcbF1c4b7143F08B635EA2',
     [ChainId.BAKLAVA]: '0x00Be915B9dCf56a3CBE739D9B9c202ca692409EC',
   },
@@ -36,7 +36,7 @@ export const CELO = makeTokens(
 
 export const VEMOBI = makeTokens(
   {
-    [ChainId.MAINNET]: '0xd2Fc9ebE9602340f9917794d1B549cA3A275dd9f',
+    [ChainId.MAINNET]: '0xd813a846aA9D572140d7ABBB4eFaC8cD786b4c0E',
     [ChainId.ALFAJORES]: '0x7d64708ecf5201cfE74364424AddB0A8FD32174f',
     [ChainId.BAKLAVA]: '0xFe2434bcE62C9B4845fe0C57438f5F86fA4771A7',
   },
