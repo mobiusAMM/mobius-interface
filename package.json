@@ -118,7 +118,7 @@
   "dependencies": {
     "@apollo/client": "^3.4.16",
     "@celo/connect": "^1.2.0",
-    "@celo/contractkit": "1.5.1",
+    "@celo/contractkit": "1.5.2",
     "@celo/utils": "^1.2.1",
     "@celo/wallet-ledger": "^1.2.0",
     "@craco/craco": "^6.1.2",
