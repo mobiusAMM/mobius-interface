@@ -5,7 +5,7 @@ import { ButtonError } from 'components/Button'
 import { BlueCard } from 'components/Card'
 import { AutoColumn } from 'components/Column'
 import { GAUGE_CONTROLLER, GAUGE_PROXY } from 'constants/StablePools'
-import { useActiveContractKit } from 'hooks'
+import { useWeb3Context } from 'hooks'
 import JSBI from 'jsbi'
 import { Wrapper } from 'pages/Pool/styleds'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -24,7 +24,8 @@ import { ExternalLink, TYPE } from 'theme'
 import invariant from 'tiny-invariant'
 
 import { CreateProposalTabs } from '../../components/NavigationTabs'
-import { UBE } from '../../constants/tokens'
+import { CHAIN } from '../../constants'
+import { MOBI } from '../../constants/tokens'
 import { ProposalActionDetail } from './ProposalActionDetail'
 import { ProposalAction, ProposalActionSelector, ProposalActionSelectorModal } from './ProposalActionSelector'
 import { ProposalEditor } from './ProposalEditor'
@@ -96,9 +97,9 @@ const CreateProposalWrapper = styled(Wrapper)`
 `
 
 export default function CreateProposal() {
-  const { account, chainId } = useActiveContractKit()
+  const { connected, address } = useWeb3Context()
 
-  const latestProposalId = useLatestProposalId(account ?? undefined) ?? '0'
+  const latestProposalId = useLatestProposalId(connected ? address : undefined) ?? '0'
   // the first argument below should be the index of the latest governor
   const latestProposalData = useProposalData(latestProposalId)
   const { votes: availableVotes } = useUserVotes()
@@ -110,7 +111,7 @@ export default function CreateProposal() {
   const [proposalAction, setProposalAction] = useState(ProposalAction.TRANSFER_TOKEN)
   const [toAddressValue, setToAddressValue] = useState('')
   const [gaugeAddressValue, setGaugeAddressValue] = useState('')
-  const [currencyValue, setCurrencyValue] = useState<Token>(UBE[chainId ?? 42220])
+  const [currencyValue, setCurrencyValue] = useState<Token>(MOBI[CHAIN])
   const [amountValue, setAmountValue] = useState('')
   const [titleValue, setTitleValue] = useState('')
   const [bodyValue, setBodyValue] = useState('')
@@ -212,11 +213,11 @@ export default function CreateProposal() {
         break
       }
       case ProposalAction.ADD_GAUGE: {
-        createProposalData.targets = [GAUGE_CONTROLLER[chainId ?? 42220]]
+        createProposalData.targets = [GAUGE_CONTROLLER[CHAIN]]
         break
       }
       case ProposalAction.KILL_GAUGE: {
-        createProposalData.targets = [GAUGE_PROXY[chainId ?? 42220]]
+        createProposalData.targets = [GAUGE_PROXY[CHAIN]]
         break
       }
     }
@@ -264,7 +265,6 @@ ${bodyValue}
   }, [
     amountValue,
     bodyValue,
-    chainId,
     createProposalCallback,
     currencyValue,
     gaugeAddressValue,

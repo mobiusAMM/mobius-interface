@@ -96,19 +96,19 @@ export const PRICE: { [c in Coins]: number } = {
 }
 
 export const MOBIUS_MINTER_ADDRESS: { [K in ChainId]: string } = {
-  [ChainId.MAINNET]: '0x5F0200CA03196D5b817E2044a0Bb0D837e0A7823',
+  [ChainId.MAINNET]: '0x2B52d2160b088029f689D481BD1f5D3E83e57ba8',
   [ChainId.ALFAJORES]: '0x5c212FA1cf8b1143f2142C26161e65404034c01f',
   [ChainId.BAKLAVA]: '',
 }
 
 export const MOBI_TOKEN: { [K in ChainId]: Token | undefined } = {
-  [ChainId.MAINNET]: mobiToken(ChainId.MAINNET, '0x73a210637f6F6B7005512677Ba6B3C96bb4AA44B'),
+  [ChainId.MAINNET]: mobiToken(ChainId.MAINNET, '0xA04E399d9b42F1B8F3b11f0685282BfA41912a0a'),
   [ChainId.ALFAJORES]: mobiToken(ChainId.ALFAJORES, '0x6dDcbC22c1ED5D0662635ffb020c82DF4e1Ba234'),
   [ChainId.BAKLAVA]: undefined,
 }
 
 export const GAUGE_CONTROLLER: { [K in ChainId]: string } = {
-  [ChainId.MAINNET]: '0x7530E03056D3a8eD0323e61091ea2f17a1aC5C25',
+  [ChainId.MAINNET]: '0xF8eABb30A124AAc16B9eD6aFaed830BE30fB128E',
   [ChainId.ALFAJORES]: '0x00063Fbe0c90834EE90C6191d0D9F04eaB01A14f',
   [ChainId.BAKLAVA]: '',
 }

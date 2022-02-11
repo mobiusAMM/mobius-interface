@@ -1,6 +1,5 @@
 import { ChainId, Token } from '@ubeswap/sdk'
 import mapValues from 'lodash/mapValues'
-import { WrappedTokenInfo } from 'state/lists/hooks'
 
 const makeTokens = (
   addresses: { [net in ChainId]: string },
@@ -15,25 +14,13 @@ const makeTokens = (
 
 export const MOBI = makeTokens(
   {
-    [ChainId.MAINNET]: '0x73a210637f6F6B7005512677Ba6B3C96bb4AA44B',
+    [ChainId.MAINNET]: '0xA04E399d9b42F1B8F3b11f0685282BfA41912a0a',
     [ChainId.ALFAJORES]: '0x17a139f275102bBaB5BcbF1c4b7143F08B635EA2',
     [ChainId.BAKLAVA]: '0x00Be915B9dCf56a3CBE739D9B9c202ca692409EC',
   },
   18,
   'MOBI',
   'Mobius DAO Token'
-)
-
-export const MOBI = new WrappedTokenInfo(
-  {
-    chainId: ChainId.MAINNET,
-    address: '0x73a210637f6F6B7005512677Ba6B3C96bb4AA44B',
-    decimals: 18,
-    symbol: 'MOBI',
-    name: 'Mobius DAO Token',
-    logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_MOBI.png',
-  },
-  []
 )
 
 export const CELO = makeTokens(
