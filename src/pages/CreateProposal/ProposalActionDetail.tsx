@@ -43,18 +43,18 @@ export const ProposalActionDetail = ({
   onGaugeAddressInput: (address: string) => void
 }) => {
   const proposalActionsData = {
-    // [ProposalAction.ADD_GAUGE]: [
-    //   {
-    //     type: ProposalActionDetailField.GAUGE,
-    //     label: 'Gauge Address',
-    //   },
-    // ],
-    // [ProposalAction.KILL_GAUGE]: [
-    //   {
-    //     type: ProposalActionDetailField.GAUGE,
-    //     label: 'Gauge Address',
-    //   },
-    // ],
+    [ProposalAction.ADD_GAUGE]: [
+      {
+        type: ProposalActionDetailField.GAUGE,
+        label: 'Gauge Address',
+      },
+    ],
+    [ProposalAction.KILL_GAUGE]: [
+      {
+        type: ProposalActionDetailField.GAUGE,
+        label: 'Gauge Address',
+      },
+    ],
     [ProposalAction.TRANSFER_TOKEN]: [
       {
         type: ProposalActionDetailField.ADDRESS,

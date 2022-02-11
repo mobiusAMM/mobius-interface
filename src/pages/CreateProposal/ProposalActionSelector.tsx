@@ -10,8 +10,8 @@ import { CloseIcon, TYPE } from 'theme'
 
 export enum ProposalAction {
   TRANSFER_TOKEN = 'Transfer Token',
-  // ADD_GAUGE = 'Add Gauge',
-  // KILL_GAUGE = 'Kill Gauge',
+  ADD_GAUGE = 'Add Gauge',
+  KILL_GAUGE = 'Kill Gauge',
 }
 
 interface ProposalActionSelectorModalProps {
@@ -109,7 +109,7 @@ export function ProposalActionSelectorModal({
           </RowBetween>
         </PaddedColumn>
         <Separator />
-        {/* <MenuItem onClick={() => handleProposalActionSelect(ProposalAction.ADD_GAUGE)}>
+        <MenuItem onClick={() => handleProposalActionSelect(ProposalAction.ADD_GAUGE)}>
           <Column>
             <Text fontWeight={500}>
               <TYPE.main>Add Gauge</TYPE.main>
@@ -122,7 +122,7 @@ export function ProposalActionSelectorModal({
               <TYPE.main>Kill Gauge</TYPE.main>
             </Text>
           </Column>
-        </MenuItem> */}
+        </MenuItem>
         <MenuItem onClick={() => handleProposalActionSelect(ProposalAction.TRANSFER_TOKEN)}>
           <Column>
             <Text fontWeight={500}>

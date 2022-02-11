@@ -4,6 +4,7 @@ import { Token, TokenAmount } from '@ubeswap/sdk'
 import { ButtonError } from 'components/Button'
 import { BlueCard } from 'components/Card'
 import { AutoColumn } from 'components/Column'
+import { GAUGE_CONTROLLER, GAUGE_PROXY } from 'constants/StablePools'
 import { useActiveContractKit } from 'hooks'
 import JSBI from 'jsbi'
 import { Wrapper } from 'pages/Pool/styleds'
@@ -20,6 +21,7 @@ import {
 import { tryParseAmount } from 'state/swap/hooks'
 import styled from 'styled-components/macro'
 import { ExternalLink, TYPE } from 'theme'
+import invariant from 'tiny-invariant'
 
 import { CreateProposalTabs } from '../../components/NavigationTabs'
 import { UBE } from '../../constants/tokens'
@@ -180,13 +182,13 @@ export default function CreateProposal() {
       Boolean(
         !proposalAction ||
           (proposalAction === ProposalAction.TRANSFER_TOKEN && !isAddress(toAddressValue)) ||
-          // ((proposalAction === ProposalAction.ADD_GAUGE || proposalAction === ProposalAction.KILL_GAUGE) &&
-          //   !isAddress(gaugeAddressValue)) ||
+          ((proposalAction === ProposalAction.ADD_GAUGE || proposalAction === ProposalAction.KILL_GAUGE) &&
+            !isAddress(gaugeAddressValue)) ||
           (proposalAction === ProposalAction.TRANSFER_TOKEN && amountValue === '') ||
           titleValue === '' ||
           bodyValue === ''
       ),
-    [proposalAction, toAddressValue, amountValue, titleValue, bodyValue]
+    [proposalAction, toAddressValue, gaugeAddressValue, amountValue, titleValue, bodyValue]
   )
 
   const hasEnoughVote = Boolean(
@@ -209,14 +211,14 @@ export default function CreateProposal() {
         createProposalData.targets = [currencyValue.address]
         break
       }
-      // case ProposalAction.ADD_GAUGE: {
-      //   createProposalData.targets = [GAUGE_CONTROLLER[chainId ?? 42220]]
-      //   break
-      // }
-      // case ProposalAction.KILL_GAUGE: {
-      //   createProposalData.targets = [GAUGE_PROXY[chainId ?? 42220]]
-      //   break
-      // }
+      case ProposalAction.ADD_GAUGE: {
+        createProposalData.targets = [GAUGE_CONTROLLER[chainId ?? 42220]]
+        break
+      }
+      case ProposalAction.KILL_GAUGE: {
+        createProposalData.targets = [GAUGE_PROXY[chainId ?? 42220]]
+        break
+      }
     }
     createProposalData.values = ['0']
     createProposalData.description = `# ${titleValue}
@@ -228,24 +230,25 @@ ${bodyValue}
     let values: string[][]
     switch (proposalAction) {
       case ProposalAction.TRANSFER_TOKEN: {
+        invariant(tokenAmount, 'token amount')
         types = [['address', 'uint256']]
         values = [[getAddress(toAddressValue), tokenAmount.quotient.toString()]]
         createProposalData.signatures = [`transfer(${types[0].join(',')})`]
         break
       }
 
-      // case ProposalAction.ADD_GAUGE: {
-      //   types = [['address', 'int128', 'uint256']]
-      //   values = [[getAddress(gaugeAddressValue), '0', '0']]
-      //   createProposalData.signatures = [`add_gauge(${types[0].join(',')})`]
-      //   break
-      // }
+      case ProposalAction.ADD_GAUGE: {
+        types = [['address', 'int128', 'uint256']]
+        values = [[getAddress(gaugeAddressValue), '0', '0']]
+        createProposalData.signatures = [`add_gauge(${types[0].join(',')})`]
+        break
+      }
 
-      // case ProposalAction.KILL_GAUGE: {
-      //   types = [['address', 'bool']]
-      //   values = [[getAddress(gaugeAddressValue), '1']]
-      //   createProposalData.signatures = [`set_killed(${types[0].join(',')})`]
-      // }
+      case ProposalAction.KILL_GAUGE: {
+        types = [['address', 'bool']]
+        values = [[getAddress(gaugeAddressValue), '1']]
+        createProposalData.signatures = [`set_killed(${types[0].join(',')})`]
+      }
     }
 
     createProposalData.calldatas = []
@@ -258,7 +261,17 @@ ${bodyValue}
     })
 
     if (hash) setHash(hash)
-  }, [amountValue, bodyValue, createProposalCallback, currencyValue, proposalAction, titleValue, toAddressValue])
+  }, [
+    amountValue,
+    bodyValue,
+    chainId,
+    createProposalCallback,
+    currencyValue,
+    gaugeAddressValue,
+    proposalAction,
+    titleValue,
+    toAddressValue,
+  ])
 
   return (
     <Upper>
