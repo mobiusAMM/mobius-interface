@@ -1,24 +1,21 @@
 import { parseUnits } from '@ethersproject/units'
-import { ChainId, cUSD, JSBI, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
-import { ParsedQs } from 'qs'
-import { useCallback, useEffect, useState } from 'react'
+import { JSBI, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
+import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { MentoPool } from 'state/mentoPools/reducer'
+import invariant from 'tiny-invariant'
 import { MentoMath } from 'utils/mentoMath'
 
-import { CHAIN } from '../../constants'
 import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
-import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress } from '../../utils'
 import { AppDispatch, AppState } from '../index'
 import { useCurrentPool, useMathUtil, usePools } from '../mentoPools/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
-import { SwapState } from './reducer'
+import { Field, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 
-export function useSwapState(): AppState['swap'] {
-  return useSelector<AppState, AppState['swap']>((state) => state.swap)
+export function useSwapState(): AppState['mento'] {
+  return useSelector<AppState, AppState['mento']>((state) => state.mento)
 }
 
 export function useSwapActionHandlers(): {
@@ -123,6 +120,7 @@ function calcInputOutput(
 
   const swapFee = JSBI.divide(poolInfo.swapFee, JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18)))
 
+  invariant(parsedAmount)
   if (isExactIn) {
     details[0] = parsedAmount
     const [expectedOut, fee] = math.getAmountOut(parsedAmount.raw, balanceIn, balanceOut, swapFee)
@@ -151,13 +149,12 @@ export function useMentoTradeInfo(): {
     typedValue,
     [Field.INPUT]: { currencyId: inputCurrencyId },
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
-    recipient,
   } = useSwapState()
   const inputCurrency = useCurrency(true, inputCurrencyId)
   const outputCurrency = useCurrency(true, outputCurrencyId)
   const pools = usePools()
   const poolsLoading = pools.length === 0
-  const [pool] = useCurrentPool(inputCurrency?.address, outputCurrency?.address)
+  const [pool] = useCurrentPool(inputCurrency?.address ?? '', outputCurrency?.address ?? '')
   const mathUtil = useMathUtil(pool)
 
   const to: string | null = connected ? address : null
@@ -196,7 +193,7 @@ export function useMentoTradeInfo(): {
   if (!to || !formattedTo) {
     inputError = inputError ?? 'Enter a recipient'
   }
-  if (!inputCurrency || !outputCurrency || !parsedAmount || poolsLoading) {
+  if (!inputCurrency || !outputCurrency || !parsedAmount || poolsLoading || !mathUtil) {
     return {
       currencies,
       currencyBalances,
@@ -206,6 +203,16 @@ export function useMentoTradeInfo(): {
     }
   }
   const [input, output, fee] = calcInputOutput(inputCurrency, outputCurrency, isExactIn, parsedAmount, mathUtil, pool)
+  if (!input || !output || !fee) {
+    return {
+      currencies,
+      currencyBalances,
+      parsedAmount,
+      inputError,
+      v2Trade: undefined,
+    }
+  }
+
   if (currencyBalances[Field.INPUT]?.lessThan(input || JSBI.BigInt('0'))) {
     inputError = 'Insufficient Balance'
   }
@@ -222,99 +229,4 @@ export function useMentoTradeInfo(): {
     v2Trade,
     inputError,
   }
-}
-
-function parseCurrencyFromURLParameter(input: boolean, urlParam: any, chainId: ChainId): string {
-  if (typeof urlParam === 'string') {
-    const valid = isAddress(urlParam)
-    if (valid) return valid
-    if (urlParam.toUpperCase() === 'CUSD') {
-      return cUSD[chainId].address
-    }
-    if (valid === false) return cUSD[chainId].address
-  }
-  if (input) {
-    return chainId === ChainId.ALFAJORES
-      ? '0xF194afDf50B03e69Bd7D057c1Aa9e10c9954E4C9'
-      : '0x471EcE3750Da237f93B8E339c536989b8978a438'
-  } else {
-    return chainId === ChainId.ALFAJORES
-      ? '0x2AaF20d89277BF024F463749045964D7e7d3A774'
-      : '0x765DE816845861e75A25fCA122bb6898B8B1282a'
-  }
-}
-
-function parseTokenAmountURLParameter(urlParam: any): string {
-  return typeof urlParam === 'string' && !isNaN(parseFloat(urlParam)) ? urlParam : ''
-}
-
-function parseIndependentFieldURLParameter(urlParam: any): Field {
-  return typeof urlParam === 'string' && urlParam.toLowerCase() === 'output' ? Field.OUTPUT : Field.INPUT
-}
-
-const ENS_NAME_REGEX = /^[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)?$/
-const ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/
-function validatedRecipient(recipient: any): string | null {
-  if (typeof recipient !== 'string') return null
-  const address = isAddress(recipient)
-  if (address) return address
-  if (ENS_NAME_REGEX.test(recipient)) return recipient
-  if (ADDRESS_REGEX.test(recipient)) return recipient
-  return null
-}
-
-export function queryParametersToSwapState(parsedQs: ParsedQs, chainId: ChainId): SwapState {
-  let inputCurrency = parseCurrencyFromURLParameter(true, parsedQs.inputCurrency, chainId)
-  let outputCurrency = parseCurrencyFromURLParameter(false, parsedQs.outputCurrency, chainId)
-
-  if (inputCurrency === outputCurrency) {
-    if (typeof parsedQs.outputCurrency === 'string') {
-      inputCurrency = ''
-    } else {
-      outputCurrency = ''
-    }
-  }
-
-  const recipient = validatedRecipient(parsedQs.recipient)
-
-  return {
-    [Field.INPUT]: {
-      currencyId: inputCurrency,
-    },
-    [Field.OUTPUT]: {
-      currencyId: outputCurrency,
-    },
-    typedValue: parseTokenAmountURLParameter(parsedQs.exactAmount),
-    independentField: parseIndependentFieldURLParameter(parsedQs.exactField),
-    recipient,
-  }
-}
-
-// updates the swap state to use the defaults for a given network
-export function useDefaultsFromURLSearch():
-  | { inputCurrencyId: string | undefined; outputCurrencyId: string | undefined }
-  | undefined {
-  const dispatch = useDispatch<AppDispatch>()
-  const parsedQs = useParsedQueryString()
-  const [result, setResult] = useState<
-    { inputCurrencyId: string | undefined; outputCurrencyId: string | undefined } | undefined
-  >()
-  useEffect(() => {
-    const parsed = queryParametersToSwapState(parsedQs, CHAIN)
-
-    dispatch(
-      replaceSwapState({
-        typedValue: parsed.typedValue,
-        field: parsed.independentField,
-        inputCurrencyId: parsed[Field.INPUT].currencyId,
-        outputCurrencyId: parsed[Field.OUTPUT].currencyId,
-        recipient: parsed.recipient,
-      })
-    )
-
-    setResult({ inputCurrencyId: parsed[Field.INPUT].currencyId, outputCurrencyId: parsed[Field.OUTPUT].currencyId })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch])
-
-  return result
 }

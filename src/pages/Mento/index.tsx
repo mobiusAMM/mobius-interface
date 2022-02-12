@@ -1,13 +1,13 @@
-import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
+import { JSBI, TokenAmount } from '@ubeswap/sdk'
 import { describeTrade } from 'components/swap/routing/describeTrade'
 import { useMentoTradeCallback } from 'components/swap/routing/useMentoTradeCallback'
 import { useIsTransactionUnsupported } from 'hooks/Trades'
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { ArrowDown } from 'react-feather'
 import ReactGA from 'react-ga'
 import { Text } from 'rebass'
-import { useDefaultsFromURLSearch, useMentoTradeInfo, useSwapActionHandlers, useSwapState } from 'state/mento/hooks'
+import { useMentoTradeInfo, useSwapActionHandlers, useSwapState } from 'state/mento/hooks'
 import styled, { ThemeContext } from 'styled-components'
 
 import { ButtonConfirmed, ButtonError, ButtonPrimary } from '../../components/Button'
@@ -25,12 +25,11 @@ import SwapHeader from '../../components/swap/SwapHeader'
 import TradePrice from '../../components/swap/TradePrice'
 import { INITIAL_ALLOWED_SLIPPAGE } from '../../constants'
 import { useWeb3Context } from '../../hooks'
-import { useCurrency } from '../../hooks/Tokens'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
 import { useToggleSettingsMenu } from '../../state/application/hooks'
+import { Field } from '../../state/mento/actions'
 import { MentoTrade } from '../../state/mento/hooks'
-import { Field } from '../../state/swap/actions'
-import { useExpertModeManager, useIsDarkMode, useUserSlippageTolerance } from '../../state/user/hooks'
+import { useExpertModeManager, useUserSlippageTolerance } from '../../state/user/hooks'
 import { ExternalLink, TYPE } from '../../theme'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { computeMentoTradePriceBreakdown, warningSeverity } from '../../utils/prices'
@@ -44,21 +43,6 @@ const VoteCard = styled(DataCard)`
 `
 
 export default function Mento() {
-  const loadedUrlParams = useDefaultsFromURLSearch()
-  const isDarkMode = useIsDarkMode()
-
-  // token warning stuff
-  const [loadedInputCurrency, loadedOutputCurrency] = [
-    useCurrency(true, loadedUrlParams?.inputCurrencyId),
-    useCurrency(true, loadedUrlParams?.outputCurrencyId),
-  ]
-  const urlLoadedTokens: Token[] = useMemo(
-    () => [loadedInputCurrency, loadedOutputCurrency]?.filter((c): c is Token => c instanceof Token) ?? [],
-    [loadedInputCurrency, loadedOutputCurrency]
-  )
-
-  // dismiss warning if all imported tokens are in active lists
-
   const { connect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)
 
@@ -395,7 +379,7 @@ export default function Mento() {
                 disabled={!isValid || !!swapCallbackError}
                 error={isValid && priceImpactSeverity > 2 && !swapCallbackError}
               >
-                <Text fontSize={20} fontWeight={500} color={isValid && actionLabel && (isDarkMode ? 'black' : 'white')}>
+                <Text fontSize={20} fontWeight={500}>
                   {swapInputError
                     ? swapInputError
                     : priceImpactSeverity > 3 && isExpertMode

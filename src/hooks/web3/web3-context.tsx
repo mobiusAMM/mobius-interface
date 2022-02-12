@@ -89,10 +89,9 @@ export const switchNetwork = async () => {
   }
 }
 
-// eslint-disable-next-line react/prop-types
 export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [connected, setConnected] = useState(false)
-  const [chainID, setChainID] = useState(CHAIN)
+  const [chainID] = useState(CHAIN)
   const [providerChainID, setProviderChainID] = useState(CHAIN)
   const [address, setAddress] = useState('')
 

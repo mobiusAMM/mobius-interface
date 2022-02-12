@@ -9,7 +9,6 @@ import Header from '../components/Header'
 import Polling from '../components/Header/Polling'
 import URLWarning from '../components/Header/URLWarning'
 import Popups from '../components/Popups'
-import DarkModeQueryParamReader from '../theme/DarkModeQueryParamReader'
 import { getMobileOperatingSystem, Mobile } from '../utils/mobile'
 import ApeViewer from './ApeViewer'
 import Charts from './Charts'
@@ -96,7 +95,6 @@ export default function App() {
 
   return (
     <Suspense fallback={null}>
-      <Route component={DarkModeQueryParamReader} />
       <AppWrapper giveSpace={location.pathname !== '/'}>
         {location.pathname !== '/' && (
           <>
