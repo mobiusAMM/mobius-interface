@@ -112,26 +112,12 @@ export function useOpenSumTrade(
   }
 }
 
-export function useOpticsV1Tokens(): { [address: string]: Token } {
-  const openSumTokens = ConstantSum[CHAIN]?.reduce(
-    (accum: { [address: string]: Token }, { tokens }: ConstantSumInfo) => ({
-      ...accum,
-      [tokens[0].address]: tokens[0],
-    }),
-    {}
-  )
-  return openSumTokens ?? {}
+export function useOpticsV1Tokens(): Token[] {
+  return ConstantSum[CHAIN].map(({ tokens }) => tokens[0])
 }
 
-export function useOpticsV2Tokens(): { [address: string]: Token } {
-  const openSumTokens = ConstantSum[CHAIN]?.reduce(
-    (accum: { [address: string]: Token }, { tokens }: ConstantSumInfo) => ({
-      ...accum,
-      [tokens[1].address]: tokens[1],
-    }),
-    {}
-  )
-  return openSumTokens ?? {}
+export function useOpticsV2Tokens(): Token[] {
+  return ConstantSum[CHAIN].map(({ tokens }) => tokens[1])
 }
 
 export function getPairedToken(selectedTokenAddress: string, chainId: ChainId): Token | undefined {

@@ -150,8 +150,8 @@ export function useMentoTradeInfo(): {
     [Field.INPUT]: { currencyId: inputCurrencyId },
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
   } = useSwapState()
-  const inputCurrency = useCurrency(true, inputCurrencyId)
-  const outputCurrency = useCurrency(true, outputCurrencyId)
+  const inputCurrency = useCurrency(inputCurrencyId)
+  const outputCurrency = useCurrency(outputCurrencyId)
   const pools = usePools()
   const poolsLoading = pools.length === 0
   const [pool] = useCurrentPool(inputCurrency?.address ?? '', outputCurrency?.address ?? '')

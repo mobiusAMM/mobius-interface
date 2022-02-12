@@ -2,26 +2,19 @@ import { arrayify } from '@ethersproject/bytes'
 import { parseBytes32String } from '@ethersproject/strings'
 import { Token } from '@ubeswap/sdk'
 import { useMemo } from 'react'
+import { NEVER_RELOAD, useSingleCallResult } from 'state/multicall/hooks'
+import { dedupeTokens } from 'utils/tokens'
 
 import { filterTokens } from '../components/SearchModal/filtering'
 import { CHAIN } from '../constants'
 import { MENTO_POOL_INFO, MOBI_TOKEN, STATIC_POOL_INFO } from '../constants/StablePools'
 import { VEMOBI } from '../constants/tokens'
-import { NEVER_RELOAD, useSingleCallResult } from '../state/multicall/hooks'
 import { isAddress } from '../utils'
 import { useBytes32TokenContract, useTokenContract } from './useContract'
 
-export function useSwappableTokens(mento?: boolean): { [address: string]: Token } {
-  const pools = mento ? MENTO_POOL_INFO[CHAIN] ?? [] : STATIC_POOL_INFO[CHAIN] ?? []
-  const swappableTokens: { [address: string]: Token } = {}
-  pools
-    .flatMap(({ tokens, disabled }) => (disabled ? null : tokens))
-    .filter((t) => t !== null)
-    .forEach((token: Token) => {
-      if (swappableTokens[token.address] || token.name === 'Mob LP') return
-      swappableTokens[token.address] = token
-    })
-  return swappableTokens
+export function useSwappableTokens(mento: boolean): Token[] {
+  const pools = mento ? MENTO_POOL_INFO[CHAIN] : STATIC_POOL_INFO[CHAIN].filter((pool) => !pool.disabled)
+  return dedupeTokens(pools.flatMap(({ tokens }) => tokens))
 }
 
 export function useDefaultTokens(): { [address: string]: Token } {
@@ -85,17 +78,23 @@ function parseStringOrBytes32(str: string | undefined, bytes32: string | undefin
     : defaultValue
 }
 
+function getAllTokens(): Token[] | null {
+  const StableTokensWithDup = STATIC_POOL_INFO[CHAIN].flatMap((pools) => pools.tokens)
+  const MentoTokensWithDup = MENTO_POOL_INFO[CHAIN].flatMap((pools) => pools.tokens)
+  return dedupeTokens(MentoTokensWithDup.concat(StableTokensWithDup))
+}
+
 // undefined if invalid or does not exist
 // null if loading
 // otherwise returns the token
-export function useToken(mento?: boolean, tokenAddress?: string): Token | undefined | null {
-  const tokens = useSwappableTokens(mento)
+export function useToken(tokenAddress?: string): Token | null | undefined {
+  const tokens = getAllTokens()
 
   const address = isAddress(tokenAddress)
+  const token = tokens?.filter((t) => t.address === address)[0]
 
   const tokenContract = useTokenContract(address ? address : undefined, false)
   const tokenContractBytes32 = useBytes32TokenContract(address ? address : undefined, false)
-  const token: Token | undefined = address ? tokens[address] : undefined
 
   const tokenName = useSingleCallResult(token ? undefined : tokenContract, 'name', undefined, NEVER_RELOAD)
   const tokenNameBytes32 = useSingleCallResult(
@@ -136,8 +135,8 @@ export function useToken(mento?: boolean, tokenAddress?: string): Token | undefi
   ])
 }
 
-export function useCurrency(mento: boolean, currencyId: string | undefined): Token | null | undefined {
-  const token = useToken(mento, currencyId)
+export function useCurrency(currencyId: string | undefined): Token | null | undefined {
+  const token = useToken(currencyId)
   return token
 }
 

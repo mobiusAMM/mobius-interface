@@ -6,7 +6,7 @@ export type ConstantSumInfo = {
   tokens: [WrappedTokenInfo, WrappedTokenInfo]
 }
 
-export const ConstantSum: { [K in ChainId]: ConstantSumInfo[] | undefined } = {
+export const ConstantSum: { [K in ChainId]: ConstantSumInfo[] } = {
   [ChainId.MAINNET]: [
     {
       // wETH v1/v2 pool

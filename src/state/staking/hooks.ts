@@ -154,7 +154,7 @@ export function useSNXRewardInfo(): SNXRewardInfo {
   const snxInfo = stakingInfo.snx
   const mobi = useMobi()
 
-  const rewardToken = useToken(false, snxInfo?.rewardToken ?? '')
+  const rewardToken = useToken(snxInfo?.rewardToken ?? '')
   const priceOfReward = useTokenPrice(snxInfo?.rewardToken)
   const priceOfMobi = useTokenPrice(mobi?.address)
   if (!snxInfo || !snxInfo.tokenRate) return { snxAddress: snxInfo?.address, rewardToken }

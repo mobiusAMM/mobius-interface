@@ -150,8 +150,8 @@ export function useMobiusTradeInfo(): {
     [Field.INPUT]: { currencyId: inputCurrencyId },
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
   } = useSwapState()
-  const inputCurrency = useCurrency(false, inputCurrencyId)
-  const outputCurrency = useCurrency(false, outputCurrencyId)
+  const inputCurrency = useCurrency(inputCurrencyId)
+  const outputCurrency = useCurrency(outputCurrencyId)
 
   const pools = usePools()
   const poolsLoading = pools.length === 0

@@ -33,16 +33,6 @@ const ContentWrapper = styled(Column)`
   position: relative;
 `
 
-const Footer = styled.div`
-  width: 100%;
-  border-radius: 20px;
-  padding: 20px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  background-color: ${({ theme }) => theme.bg1};
-  border-top: 1px solid ${({ theme }) => theme.bg2};
-`
-
 interface CurrencySearchProps {
   isOpen: boolean
   onDismiss: () => void
@@ -64,10 +54,10 @@ export function CurrencySearch({
   showCommonBases,
   onDismiss,
   isOpen,
-  showManageView,
   showImportView,
   setImportToken,
   tokenType,
+  mento,
 }: CurrencySearchProps) {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -79,11 +69,11 @@ export function CurrencySearch({
   const [invertSearchOrder] = useState<boolean>(false)
   const location = useLocation()
 
-  const allTokens = useSwappableTokens(location.pathname.includes('mint'))
+  const allTokens = useSwappableTokens(mento ?? false)
   // if they input an address, use it
   const isAddressSearch = isAddress(searchQuery)
-  const searchToken = useToken(location.pathname.includes('mint'), searchQuery)
-  const [tokensInSamePool] = useTokensTradeable(location.pathname.includes('mint'), otherSelectedCurrency)
+  const searchToken = useToken(searchQuery)
+  const tokensInSamePool = useTokensTradeable(mento ?? false, otherSelectedCurrency)
   const opticsV1 = useOpticsV1Tokens()
   const opticsV2 = useOpticsV2Tokens()
   let tokensToSelect = allTokens
@@ -298,18 +288,3 @@ export function CurrencySearch({
     </ContentWrapper>
   )
 }
-
-/*
-<Footer>
-        <Row justify="center">
-          <ButtonText onClick={showManageView} color={theme.blue1} className="list-token-manage-button">
-            <RowFixed>
-              <IconWrapper size="16px" marginRight="6px">
-                <Edit />
-              </IconWrapper>
-              <TYPE.main color={theme.blue1}>Manage</TYPE.main>
-            </RowFixed>
-          </ButtonText>
-        </Row>
-      </Footer>
-      */
