@@ -1,5 +1,6 @@
 import { ChainId, Token } from '@ubeswap/sdk'
 import mapValues from 'lodash/mapValues'
+import { WrappedTokenInfo } from 'state/lists/hooks'
 
 const makeTokens = (
   addresses: { [net in ChainId]: string },
@@ -44,3 +45,43 @@ export const VEMOBI = makeTokens(
   'veMOBI',
   'Voting Escrow MOBI'
 )
+
+export const ExternalRewards: { [K in ChainId]: WrappedTokenInfo[] } = {
+  [ChainId.MAINNET]: [
+    new WrappedTokenInfo(
+      {
+        address: '0x00400FcbF0816bebB94654259de7273f4A05c762',
+        name: 'Poof',
+        symbol: 'POOF',
+        chainId: ChainId.MAINNET,
+        decimals: 18,
+        logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_POOF.png',
+      },
+      []
+    ),
+    new WrappedTokenInfo(
+      {
+        address: '0x17700282592D6917F6A73D0bF8AcCf4D578c131e',
+        name: 'Moola',
+        symbol: 'MOO',
+        chainId: ChainId.MAINNET,
+        decimals: 18,
+        logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_MOO.png',
+      },
+      []
+    ),
+    new WrappedTokenInfo(
+      {
+        address: '0x471EcE3750Da237f93B8E339c536989b8978a438',
+        name: 'Celo',
+        symbol: 'CELO',
+        chainId: ChainId.MAINNET,
+        decimals: 18,
+        logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_CELO.png',
+      },
+      []
+    ),
+  ],
+  [ChainId.ALFAJORES]: [],
+  [ChainId.BAKLAVA]: [],
+}

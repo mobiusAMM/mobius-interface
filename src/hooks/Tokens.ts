@@ -1,15 +1,12 @@
 import { arrayify } from '@ethersproject/bytes'
 import { parseBytes32String } from '@ethersproject/strings'
 import { Token } from '@ubeswap/sdk'
-import { useMemo } from 'react'
-import { NEVER_RELOAD, useSingleCallResult } from 'state/multicall/hooks'
 import { dedupeTokens } from 'utils/tokens'
 
 import { CHAIN } from '../constants'
 import { MENTO_POOL_INFO, MOBI_TOKEN, STATIC_POOL_INFO } from '../constants/StablePools'
-import { VEMOBI } from '../constants/tokens'
+import { ExternalRewards, VEMOBI } from '../constants/tokens'
 import { isAddress } from '../utils'
-import { useBytes32TokenContract, useTokenContract } from './useContract'
 
 export function useSwappableTokens(mento: boolean): Token[] {
   const pools = mento ? MENTO_POOL_INFO[CHAIN] : STATIC_POOL_INFO[CHAIN].filter((pool) => !pool.disabled)
@@ -43,62 +40,22 @@ function parseStringOrBytes32(str: string | undefined, bytes32: string | undefin
 function getAllTokens(): Token[] | null {
   const StableTokensWithDup = STATIC_POOL_INFO[CHAIN].flatMap((pools) => pools.tokens)
   const MentoTokensWithDup = MENTO_POOL_INFO[CHAIN].flatMap((pools) => pools.tokens)
-  return dedupeTokens(MentoTokensWithDup.concat(StableTokensWithDup))
+  return dedupeTokens(MentoTokensWithDup.concat(StableTokensWithDup).concat(ExternalRewards[CHAIN]))
 }
 
 // undefined if invalid or does not exist
 // null if loading
 // otherwise returns the token
-export function useToken(tokenAddress?: string): Token | null | undefined {
+export function addressToToken(tokenAddress?: string): Token | null {
   const tokens = getAllTokens()
 
   const address = isAddress(tokenAddress)
   const token = tokens?.filter((t) => t.address === address)[0]
-
-  const tokenContract = useTokenContract(address ? address : undefined, false)
-  const tokenContractBytes32 = useBytes32TokenContract(address ? address : undefined, false)
-
-  const tokenName = useSingleCallResult(token ? undefined : tokenContract, 'name', undefined, NEVER_RELOAD)
-  const tokenNameBytes32 = useSingleCallResult(
-    token ? undefined : tokenContractBytes32,
-    'name',
-    undefined,
-    NEVER_RELOAD
-  )
-  const symbol = useSingleCallResult(token ? undefined : tokenContract, 'symbol', undefined, NEVER_RELOAD)
-  const symbolBytes32 = useSingleCallResult(token ? undefined : tokenContractBytes32, 'symbol', undefined, NEVER_RELOAD)
-  const decimals = useSingleCallResult(token ? undefined : tokenContract, 'decimals', undefined, NEVER_RELOAD)
-
-  return useMemo(() => {
-    if (token) return token
-    if (!address) return undefined
-    if (decimals.loading || symbol.loading || tokenName.loading) return null
-    if (decimals.result) {
-      return new Token(
-        CHAIN,
-        address,
-        decimals.result[0],
-        parseStringOrBytes32(symbol.result?.[0], symbolBytes32.result?.[0], 'UNKNOWN'),
-        parseStringOrBytes32(tokenName.result?.[0], tokenNameBytes32.result?.[0], 'Unknown Token')
-      )
-    }
-    return undefined
-  }, [
-    address,
-    decimals.loading,
-    decimals.result,
-    symbol.loading,
-    symbol.result,
-    symbolBytes32.result,
-    token,
-    tokenName.loading,
-    tokenName.result,
-    tokenNameBytes32.result,
-  ])
+  return token ?? null
 }
 
-export function useCurrency(currencyId: string | undefined): Token | null | undefined {
-  const token = useToken(currencyId)
+export function useCurrency(currencyId: string | undefined): Token | null {
+  const token = addressToToken(currencyId)
   return token
 }
 

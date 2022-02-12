@@ -1,6 +1,6 @@
 import { Fraction, JSBI, Percent, Token, TokenAmount } from '@ubeswap/sdk'
 import { calcApy } from 'components/earn/StablePoolCard'
-import { useMobi, useToken, useVeMobi } from 'hooks/Tokens'
+import { addressToToken, useMobi, useVeMobi } from 'hooks/Tokens'
 import { useSelector } from 'react-redux'
 import { AppState } from 'state'
 import { useTokenPrice } from 'state/application/hooks'
@@ -154,7 +154,7 @@ export function useSNXRewardInfo(): SNXRewardInfo {
   const snxInfo = stakingInfo.snx
   const mobi = useMobi()
 
-  const rewardToken = useToken(snxInfo?.rewardToken ?? '')
+  const rewardToken = addressToToken(snxInfo?.rewardToken ?? '')
   const priceOfReward = useTokenPrice(snxInfo?.rewardToken)
   const priceOfMobi = useTokenPrice(mobi?.address)
   if (!snxInfo || !snxInfo.tokenRate) return { snxAddress: snxInfo?.address, rewardToken }
