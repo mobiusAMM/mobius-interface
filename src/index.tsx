@@ -73,15 +73,13 @@ ReactDOM.render(
     <ApolloProvider client={client}>
       <Provider store={store}>
         <Web3ContextProvider>
-          <>
-            <Updaters />
-            <ThemeProvider>
-              <ThemedGlobalStyle />
-              <HashRouter>
-                <App />
-              </HashRouter>
-            </ThemeProvider>
-          </>
+          <Updaters />
+          <ThemeProvider>
+            <ThemedGlobalStyle />
+            <HashRouter>
+              <App />
+            </HashRouter>
+          </ThemeProvider>
         </Web3ContextProvider>
       </Provider>
     </ApolloProvider>
