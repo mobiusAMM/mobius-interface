@@ -1,7 +1,6 @@
 import { TokenAmount } from '@ubeswap/sdk'
 import { describeTrade } from 'components/swap/routing/describeTrade'
 import { useTradeCallback } from 'components/swap/routing/useTradeCallback'
-import { useIsTransactionUnsupported } from 'hooks/Trades'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { ArrowDown } from 'react-feather'
@@ -10,7 +9,7 @@ import { Text } from 'rebass'
 import { ThemeContext } from 'styled-components'
 import invariant from 'tiny-invariant'
 
-import { ButtonConfirmed, ButtonError, ButtonPrimary } from '../../components/Button'
+import { ButtonConfirmed, ButtonError } from '../../components/Button'
 import Card from '../../components/Card'
 import Column, { AutoColumn } from '../../components/Column'
 import CurrencyInputPanel from '../../components/CurrencyInputPanel'
@@ -29,7 +28,6 @@ import { useToggleSettingsMenu } from '../../state/application/hooks'
 import { Field } from '../../state/swap/actions'
 import { MobiusTrade, useMobiusTradeInfo, useSwapActionHandlers, useSwapState } from '../../state/swap/hooks'
 import { useExpertModeManager, useUserSlippageTolerance } from '../../state/user/hooks'
-import { TYPE } from '../../theme'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { computeTradePriceBreakdown, warningSeverity } from '../../utils/prices'
 import AppBody from '../AppBody'
@@ -182,8 +180,6 @@ export default function Swap() {
     [onCurrencySelection]
   )
 
-  const swapIsUnsupported = useIsTransactionUnsupported(currencies?.INPUT, currencies?.OUTPUT)
-
   const { isEstimate, makeLabel } = describeTrade()
   const actionLabel = makeLabel(independentField !== Field.INPUT)
 
@@ -281,11 +277,7 @@ export default function Swap() {
             </Card>
           </AutoColumn>
           <BottomGrouping>
-            {swapIsUnsupported ? (
-              <ButtonPrimary disabled={true}>
-                <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
-              </ButtonPrimary>
-            ) : !connected ? (
+            {!connected ? (
               <ButtonError disabledStyle={true} onClick={connect}>
                 Connect Wallet
               </ButtonError>

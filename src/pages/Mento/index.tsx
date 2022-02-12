@@ -1,7 +1,6 @@
 import { JSBI, TokenAmount } from '@ubeswap/sdk'
 import { describeTrade } from 'components/swap/routing/describeTrade'
 import { useMentoTradeCallback } from 'components/swap/routing/useMentoTradeCallback'
-import { useIsTransactionUnsupported } from 'hooks/Trades'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { ArrowDown } from 'react-feather'
@@ -10,7 +9,7 @@ import { Text } from 'rebass'
 import { useMentoTradeInfo, useSwapActionHandlers, useSwapState } from 'state/mento/hooks'
 import styled, { ThemeContext } from 'styled-components'
 
-import { ButtonConfirmed, ButtonError, ButtonPrimary } from '../../components/Button'
+import { ButtonConfirmed, ButtonError } from '../../components/Button'
 import Card, { GreyCard } from '../../components/Card'
 import Column, { AutoColumn } from '../../components/Column'
 import CurrencyInputPanel from '../../components/CurrencyInputPanel'
@@ -192,8 +191,6 @@ export default function Mento() {
     [onCurrencySelection]
   )
 
-  const swapIsUnsupported = useIsTransactionUnsupported(currencies?.INPUT, currencies?.OUTPUT)
-
   const { isEstimate, makeLabel } = describeTrade(true)
   const actionLabel = makeLabel(independentField !== Field.INPUT)
 
@@ -303,11 +300,7 @@ export default function Mento() {
             </Card>
           </AutoColumn>
           <BottomGrouping>
-            {swapIsUnsupported ? (
-              <ButtonPrimary disabled={true}>
-                <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
-              </ButtonPrimary>
-            ) : !connected ? (
+            {!connected ? (
               <ButtonError disabledStyle={true} onClick={connect}>
                 Connect Wallet
               </ButtonError>

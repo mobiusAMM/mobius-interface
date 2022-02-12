@@ -5,7 +5,6 @@ import { useMemo } from 'react'
 import { NEVER_RELOAD, useSingleCallResult } from 'state/multicall/hooks'
 import { dedupeTokens } from 'utils/tokens'
 
-import { filterTokens } from '../components/SearchModal/filtering'
 import { CHAIN } from '../constants'
 import { MENTO_POOL_INFO, MOBI_TOKEN, STATIC_POOL_INFO } from '../constants/StablePools'
 import { VEMOBI } from '../constants/tokens'
@@ -27,43 +26,6 @@ export function useAllTokens(): { [address: string]: Token } {
 
 export function useAllInactiveTokens(): { [address: string]: Token } {
   return {}
-}
-
-export function useUnsupportedTokens(): { [address: string]: Token } {
-  return {}
-}
-
-export function useIsTokenActive(token: Token | undefined | null): boolean {
-  const activeTokens = useAllTokens()
-
-  if (!activeTokens || !token) {
-    return false
-  }
-
-  return !!activeTokens[token.address]
-}
-
-// used to detect extra search results
-export function useFoundOnInactiveList(searchQuery: string): Token[] | undefined {
-  const inactiveTokens = useAllInactiveTokens()
-
-  return useMemo(() => {
-    if (searchQuery === '') {
-      return undefined
-    } else {
-      const tokens = filterTokens(Object.values(inactiveTokens), searchQuery)
-      return tokens
-    }
-  }, [inactiveTokens, searchQuery])
-}
-
-// Check if currency is included in custom list from user storage
-export function useIsUserAddedToken(currency: Token | undefined | null): boolean {
-  if (!currency) {
-    return false
-  }
-
-  return false
 }
 
 // parse a name or symbol from a token response
