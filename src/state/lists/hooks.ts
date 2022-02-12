@@ -169,8 +169,3 @@ export function useActiveListUrls(): string[] | undefined {
     (url) => !UNSUPPORTED_LIST_URLS.includes(url)
   )
 }
-
-// used to hide warnings on import for default tokens
-export function useDefaultTokenList(): TokenAddressMap {
-  return listToTokenMap(StableTokens)
-}

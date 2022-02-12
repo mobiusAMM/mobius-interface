@@ -86,7 +86,6 @@ const tokenAmountScaled = (token: Token, amount: JSBI): TokenAmount =>
 export const getPoolInfo = (pool: StableSwapPool): StablePoolInfo | Record<string, never> | undefined => {
   const external =
     pool.additionalRewardRate?.map((rate, i) => {
-      console.log(pool.additionalRewards)
       const token = addressToToken(pool.additionalRewards?.[i])
       invariant(token)
       return new TokenAmount(token, rate)

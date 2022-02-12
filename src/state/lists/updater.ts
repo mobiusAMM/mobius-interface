@@ -1,5 +1,4 @@
 import { getVersionUpgrade, minVersionBump, VersionUpgrade } from '@uniswap/token-lists'
-import { useAllInactiveTokens } from 'hooks/Tokens'
 import { useCallback, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useAllLists } from 'state/lists/hooks'
@@ -20,9 +19,6 @@ export default function Updater(): null {
   // get all loaded lists, and the active urls
   const lists = useAllLists()
   const activeListUrls = useActiveListUrls()
-
-  // initiate loading
-  useAllInactiveTokens()
 
   const fetchList = useFetchListCallback()
   const fetchAllListsCallback = useCallback(() => {
