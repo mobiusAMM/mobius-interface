@@ -155,7 +155,6 @@ export function useDerivedStableSwapInfo(): {
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
     recipient,
   } = useSwapState()
-
   const inputCurrency = useCurrency(false, inputCurrencyId)
   const outputCurrency = useCurrency(false, outputCurrencyId)
   const to: string | null = connected ? address : null
