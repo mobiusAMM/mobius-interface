@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           always-auth: true
-          node-version: '14'
+          node-version: '16'
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
