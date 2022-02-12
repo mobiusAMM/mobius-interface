@@ -12,6 +12,7 @@ export interface IMentoExchange {
  * Info loaded from the exchange. This is used by the calculator.
  */
 export interface IMentoExchangeInfo {
+  address: string
   fee: Percent
   stableReserve: TokenAmount
   celoReserve: TokenAmount
