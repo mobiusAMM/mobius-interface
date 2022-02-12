@@ -222,15 +222,6 @@ export function useMathUtil(pool: StableSwapPool | string): StableSwapMath | und
   return math
 }
 
-export function useUnderlyingPool(metaPoolName: string): StableSwapPool | undefined {
-  const underlying = useSelector<AppState, StableSwapPool>((state) => {
-    const meta = state.stablePools.pools[metaPoolName]?.pool
-    if (!meta || !meta.metaPool) return meta
-    return state.stablePools.pools[meta.metaPool]?.pool
-  })
-  return underlying
-}
-
 export function usePool(): readonly [StableSwapPool] {
   const [tok1, tok2] = useSelector<AppState, [string, string]>((state) => [
     state.swap.INPUT.currencyId,
