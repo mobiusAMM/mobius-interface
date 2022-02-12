@@ -1,4 +1,3 @@
-import { ArrowBackIos, ArrowForwardIos } from '@material-ui/icons'
 import { CELO, TokenAmount } from '@ubeswap/sdk'
 import { CardNoise } from 'components/earn/styled'
 import Modal from 'components/Modal'
@@ -6,7 +5,7 @@ import usePrevious from 'hooks/usePrevious'
 import { darken } from 'polished'
 import React, { useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { Moon, Sun } from 'react-feather'
+import { ChevronLeft, ChevronRight, Moon, Sun } from 'react-feather'
 import Hamburger from 'react-hamburger-menu'
 import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
@@ -288,10 +287,10 @@ export default function Header() {
                   <StyledNavLink id={`swap-nav-link`} to={'/risk'}>
                     {t('Risks')}
                   </StyledNavLink>
-                  <ArrowBackIos color={'disabled'} onClick={() => setDesktopExpand(false)} />
+                  <ChevronLeft style={{ cursor: 'pointer' }} onClick={() => setDesktopExpand(false)} />
                 </>
               ) : (
-                <ArrowForwardIos color={'disabled'} onClick={() => setDesktopExpand(true)} />
+                <ChevronRight style={{ cursor: 'pointer' }} onClick={() => setDesktopExpand(true)} />
               )}
             </>
           )}
