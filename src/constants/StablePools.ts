@@ -114,7 +114,7 @@ export const GAUGE_CONTROLLER: { [K in ChainId]: string } = {
 }
 
 export const GAUGE_PROXY: { [K in ChainId]: string } = {
-  [ChainId.MAINNET]: '0x21d0420ccF3bC756F9b01669667A26d83837D8b3',
+  [ChainId.MAINNET]: '0x0a3Ac12422C95F84b5bD18A6d9904d132a161C68',
   [ChainId.ALFAJORES]: '',
   [ChainId.BAKLAVA]: '',
 }
