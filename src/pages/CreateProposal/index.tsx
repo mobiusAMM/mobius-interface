@@ -233,7 +233,7 @@ ${bodyValue}
       case ProposalAction.TRANSFER_TOKEN: {
         invariant(tokenAmount, 'token amount')
         types = [['address', 'uint256']]
-        values = [[getAddress(toAddressValue), tokenAmount.quotient.toString()]]
+        values = [[getAddress(toAddressValue), tokenAmount.raw.toString()]]
         createProposalData.signatures = [`transfer(${types[0].join(',')})`]
         break
       }
