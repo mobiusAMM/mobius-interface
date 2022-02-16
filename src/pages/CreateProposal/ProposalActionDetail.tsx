@@ -14,9 +14,9 @@ enum ProposalActionDetailField {
 
 const ProposalActionDetailContainer = styled.div`
   margin-top: 10px;
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  grid-gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 `
 
 export const ProposalActionDetail = ({
