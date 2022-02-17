@@ -10,7 +10,8 @@ import { CHAIN } from '../../constants'
 // Addresses that do not contribute to circulating supply
 
 const nonCirculatingAddresses = {
-  Treasury: '0x16E319d8dAFeF25AAcec0dF0f1E349819D36993c',
+  Treasury: '0x7d9Af9dF33D6CAB895B4cF3422D790cbE98B48c8',
+  Multisig: '0x16E319d8dAFeF25AAcec0dF0f1E349819D36993c',
   Airdrop: '0x74Fc71eF736feeaCfd58aeb2543c5fe4d33aDc14',
   Founder: '0x34deFd314fa23821a87FCbF5393311Bc5B7608C1',
   Investor: '0x5498248EaB20ff314bC465268920B48eed4Cdb7C',
@@ -34,7 +35,8 @@ export const useCirculatingSupply = (): { supply: TokenAmount; staked: Percent }
   const [available, setAvailable] = useState<BigNumber | null>(null)
   useEffect(() => {
     void (async () => {
-      setAvailable((await mobiContract?.available_supply())!)
+      const balance = await mobiContract?.available_supply()
+      balance && setAvailable(balance)
     })()
   }, [mobiContract])
 
@@ -42,7 +44,8 @@ export const useCirculatingSupply = (): { supply: TokenAmount; staked: Percent }
   const [staked, setStaked] = useState<BigNumber | null>(null)
   useEffect(() => {
     void (async () => {
-      setStaked((await mobiContract?.balanceOf('0xd813a846aA9D572140d7ABBB4eFaC8cD786b4c0E'))!)
+      const balance = await mobiContract?.balanceOf('0xd813a846aA9D572140d7ABBB4eFaC8cD786b4c0E')
+      balance && setStaked(balance)
     })()
   }, [mobiContract])
 

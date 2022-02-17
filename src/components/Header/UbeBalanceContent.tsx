@@ -44,10 +44,6 @@ export default function UbeBalanceContent({ setShowUbeBalanceModal }: { setShowU
   const ube = MOBI[CHAIN]
 
   const total = useAggregateUbeBalance()
-  // const ubeBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, ube)
-  // const ubeToClaim: TokenAmount | undefined = useTotalUbeEarned()
-
-  // const totalSupply: TokenAmount | undefined = useTotalSupply(ube)
   const mobi = useMobi()
   const mobiprice = useCUSDPrice(mobi)
   const ret = useCirculatingSupply()
@@ -72,25 +68,7 @@ export default function UbeBalanceContent({ setShowUbeBalanceModal }: { setShowU
                   {total?.toFixed(2, { groupSeparator: ',' })}
                 </TYPE.white>
               </AutoColumn>
-              {/* <AutoColumn gap="md">
-                <RowBetween>
-                  <TYPE.white color="white">Balance:</TYPE.white>
-                  <TYPE.white color="white">{ubeBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
-                </RowBetween>
-                {/* <RowBetween>
-                  <TYPE.white color="white">Unclaimed:</TYPE.white>
-                  <TYPE.white color="white">
-                    {ubeToClaim?.toFixed(4, { groupSeparator: ',' })}{' '}
-                    {ubeToClaim && ubeToClaim.greaterThan('0') && (
-                      <StyledInternalLink onClick={() => setShowUbeBalanceModal(false)} to="/farm">
-                        (claim)
-                      </StyledInternalLink>
-                    )}
-                  </TYPE.white>
-                </RowBetween> */}
-              {/* </AutoColumn> */}
             </CardSection>
-            {/* <Break /> */}
           </>
         )}
         <CardSection gap="sm">
@@ -102,7 +80,7 @@ export default function UbeBalanceContent({ setShowUbeBalanceModal }: { setShowU
             <RowBetween>
               <RowFixed>
                 <TYPE.white color="white">MOBI in circulation</TYPE.white>
-                <QuestionHelper text={'Total minted supply - treasury - unvested - staked'} />
+                <QuestionHelper text={'Total minted supply - treasury - unreleased'} />
               </RowFixed>
               <TYPE.white color="white">{ret?.supply?.toFixed(0, { groupSeparator: ',' }) ?? <Loader />}</TYPE.white>
             </RowBetween>
