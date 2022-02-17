@@ -44,7 +44,7 @@ function useContract(address: string | undefined, ABI: any, withSignerIfPossible
   return useMemo(() => {
     if (!address || !ABI || !provider) return null
     try {
-      return getContract(address, ABI, provider, connected)
+      return getContract(address, ABI, provider, connected && withSignerIfPossible)
     } catch (error) {
       console.error('Failed to get contract', error)
       return null

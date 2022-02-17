@@ -111,21 +111,6 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
             },
           },
         },
-        ledger: {
-          display: {
-            logo: '',
-            name: 'Ledger',
-            description: 'Connect directly to ledger',
-          },
-          package: WalletConnectProvider,
-          connector: async (ProviderPackage, options) => {
-            const provider = new ProviderPackage(options)
-
-            await provider.enable()
-
-            return provider
-          },
-        },
       },
     })
   )
@@ -206,7 +191,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
     setTimeout(() => {
       window.location.reload()
     }, 1)
-  }, [provider, web3Modal, connected])
+  }, [web3Modal])
 
   const onChainProvider = useMemo(
     () => ({
