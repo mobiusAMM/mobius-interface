@@ -288,6 +288,14 @@ export default function VotePage({
           </CardWrapper>
           <AutoColumn gap="md">
             <TYPE.mediumHeader fontWeight={600}>
+              <TYPE.main>Description</TYPE.main>
+            </TYPE.mediumHeader>
+            <MarkDownWrapper>
+              <ReactMarkdown source={proposalData?.description.substr(proposalData?.description.indexOf('\n') + 1)} />
+            </MarkDownWrapper>
+          </AutoColumn>
+          <AutoColumn gap="md">
+            <TYPE.mediumHeader fontWeight={600}>
               <TYPE.main>Details</TYPE.main>
             </TYPE.mediumHeader>
             {proposalData?.details?.map((d, i) => {
@@ -306,14 +314,6 @@ export default function VotePage({
                 </DetailText>
               )
             })}
-          </AutoColumn>
-          <AutoColumn gap="md">
-            <TYPE.mediumHeader fontWeight={600}>
-              <TYPE.main>Description</TYPE.main>
-            </TYPE.mediumHeader>
-            <MarkDownWrapper>
-              <ReactMarkdown source={proposalData?.description} />
-            </MarkDownWrapper>
           </AutoColumn>
           <AutoColumn gap="md">
             <TYPE.mediumHeader fontWeight={600}>
