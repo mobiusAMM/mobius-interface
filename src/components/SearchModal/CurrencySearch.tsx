@@ -1,5 +1,4 @@
 import { cUSD, Token } from '@ubeswap/sdk'
-import { ButtonLight } from 'components/Button'
 import { useOnClickOutside } from 'hooks/useOnClickOutside'
 import useTheme from 'hooks/useTheme'
 import useToggle from 'hooks/useToggle'
@@ -14,7 +13,7 @@ import { useOpticsV1Tokens, useOpticsV2Tokens } from 'state/openSum/hooks'
 import styled from 'styled-components'
 
 import { CHAIN } from '../../constants'
-import { useFoundOnInactiveList, useSwappableTokens, useToken } from '../../hooks/Tokens'
+import { useSwappableTokens } from '../../hooks/Tokens'
 import { useTokensTradeable } from '../../state/stake/hooks'
 import { CloseIcon, TYPE } from '../../theme'
 import { isAddress } from '../../utils'
@@ -33,16 +32,6 @@ const ContentWrapper = styled(Column)`
   position: relative;
 `
 
-const Footer = styled.div`
-  width: 100%;
-  border-radius: 20px;
-  padding: 20px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  background-color: ${({ theme }) => theme.bg1};
-  border-top: 1px solid ${({ theme }) => theme.bg2};
-`
-
 interface CurrencySearchProps {
   isOpen: boolean
   onDismiss: () => void
@@ -50,9 +39,6 @@ interface CurrencySearchProps {
   onCurrencySelect: (currency: Token) => void
   otherSelectedCurrency?: Token | null
   showCommonBases?: boolean
-  showManageView: () => void
-  showImportView: () => void
-  setImportToken: (token: Token) => void
   mento?: boolean
   tokenType?: TokenType
 }
@@ -64,10 +50,8 @@ export function CurrencySearch({
   showCommonBases,
   onDismiss,
   isOpen,
-  showManageView,
-  showImportView,
-  setImportToken,
   tokenType,
+  mento,
 }: CurrencySearchProps) {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -79,11 +63,10 @@ export function CurrencySearch({
   const [invertSearchOrder] = useState<boolean>(false)
   const location = useLocation()
 
-  const allTokens = useSwappableTokens(location.pathname.includes('mint'))
+  const allTokens = useSwappableTokens(mento ?? false)
   // if they input an address, use it
   const isAddressSearch = isAddress(searchQuery)
-  const searchToken = useToken(location.pathname.includes('mint'), searchQuery)
-  const [tokensInSamePool] = useTokensTradeable(location.pathname.includes('mint'), otherSelectedCurrency)
+  const tokensInSamePool = useTokensTradeable(mento ?? false, otherSelectedCurrency)
   const opticsV1 = useOpticsV1Tokens()
   const opticsV2 = useOpticsV2Tokens()
   let tokensToSelect = allTokens
@@ -104,8 +87,6 @@ export function CurrencySearch({
       })
     }
   }, [isAddressSearch])
-
-  const showETH = false
 
   const tokenComparator = useTokenComparator(invertSearchOrder)
 
@@ -190,17 +171,6 @@ export function CurrencySearch({
   const node = useRef<HTMLDivElement>()
   useOnClickOutside(node, open ? toggle : undefined)
 
-  // if no results on main list, show option to expand into inactive
-  const [showExpanded, setShowExpanded] = useState(false)
-  const inactiveTokens = useFoundOnInactiveList(searchQuery)
-
-  // reset expanded results on query reset
-  useEffect(() => {
-    if (searchQuery === '') {
-      setShowExpanded(false)
-    }
-  }, [setShowExpanded, searchQuery])
-
   return (
     <ContentWrapper>
       <PaddedColumn gap="16px">
@@ -229,22 +199,17 @@ export function CurrencySearch({
         )}
       </PaddedColumn>
       <Separator />
-      {filteredSortedTokens?.length > 0 || (showExpanded && inactiveTokens && inactiveTokens.length > 0) ? (
+      {filteredSortedTokens?.length > 0 ? (
         <div style={{ flex: '1' }}>
           <AutoSizer disableWidth>
             {({ height }) => (
               <CurrencyList
                 height={height}
-                showETH={showETH}
-                currencies={
-                  showExpanded && inactiveTokens ? filteredSortedTokens.concat(inactiveTokens) : filteredSortedTokens
-                }
+                currencies={filteredSortedTokens}
                 onCurrencySelect={handleCurrencySelect}
                 otherCurrency={otherSelectedCurrency}
                 selectedCurrency={selectedCurrency}
                 fixedListRef={fixedList}
-                showImportView={showImportView}
-                setImportToken={setImportToken}
               />
             )}
           </AutoSizer>
@@ -254,62 +219,8 @@ export function CurrencySearch({
           <TYPE.main color={theme.text3} textAlign="center" mb="20px">
             No results found in active pools.
           </TYPE.main>
-          {inactiveTokens &&
-            inactiveTokens.length > 0 &&
-            !searchToken &&
-            searchQuery.length > 1 &&
-            filteredSortedTokens?.length === 0 && (
-              // expand button in line with no results
-              <Row align="center" width="100%" justify="center">
-                <ButtonLight
-                  width="fit-content"
-                  borderRadius="12px"
-                  padding="8px 12px"
-                  onClick={() => setShowExpanded(!showExpanded)}
-                >
-                  {!showExpanded
-                    ? `Show ${inactiveTokens.length} more inactive ${inactiveTokens.length === 1 ? 'token' : 'tokens'}`
-                    : 'Hide expanded search'}
-                </ButtonLight>
-              </Row>
-            )}
         </Column>
       )}
-
-      {inactiveTokens &&
-        inactiveTokens.length > 0 &&
-        !searchToken &&
-        (searchQuery.length > 1 || showExpanded) &&
-        (filteredSortedTokens?.length !== 0 || showExpanded) && (
-          // button fixed to bottom
-          <Row align="center" width="100%" justify="center" style={{ position: 'absolute', bottom: '80px', left: 0 }}>
-            <ButtonLight
-              width="fit-content"
-              borderRadius="12px"
-              padding="8px 12px"
-              onClick={() => setShowExpanded(!showExpanded)}
-            >
-              {!showExpanded
-                ? `Show ${inactiveTokens.length} more inactive ${inactiveTokens.length === 1 ? 'token' : 'tokens'}`
-                : 'Hide expanded search'}
-            </ButtonLight>
-          </Row>
-        )}
     </ContentWrapper>
   )
 }
-
-/*
-<Footer>
-        <Row justify="center">
-          <ButtonText onClick={showManageView} color={theme.blue1} className="list-token-manage-button">
-            <RowFixed>
-              <IconWrapper size="16px" marginRight="6px">
-                <Edit />
-              </IconWrapper>
-              <TYPE.main color={theme.blue1}>Manage</TYPE.main>
-            </RowFixed>
-          </ButtonText>
-        </Row>
-      </Footer>
-      */

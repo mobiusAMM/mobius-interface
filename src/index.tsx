@@ -16,7 +16,6 @@ import { Web3ContextProvider } from './hooks'
 import App from './pages/App'
 import store from './state'
 import ApplicationUpdater, { PriceData } from './state/application/updater'
-import ListsUpdater from './state/lists/updater'
 import LogsUpdater from './state/logs/updater'
 import MulticallUpdater from './state/multicall/updater'
 import TransactionUpdater from './state/transactions/updater'
@@ -53,7 +52,6 @@ const client = new ApolloClient({
 function Updaters() {
   return (
     <>
-      <ListsUpdater />
       <UserUpdater />
       <ApplicationUpdater />
       <TransactionUpdater />
@@ -75,15 +73,13 @@ ReactDOM.render(
     <ApolloProvider client={client}>
       <Provider store={store}>
         <Web3ContextProvider>
-          <>
-            <Updaters />
-            <ThemeProvider>
-              <ThemedGlobalStyle />
-              <HashRouter>
-                <App />
-              </HashRouter>
-            </ThemeProvider>
-          </>
+          <Updaters />
+          <ThemeProvider>
+            <ThemedGlobalStyle />
+            <HashRouter>
+              <App />
+            </HashRouter>
+          </ThemeProvider>
         </Web3ContextProvider>
       </Provider>
     </ApolloProvider>

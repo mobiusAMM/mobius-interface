@@ -1,16 +1,16 @@
-import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
+import { TokenAmount } from '@ubeswap/sdk'
 import { describeTrade } from 'components/swap/routing/describeTrade'
 import { useTradeCallback } from 'components/swap/routing/useTradeCallback'
-import { useIsTransactionUnsupported } from 'hooks/Trades'
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { ArrowDown } from 'react-feather'
 import ReactGA from 'react-ga'
 import { Text } from 'rebass'
 import { ThemeContext } from 'styled-components'
+import invariant from 'tiny-invariant'
 
-import { ButtonConfirmed, ButtonError, ButtonPrimary } from '../../components/Button'
-import Card, { GreyCard } from '../../components/Card'
+import { ButtonConfirmed, ButtonError } from '../../components/Button'
+import Card from '../../components/Card'
 import Column, { AutoColumn } from '../../components/Column'
 import CurrencyInputPanel from '../../components/CurrencyInputPanel'
 import Loader from '../../components/Loader'
@@ -23,38 +23,17 @@ import SwapHeader from '../../components/swap/SwapHeader'
 import TradePrice from '../../components/swap/TradePrice'
 import { INITIAL_ALLOWED_SLIPPAGE } from '../../constants'
 import { useWeb3Context } from '../../hooks'
-import { useCurrency } from '../../hooks/Tokens'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
 import { useToggleSettingsMenu } from '../../state/application/hooks'
 import { Field } from '../../state/swap/actions'
-import {
-  MobiusTrade,
-  useDefaultsFromURLSearch,
-  useMobiusTradeInfo,
-  useSwapActionHandlers,
-  useSwapState,
-} from '../../state/swap/hooks'
-import { useExpertModeManager, useIsDarkMode, useUserSlippageTolerance } from '../../state/user/hooks'
-import { TYPE } from '../../theme'
+import { MobiusTrade, useMobiusTradeInfo, useSwapActionHandlers, useSwapState } from '../../state/swap/hooks'
+import { useExpertModeManager, useUserSlippageTolerance } from '../../state/user/hooks'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { computeTradePriceBreakdown, warningSeverity } from '../../utils/prices'
 import AppBody from '../AppBody'
 import { ClickableText } from '../Pool/styleds'
 
 export default function Swap() {
-  const loadedUrlParams = useDefaultsFromURLSearch()
-  const isDarkMode = useIsDarkMode()
-
-  const [loadedInputCurrency, loadedOutputCurrency] = [
-    useCurrency(false, loadedUrlParams?.inputCurrencyId),
-    useCurrency(false, loadedUrlParams?.outputCurrencyId),
-  ]
-
-  const urlLoadedTokens: Token[] = useMemo(
-    () => [loadedInputCurrency, loadedOutputCurrency]?.filter((c): c is Token => c instanceof Token) ?? [],
-    [loadedInputCurrency, loadedOutputCurrency]
-  )
-
   const { connect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)
 
@@ -113,11 +92,6 @@ export default function Swap() {
     [dependentField]: parsedAmounts[dependentField]?.toSignificant(6) ?? '',
   }
 
-  const userHasSpecifiedInputOutput = Boolean(
-    currencies[Field.INPUT] && currencies[Field.OUTPUT] && parsedAmounts[independentField]?.greaterThan(JSBI.BigInt(0))
-  )
-  const noRoute = false
-
   // check whether the user has approved the router on the input token
   const [approval, approveCallback] = useApproveCallback(trade?.input, trade?.pool.address)
 
@@ -141,6 +115,7 @@ export default function Swap() {
 
   const handleSwap = useCallback(() => {
     setSwapState({ attemptingTxn: true, tradeToConfirm, showConfirm, swapErrorMessage: undefined, txHash: undefined })
+    invariant(swapCallback)
     swapCallback()
       .then((hash) => {
         setSwapState({ attemptingTxn: false, tradeToConfirm, showConfirm, swapErrorMessage: undefined, txHash: hash })
@@ -204,8 +179,6 @@ export default function Swap() {
     (outputCurrency) => onCurrencySelection(Field.OUTPUT, outputCurrency),
     [onCurrencySelection]
   )
-
-  const swapIsUnsupported = useIsTransactionUnsupported(currencies?.INPUT, currencies?.OUTPUT)
 
   const { isEstimate, makeLabel } = describeTrade()
   const actionLabel = makeLabel(independentField !== Field.INPUT)
@@ -304,18 +277,10 @@ export default function Swap() {
             </Card>
           </AutoColumn>
           <BottomGrouping>
-            {swapIsUnsupported ? (
-              <ButtonPrimary disabled={true}>
-                <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
-              </ButtonPrimary>
-            ) : !connected ? (
+            {!connected ? (
               <ButtonError disabledStyle={true} onClick={connect}>
                 Connect Wallet
               </ButtonError>
-            ) : noRoute && userHasSpecifiedInputOutput ? (
-              <GreyCard style={{ textAlign: 'center' }}>
-                <TYPE.main mb="4px">Insufficient liquidity for this trade.</TYPE.main>
-              </GreyCard>
             ) : showApproveFlow ? (
               <RowBetween>
                 <ButtonConfirmed
@@ -380,7 +345,7 @@ export default function Swap() {
                 disabled={!isValid || !!swapCallbackError}
                 error={isValid && priceImpactSeverity > 2 && !swapCallbackError}
               >
-                <Text fontSize={20} fontWeight={500} color={isValid && actionLabel && (isDarkMode ? 'black' : 'white')}>
+                <Text fontSize={20} fontWeight={500}>
                   {swapInputError
                     ? swapInputError
                     : priceImpactSeverity > 3 && isExpertMode
@@ -399,11 +364,6 @@ export default function Swap() {
           <AutoRow style={{ justifyContent: 'center' }}></AutoRow>
         </Wrapper>
       </AppBody>
-      {/* {!swapIsUnsupported ? (
-        <AdvancedSwapDetailsDropdown trade={trade} />
-      ) : (
-        <UnsupportedCurrencyFooter show={swapIsUnsupported} currencies={[currencies.INPUT, currencies.OUTPUT]} />
-      )} */}
     </>
   )
 }

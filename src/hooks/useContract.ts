@@ -1,5 +1,4 @@
 import { Contract } from '@ethersproject/contracts'
-import IUniswapV2PairABI from '@ubeswap/core/build/abi/IUniswapV2Pair.json'
 import { GOVERNANCE_ADDRESS } from 'constants/governance'
 import { GAUGE_CONTROLLER as GAUGE_CONTROLLER_ADDRESS, MOBIUS_MINTER_ADDRESS } from 'constants/StablePools'
 import { VEMOBI } from 'constants/tokens'
@@ -45,7 +44,7 @@ function useContract(address: string | undefined, ABI: any, withSignerIfPossible
   return useMemo(() => {
     if (!address || !ABI || !provider) return null
     try {
-      return getContract(address, ABI, provider, connected)
+      return getContract(address, ABI, provider, connected && withSignerIfPossible)
     } catch (error) {
       console.error('Failed to get contract', error)
       return null
@@ -90,10 +89,6 @@ export function useConstantSumContract(address?: string, withSignerIfPossible?: 
 
 export function useBytes32TokenContract(tokenAddress?: string, withSignerIfPossible?: boolean): Contract | null {
   return useContract(tokenAddress, ERC20_BYTES32_ABI, withSignerIfPossible)
-}
-
-export function usePairContract(pairAddress?: string, withSignerIfPossible?: boolean): Contract | null {
-  return useContract(pairAddress, IUniswapV2PairABI, withSignerIfPossible)
 }
 
 export function useStableSwapContract(swapAddress?: string, withSignerIfPossible?: boolean): Swap | null {

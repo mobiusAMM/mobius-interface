@@ -89,10 +89,9 @@ export const switchNetwork = async () => {
   }
 }
 
-// eslint-disable-next-line react/prop-types
 export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [connected, setConnected] = useState(false)
-  const [chainID, setChainID] = useState(CHAIN)
+  const [chainID] = useState(CHAIN)
   const [providerChainID, setProviderChainID] = useState(CHAIN)
   const [address, setAddress] = useState('')
 
@@ -110,21 +109,6 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
             rpc: {
               [42220]: uri,
             },
-          },
-        },
-        ledger: {
-          display: {
-            logo: '',
-            name: 'Ledger',
-            description: 'Connect directly to ledger',
-          },
-          package: WalletConnectProvider,
-          connector: async (ProviderPackage, options) => {
-            const provider = new ProviderPackage(options)
-
-            await provider.enable()
-
-            return provider
           },
         },
       },
@@ -207,7 +191,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
     setTimeout(() => {
       window.location.reload()
     }, 1)
-  }, [provider, web3Modal, connected])
+  }, [web3Modal])
 
   const onChainProvider = useMemo(
     () => ({

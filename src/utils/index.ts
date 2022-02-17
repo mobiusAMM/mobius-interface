@@ -3,12 +3,11 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { AddressZero } from '@ethersproject/constants'
 import { Contract } from '@ethersproject/contracts'
 import { JsonRpcProvider, JsonRpcSigner } from '@ethersproject/providers'
-import { JSBI, Percent, Token, TokenAmount } from '@ubeswap/sdk'
+import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
 import { Exchange, Swap } from 'generated/index'
 
 import EXCHANGE from '../constants/abis/Exchange.json'
 import SWAP from '../constants/abis/Swap.json'
-import { TokenAddressMap } from '../state/lists/hooks'
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {
@@ -70,9 +69,6 @@ export function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
 }
 
-export function isTokenOnList(defaultTokens: TokenAddressMap, currency?: Token): boolean {
-  return Boolean(currency instanceof Token && defaultTokens[currency.chainId]?.[currency.address])
-}
 export function getStableSwapContract(address: string, provider: JsonRpcProvider, connected: boolean): Swap {
   return getContract(address, SWAP.abi, provider, connected) as Swap
 }

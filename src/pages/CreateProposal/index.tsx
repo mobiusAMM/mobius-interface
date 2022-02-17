@@ -7,8 +7,10 @@ import { AutoColumn } from 'components/Column'
 import { GAUGE_CONTROLLER, GAUGE_PROXY } from 'constants/StablePools'
 import { useWeb3Context } from 'hooks'
 import JSBI from 'jsbi'
+import AppBody from 'pages/AppBody'
 import { Wrapper } from 'pages/Pool/styleds'
 import React, { useCallback, useMemo, useState } from 'react'
+import { isMobile } from 'react-device-detect'
 import {
   CreateProposalData,
   ProposalState,
@@ -30,23 +32,6 @@ import { ProposalActionDetail } from './ProposalActionDetail'
 import { ProposalAction, ProposalActionSelector, ProposalActionSelectorModal } from './ProposalActionSelector'
 import { ProposalEditor } from './ProposalEditor'
 import { ProposalSubmissionModal } from './ProposalSubmissionModal'
-
-const Upper = styled(AutoColumn)`
-  border-radius: 20px;
-  width: 640px;
-  overflow: hidden;
-  position: relative;
-  padding: 1rem;
-  background: ${({ theme }) => theme.bg1};
-  color: ${({ theme }) => theme.text1} !important;
-  box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.01), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04),
-    0px 24px 32px rgba(0, 0, 0, 0.01);
-  ${({ theme }) => theme.mediaWidth.upToSmall`
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-  max-width: 420px;
-`}
-`
 
 const CreateProposalButton = ({
   proposalThreshold,
@@ -233,7 +218,7 @@ ${bodyValue}
       case ProposalAction.TRANSFER_TOKEN: {
         invariant(tokenAmount, 'token amount')
         types = [['address', 'uint256']]
-        values = [[getAddress(toAddressValue), tokenAmount.quotient.toString()]]
+        values = [[getAddress(toAddressValue), tokenAmount.raw.toString()]]
         createProposalData.signatures = [`transfer(${types[0].join(',')})`]
         break
       }
@@ -274,7 +259,7 @@ ${bodyValue}
   ])
 
   return (
-    <Upper>
+    <AppBody wide mobile={isMobile}>
       <CreateProposalTabs />
       <CreateProposalWrapper>
         <BlueCard>
@@ -327,6 +312,6 @@ ${bodyValue}
         onProposalActionSelect={(proposalAction: ProposalAction) => handleActionChange(proposalAction)}
       />
       <ProposalSubmissionModal isOpen={attempting} hash={hash} onDismiss={handleDismissSubmissionModal} />
-    </Upper>
+    </AppBody>
   )
 }
