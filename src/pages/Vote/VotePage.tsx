@@ -147,6 +147,18 @@ export default function VotePage({
             .toNumber()
         )
       : undefined
+  const startDate: DateTime | undefined =
+    proposalData && currentTimestamp && currentBlock
+      ? DateTime.fromSeconds(
+          currentTimestamp
+            .add(
+              BigNumber.from(AVERAGE_BLOCK_TIME_IN_SECS[CHAIN] ?? DEFAULT_AVERAGE_BLOCK_TIME_IN_SECS).mul(
+                BigNumber.from(proposalData.startBlock - currentBlock)
+              )
+            )
+            .toNumber()
+        )
+      : undefined
   const now: DateTime = DateTime.local()
 
   // get total votes and format percentages for UI
@@ -217,7 +229,8 @@ export default function VotePage({
                 <RedCard>
                   <CardNoise />
                   <TYPE.white>
-                    Only veMOBI that was locked before block {proposalData.startBlock} are eligible for voting.{' '}
+                    Only veMOBI that was locked before block {proposalData.startBlock} (approximately{' '}
+                    {startDate && startDate.toLocaleString(DateTime.DATETIME_FULL)}) are eligible for voting.{' '}
                   </TYPE.white>
                   <CardNoise />
                 </RedCard>
