@@ -273,6 +273,9 @@ export default function Header() {
               <StyledNavLink id={`vote-nav-link`} to={'/vote'}>
                 {t('Vote')}
               </StyledNavLink>
+              <StyledNavLink id={`swap-nav-link`} to={'/risk'}>
+                {t('Risks')}
+              </StyledNavLink>
               {desktopExpand ? (
                 <>
                   <StyledNavLink id={`mint-nav-link`} to={'/mint'}>
@@ -283,9 +286,6 @@ export default function Header() {
                   </StyledNavLink>
                   <StyledNavLink id={`charts-nav-link`} to={'/charts'}>
                     {t('Charts')}
-                  </StyledNavLink>
-                  <StyledNavLink id={`swap-nav-link`} to={'/risk'}>
-                    {t('Risks')}
                   </StyledNavLink>
                   <ChevronLeft style={{ cursor: 'pointer' }} onClick={() => setDesktopExpand(false)} />
                 </>
