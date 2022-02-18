@@ -37,13 +37,10 @@ export function computeTradePriceBreakdown(trade?: MobiusTrade | null): {
   return { priceImpactWithoutFee: priceImpact, realizedLPFee: trade.fee }
 }
 
-export function computeMentoTradePriceBreakdown(trade?: MentoTrade | null): {
+export function computeMentoTradePriceBreakdown(trade: MentoTrade): {
   priceImpactWithoutFee: Percent | undefined
   realizedLPFee: TokenAmount | undefined | null
 } {
-  if (!trade) return {}
-  //todo: issue here
-
   const inAmount: JSBI = trade.input.raw
   const outAmount: JSBI = trade.output.raw
   const reserveIn: JSBI =
