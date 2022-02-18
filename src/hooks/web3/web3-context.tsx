@@ -1,8 +1,10 @@
 import { JsonRpcProvider, StaticJsonRpcProvider, Web3Provider } from '@ethersproject/providers'
 import WalletConnectProvider from '@walletconnect/web3-provider'
+import { LedgerConnector } from 'connectors/ledger/LedgerConnector'
 import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Web3Modal from 'web3modal'
 
+import Discord from '../../assets/svg/discord.svg'
 import { CHAIN } from '../../constants'
 
 type onChainProvider = {
@@ -111,6 +113,17 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
             },
           },
         },
+        'custom-ledger': {
+          display: {
+            logo: Discord,
+            name: 'Celo Ledger',
+            description: 'Connect to your Celo Ledger',
+          },
+          package: LedgerConnector,
+          connector: async (p) => {
+            return provider
+          },
+        },
       },
     })
   )
@@ -164,7 +177,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
     if (chainId === CHAIN) {
       setProvider(connectedProvider)
     } else {
-      //TODO: is it possible to connecte wallet after?
+      //TODO: is it possible to connect wallet after?
       await switchNetwork()
       window.location.reload()
     }
