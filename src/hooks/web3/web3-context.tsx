@@ -4,7 +4,7 @@ import { LedgerConnector, LedgerKit } from 'connectors/ledger/LedgerConnector'
 import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Web3Modal from 'web3modal'
 
-import Discord from '../../assets/svg/discord.svg'
+import Ledger from '../../assets/svg/ledger.svg'
 import { CHAIN } from '../../constants'
 
 type onChainProvider = {
@@ -115,9 +115,9 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
         },
         'custom-ledger': {
           display: {
-            logo: Discord,
+            logo: Ledger,
             name: 'Celo Ledger',
-            description: 'Connect to your Celo Ledger',
+            description: 'Connect to your Celo Ledger Wallet',
           },
           package: LedgerConnector,
           connector: async (p) => {
