@@ -1,6 +1,6 @@
 import { JsonRpcProvider, StaticJsonRpcProvider, Web3Provider } from '@ethersproject/providers'
 import WalletConnectProvider from '@walletconnect/web3-provider'
-import { LedgerConnector } from 'connectors/ledger/LedgerConnector'
+import { LedgerConnector, LedgerKit } from 'connectors/ledger/LedgerConnector'
 import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Web3Modal from 'web3modal'
 
@@ -121,7 +121,12 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
           },
           package: LedgerConnector,
           connector: async (p) => {
-            return provider
+            console.log(0)
+            const ledgerKit = await LedgerKit.init(CHAIN, [0])
+            console.log(1, ledgerKit)
+            const re = new p(ledgerKit, 1)
+            console.log(2, re)
+            return (await re.activate()).provider
           },
         },
       },
@@ -162,13 +167,17 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   const connect = useCallback(async () => {
     const rawProvider = await web3Modal.connect()
+    console.log(4, rawProvider)
 
     _initListeners(rawProvider)
 
     const connectedProvider = new Web3Provider(rawProvider, 'any')
+    console.log(5, connectedProvider)
 
     const chainId = await connectedProvider.getNetwork().then((network) => Number(network.chainId))
+    console.log(6, chainId)
     const connectedAddress = await connectedProvider.getSigner()?.getAddress()
+    console.log(7, connectedAddress)
 
     setAddress(connectedAddress)
 
