@@ -4,7 +4,11 @@ import { IMentoExchangeInfo } from 'constants/mento'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import invariant from 'tiny-invariant'
-import { calculateEstimatedSwapInputAmount, calculateEstimatedSwapOutputAmount } from 'utils/mentoCalculator'
+import {
+  calculateEstimatedSwapInputAmount,
+  calculateEstimatedSwapOutputAmount,
+  calculateSwapPrice,
+} from 'utils/mentoCalculator'
 
 import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
@@ -216,7 +220,7 @@ export function useMentoTradeInfo(): {
     inputError = 'Insufficient Balance'
   }
 
-  const executionPrice = new Price(inputCurrency, outputCurrency, input?.raw, output?.raw)
+  const executionPrice = calculateSwapPrice(pool)
   const tradeType = isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
 
   const mentoTrade: MentoTrade | undefined =

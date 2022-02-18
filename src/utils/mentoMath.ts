@@ -3,7 +3,6 @@ import { MentoPool } from 'state/mentoPools/reducer'
 
 const ZERO = JSBI.BigInt(0)
 const ONE = JSBI.BigInt(1)
-const TWO = JSBI.BigInt(2)
 const big = JSBI.BigInt(1000000)
 export class MentoMath {
   public swapFee: JSBI

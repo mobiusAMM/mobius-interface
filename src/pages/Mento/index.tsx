@@ -55,9 +55,13 @@ export default function Mento() {
   const [allowedSlippage] = useUserSlippageTolerance()
   // swap state
   const { independentField, typedValue } = useSwapState()
-  const { v2Trade, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useMentoTradeInfo()
-
-  const trade = v2Trade
+  const {
+    mentoTrade: trade,
+    currencyBalances,
+    parsedAmount,
+    currencies,
+    inputError: swapInputError,
+  } = useMentoTradeInfo()
 
   const parsedAmounts = {
     [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.input,

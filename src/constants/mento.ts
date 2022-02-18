@@ -1,4 +1,4 @@
-import { StableToken } from '@celo/contractkit'
+import { CeloContract, StableToken } from '@celo/contractkit'
 import { ChainId, Percent, TokenAmount } from '@ubeswap/sdk'
 
 /**
@@ -6,6 +6,7 @@ import { ChainId, Percent, TokenAmount } from '@ubeswap/sdk'
  */
 export interface IMentoExchange {
   stable: StableToken
+  contract: CeloContract
 }
 
 /**
@@ -22,6 +23,15 @@ export const MENTO_POOL_INFO: { [K in ChainId]: IMentoExchange[] } = {
   [ChainId.MAINNET]: [
     {
       stable: StableToken.cUSD,
+      contract: CeloContract.Exchange,
+    },
+    {
+      stable: StableToken.cEUR,
+      contract: CeloContract.ExchangeEUR,
+    },
+    {
+      stable: StableToken.cREAL,
+      contract: CeloContract.ExchangeBRL,
     },
   ],
   [ChainId.ALFAJORES]: [],
