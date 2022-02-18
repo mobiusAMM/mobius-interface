@@ -124,7 +124,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
             console.log(0)
             const ledgerKit = await LedgerKit.init(CHAIN, [0])
             console.log(1, ledgerKit)
-            const re = new p(ledgerKit, 1)
+            const re = new p({ kit: ledgerKit, index: 1 })
             console.log(2, re)
             return (await re.activate()).provider
           },
