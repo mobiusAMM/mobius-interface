@@ -35,6 +35,39 @@ export const CELO = makeTokens(
   'Celo native asset'
 )
 
+export const CUSD = makeTokens(
+  {
+    [ChainId.MAINNET]: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
+    [ChainId.ALFAJORES]: '0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1',
+    [ChainId.BAKLAVA]: '0x62492A644A588FD904270BeD06ad52B9abfEA1aE',
+  },
+  18,
+  'cUSD',
+  'Celo Dollar'
+)
+
+export const CEUR = makeTokens(
+  {
+    [ChainId.MAINNET]: '0xD8763CBa276a3738E6DE85b4b3bF5FDed6D6cA73',
+    [ChainId.ALFAJORES]: '0x10c892A6EC43a53E45D0B916B4b7D383B1b78C0F',
+    [ChainId.BAKLAVA]: '0xf9ecE301247aD2CE21894941830A2470f4E774ca',
+  },
+  18,
+  'cEUR',
+  'Celo Euro'
+)
+
+export const CREAL = makeTokens(
+  {
+    [ChainId.MAINNET]: '0xe8537a3d056DA446677B9E9d6c5dB704EaAb4787',
+    [ChainId.ALFAJORES]: '0xE4D517785D091D3c54818832dB6094bcc2744545',
+    [ChainId.BAKLAVA]: '0xf9ecE301247aD2CE21894941830A2470f4E774ca',
+  },
+  18,
+  'cREAL',
+  'Celo Brazilian Real'
+)
+
 export const VEMOBI = makeTokens(
   {
     [ChainId.MAINNET]: '0xd813a846aA9D572140d7ABBB4eFaC8cD786b4c0E',
