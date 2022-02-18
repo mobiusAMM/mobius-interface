@@ -131,7 +131,7 @@ export default function HamburgerModal({ isOpen, onDismiss }: { isOpen: boolean;
             <StyledNavLink id={`charts-nav-link`} to={'/charts'}>
               {t('Charts')}
             </StyledNavLink>
-            <ChevronUp style={{ cursor: 'pointer' }} onClick={() => setExpand(true)} />
+            <ChevronUp style={{ cursor: 'pointer' }} onClick={() => setExpand(false)} />
           </>
         ) : (
           <ChevronDown style={{ cursor: 'pointer' }} onClick={() => setExpand(true)} />
