@@ -1,4 +1,3 @@
-import { AbstractConnector } from '@web3-react/abstract-connector'
 import Loader from 'components/Loader'
 import { darken } from 'polished'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -9,12 +8,38 @@ import { LedgerKit } from '../../../connectors/ledger/LedgerConnector'
 import { LedgerAddress } from './LedgerAddress'
 
 interface Props {
-  tryActivation: (connector: AbstractConnector | undefined) => Promise<void>
+  handleSelectIndex: (index: number) => any
 }
 
 const ADDRESSES_PER_PAGE = 5
 
-export const LedgerWalletSelector: React.FC<Props> = ({ tryActivation }: Props) => {
+type LedgerConnectorModalProps = {
+  handleSelectIndex: (i: number) => any
+  onClose: () => any
+}
+
+const ModalDiv = styled.div`
+  position: absolute;
+  z-index: 999;
+  left: 50%;
+  top: 50%;
+`
+
+export default function LedgerConnectorModal({ handleSelectIndex, onClose }: LedgerConnectorModalProps) {
+  const [showModal, setShowModal] = useState(true)
+  window.setShowLedgerModal = async (b: boolean) => {
+    console.log(b)
+    setShowModal(b)
+  }
+
+  return (
+    <ModalDiv>
+      <LedgerWalletSelector handleSelectIndex={handleSelectIndex} />
+    </ModalDiv>
+  )
+}
+
+export const LedgerWalletSelector: React.FC<Props> = ({ handleSelectIndex }: Props) => {
   const [addresses, setAddresses] = useState<readonly string[] | null>(null)
   const [kit, setKit] = useState<LedgerKit | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -69,7 +94,13 @@ export const LedgerWalletSelector: React.FC<Props> = ({ tryActivation }: Props) 
           ) : (
             <OptionsGrid>
               {addresses.map((address, i) => (
-                <LedgerAddress key={address} address={address} kit={kit} tryActivation={tryActivation} index={i} />
+                <LedgerAddress
+                  key={address}
+                  address={address}
+                  kit={kit}
+                  tryActivation={() => handleSelectIndex(i)}
+                  index={i}
+                />
               ))}
               <InfoCard
                 onClick={() => {

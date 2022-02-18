@@ -126,7 +126,8 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
           connector: async (p, options) => {
             const ledgerKit = await LedgerKit.init(CHAIN, [options.index])
             const re: LedgerConnector = new p({ kit: ledgerKit, index: options.index })
-            re.showModal()
+            re.loadModal()
+            await re.enable()
             return (await re.activate()).provider
           },
         },
