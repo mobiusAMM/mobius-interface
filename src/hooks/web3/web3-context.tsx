@@ -121,11 +121,8 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
           },
           package: LedgerConnector,
           connector: async (p) => {
-            console.log(0)
             const ledgerKit = await LedgerKit.init(CHAIN, [0])
-            console.log(1, ledgerKit)
-            const re = new p({ kit: ledgerKit, index: 1 })
-            console.log(2, re)
+            const re = new p({ kit: ledgerKit, index: 0 })
             return (await re.activate()).provider
           },
         },
@@ -167,17 +164,13 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   const connect = useCallback(async () => {
     const rawProvider = await web3Modal.connect()
-    console.log(4, rawProvider)
 
     _initListeners(rawProvider)
 
     const connectedProvider = new Web3Provider(rawProvider, 'any')
-    console.log(5, connectedProvider)
 
     const chainId = await connectedProvider.getNetwork().then((network) => Number(network.chainId))
-    console.log(6, chainId)
     const connectedAddress = await connectedProvider.getSigner()?.getAddress()
-    console.log(7, connectedAddress)
 
     setAddress(connectedAddress)
 
