@@ -1,12 +1,12 @@
 import { TransactionResponse } from '@ethersproject/providers'
 import { VestingAddresses } from 'constants/StablePools'
-import { useWeb3Context } from 'hooks'
 import { darken } from 'polished'
 import React from 'react'
 import { VestType } from 'state/claim/reducer'
 import styled from 'styled-components'
 import { humanFriendlyWei } from 'utils/eth'
 
+import { CHAIN } from '../../constants'
 import { useVestingContract } from '../../hooks/useContract'
 import { ClaimInfo } from '../../state/claim/hooks'
 import { useTransactionAdder } from '../../state/transactions/hooks'
@@ -32,13 +32,6 @@ const VoteCard = styled(DataCard)`
   background: radial-gradient(76.02% 75.41% at 1.84% 0%, #27ae60 0%, #222 100%);
   overflow: hidden;
   margin-bottom: 2rem;
-`
-
-const VerticalDivider = styled.div`
-  width: 1px;
-  height: 100%;
-  margin-right: 0.5rem;
-  background: ${({ theme }) => theme.bg4};
 `
 
 const StyledButton = styled(ButtonPrimary)<{ background: any; backgroundHover: any }>`
@@ -68,8 +61,6 @@ const InfoContainer = styled.div`
   width: 100%;
   padding: 8px;
 `
-// background: ${({ bgColor1, bgColor2 }) =>
-// `radial-gradient(91.85% 100% at 1.84% 0%, ${bgColor1} 0%, ${bgColor2} 100%) `};
 
 const Wrapper = styled(AutoColumn)<{ showBackground: boolean; background: any }>`
   border-radius: 12px;
@@ -102,22 +93,6 @@ const TopSection = styled.div`
   `};
 `
 
-const BottomSection = styled.div<{ showBackground: boolean }>`
-  padding: 12px 16px;
-  opacity: ${({ showBackground }) => (showBackground ? '1' : '0.4')};
-  border-radius: 0 0 12px 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 12px;
-  z-index: 1;
-`
-
-const DepositWithdrawBtn = styled(StyledButton)`
-  width: 40%;
-  flex: none;
-`
-
 interface Props {
   info: ClaimInfo
   type: VestType
@@ -129,8 +104,7 @@ export const ClaimCard: React.FC<Props> = ({ info, type }: Props) => {
   const backgroundColorEnd = '#212429'
   const backgroundGradient = null //generateGradient(tokens.slice())
   const { allocatedAmount, claimedAmount, unclaimedAmount } = info
-  const { chainId } = useWeb3Context()
-  const vestAddress = VestingAddresses[type][chainId]
+  const vestAddress = VestingAddresses[type][CHAIN]
   const claimContract = useVestingContract(vestAddress)
   const addTransaction = useTransactionAdder()
 
@@ -176,12 +150,7 @@ export const ClaimCard: React.FC<Props> = ({ info, type }: Props) => {
         <CardNoise />
       </VoteCard>
 
-      <Wrapper
-        showBackground={true}
-        background={backgroundGradient}
-        bgColor1={backgroundColorStart}
-        bgColor2={backgroundColorEnd}
-      >
+      <Wrapper showBackground={true} background={backgroundGradient}>
         <TopSection>
           <TYPE.black fontWeight={600} fontSize={[18, 24]}>
             Claim $MOBI

@@ -203,7 +203,6 @@ export default function AccountDetails({
   toggleWalletModal,
   pendingTransactions,
   confirmedTransactions,
-  ENSName,
 }: AccountDetailsProps) {
   const { address, disconnect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)

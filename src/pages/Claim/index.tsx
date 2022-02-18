@@ -8,17 +8,11 @@ import styled from 'styled-components'
 
 import { ClaimCard } from '../../components/claim/ClaimCard'
 import { AutoColumn } from '../../components/Column'
-import { RowBetween } from '../../components/Row'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
   width: 100%;
   margin-top: 3rem;
-`
-
-const TopSection = styled(AutoColumn)`
-  max-width: 720px;
-  width: 100%;
 `
 
 const PoolSection = styled.div`
@@ -30,13 +24,7 @@ const PoolSection = styled.div`
   justify-self: center;
 `
 
-const DataRow = styled(RowBetween)`
-  ${({ theme }) => theme.mediaWidth.upToSmall`
-flex-direction: column;
-`};
-`
-
-export default function Earn() {
+export default function Claim() {
   const { pathname } = useLocation()
   const type = pathname.includes('founder')
     ? VestType.FOUNDER

@@ -2,15 +2,10 @@ import { darken } from 'polished'
 import React from 'react'
 import { ArrowLeft } from 'react-feather'
 import { useTranslation } from 'react-i18next'
-import { useDispatch } from 'react-redux'
 import { Link as HistoryLink, NavLink } from 'react-router-dom'
-import { AppDispatch } from 'state'
-import { resetMintState } from 'state/mint/actions'
 import styled from 'styled-components'
 
-import { Row, RowBetween } from '../Row'
-// import QuestionHelper from '../QuestionHelper'
-import Settings from '../Settings'
+import { Row } from '../Row'
 
 const Tabs = styled.div`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -69,42 +64,6 @@ export function SwapPoolTabs({ active }: { active: 'swap' | 'mento' | 'pool' | '
       <StyledNavLink id={`mento-nav-link`} to={'/mint'} isActive={() => active === 'mento'}>
         {t('mint')}
       </StyledNavLink>
-    </Tabs>
-  )
-}
-
-export function FindPoolTabs() {
-  return (
-    <Tabs>
-      <RowBetween style={{ padding: '1rem 1rem 0 1rem' }}>
-        <HistoryLink to="/pool">
-          <StyledArrowLeft />
-        </HistoryLink>
-        <ActiveText>Import Pool</ActiveText>
-        <Settings />
-      </RowBetween>
-    </Tabs>
-  )
-}
-
-export function AddRemoveTabs({ adding, creating }: { adding: boolean; creating: boolean }) {
-  // reset states on back
-  const dispatch = useDispatch<AppDispatch>()
-
-  return (
-    <Tabs>
-      <RowBetween style={{ padding: '1rem 1rem 0 1rem' }}>
-        <HistoryLink
-          to="/pool"
-          onClick={() => {
-            adding && dispatch(resetMintState())
-          }}
-        >
-          <StyledArrowLeft />
-        </HistoryLink>
-        <ActiveText>{creating ? 'Create a pair' : adding ? 'Add Liquidity' : 'Remove Liquidity'}</ActiveText>
-        <Settings />
-      </RowBetween>
     </Tabs>
   )
 }
