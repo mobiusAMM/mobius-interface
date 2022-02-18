@@ -7,8 +7,12 @@ import TransportWebUSB from '@ledgerhq/hw-transport-webusb'
 import { CHAIN_INFO, ChainId } from '@ubeswap/sdk'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import { ConnectorUpdate } from '@web3-react/types'
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
 
-import { NETWORK_CHAIN_ID } from '../'
+import { NETWORK_CHAIN_ID } from '..'
+
+export const LEDGER_MODAL_ID = 'ledger-index-select'
 
 export class LedgerKit {
   private closed = false
@@ -80,6 +84,19 @@ export class LedgerConnector extends AbstractConnector {
 
   public deactivate() {
     this.kit?.close()
+  }
+
+  public showModal() {
+    const el = document.createElement('div')
+    el.id = LEDGER_MODAL_ID
+    document.body.appendChild(el)
+
+    ReactDOM.render(
+      <div style={{ height: '15rem', width: '15rem', background: 'red', position: 'absolute', top: 50, right: 50 }}>
+        Hello
+      </div>,
+      document.getElementById(LEDGER_MODAL_ID)
+    )
   }
 
   async close() {
