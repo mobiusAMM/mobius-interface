@@ -10,11 +10,10 @@ import { AppState } from '..'
 
 export function useCurrentPool(stable: StableToken | null): IMentoExchangeInfo | null {
   const pools = useSelector<AppState, IMentoExchangeInfo[]>((state) =>
-    state.mentoPools.pools.filter((pool) => {
-      return pool.stable === stable
-    })
+    state.mentoPools.pools.filter((pool) => pool.stable === stable)
   )
-  if (!pools) return null
+  console.log(stable, pools)
+  if (pools.length === 0) return null
   invariant(pools.length === 1)
   return pools[0]
 }

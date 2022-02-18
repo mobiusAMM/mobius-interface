@@ -49,7 +49,7 @@ function useContract(address: string | undefined, ABI: any, withSignerIfPossible
       console.error('Failed to get contract', error)
       return null
     }
-  }, [address, ABI, provider, connected])
+  }, [address, ABI, provider, connected, withSignerIfPossible])
 }
 
 export function useTokenContract(tokenAddress?: string, withSignerIfPossible?: boolean): Erc20 | null {

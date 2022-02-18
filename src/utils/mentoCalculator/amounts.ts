@@ -1,8 +1,10 @@
 import { TokenAmount } from '@ubeswap/sdk'
-import { ONE, ZERO } from '@ubeswap/sdk/dist/constants'
 import JSBI from 'jsbi'
 
 import type { IMentoExchangeInfo } from '../../constants/mento'
+
+const ZERO = JSBI.BigInt(0)
+const ONE = JSBI.BigInt(1)
 
 /**
  * Calculates the estimated output amount of a swap.

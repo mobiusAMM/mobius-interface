@@ -150,15 +150,14 @@ export function useMentoTradeInfo(): {
   const pools = usePools()
   const poolsLoading = pools.length === 0
 
-  const stable = inputCurrency
-    ? tokenToStable(inputCurrency)
-      ? outputCurrency
-        ? tokenToStable(outputCurrency)
-        : null
-      : null
-    : null
+  const inputStable = inputCurrency ? tokenToStable(inputCurrency) : null
+  const outputStable = outputCurrency ? tokenToStable(outputCurrency) : null
+
+  const stable = inputStable ?? outputStable
 
   const pool = useCurrentPool(stable)
+
+  console.log(pool)
 
   const to: string | null = connected ? address : null
   const relevantTokenBalances = useCurrencyBalances(connected ? address : undefined, [
