@@ -1,6 +1,5 @@
 import { MaxUint256 } from '@ethersproject/constants'
 import { TokenAmount } from '@ubeswap/sdk'
-import { useDoTransaction } from 'components/swap/routing'
 import { useCallback, useMemo } from 'react'
 import { MobiusTrade } from 'state/swap/hooks'
 import { useUserMinApprove } from 'state/user/hooks'
@@ -10,6 +9,7 @@ import { Field } from '../state/swap/actions'
 import { useHasPendingApproval } from '../state/transactions/hooks'
 import { computeSlippageAdjustedAmounts } from '../utils/prices'
 import { useTokenContract } from './useContract'
+import { useDoTransaction } from './useDoTransaction'
 import { useWeb3Context } from './web3'
 
 export enum ApprovalState {

@@ -47,11 +47,6 @@ const estimateGas = async (call: ContractCall): Promise<BigNumber> => {
       console.debug('Call threw error', call, callError)
       let errorMessage: string
       switch (callError.reason) {
-        case 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT':
-        case 'UniswapV2Router: EXCESSIVE_INPUT_AMOUNT':
-          errorMessage =
-            'This transaction will not succeed either due to price movement or fee on transfer. Try increasing your slippage tolerance.'
-          break
         default:
           errorMessage = `The transaction cannot succeed due to error: ${callError.reason}. This is probably an issue with one of the tokens you are swapping.`
       }
