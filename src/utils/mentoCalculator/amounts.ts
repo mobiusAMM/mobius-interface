@@ -38,6 +38,7 @@ export const calculateEstimatedSwapOutputAmount = (
   )
 
   const fee = new TokenAmount(fromReserves.token, feeAmount)
+  console.log('fee', feeAmount)
 
   const outputAmount = new TokenAmount(toReserves.token, amountOut)
 
