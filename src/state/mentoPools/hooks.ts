@@ -12,7 +12,6 @@ export function useCurrentPool(stable: StableToken | null): IMentoExchangeInfo |
   const pools = useSelector<AppState, IMentoExchangeInfo[]>((state) =>
     state.mentoPools.pools.filter((pool) => pool.stable === stable)
   )
-  console.log(stable, pools)
   if (pools.length === 0) return null
   invariant(pools.length === 1)
   return pools[0]

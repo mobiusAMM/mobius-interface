@@ -8,7 +8,7 @@ import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useBlockNumber } from 'state/application/hooks'
 
-import { CHAIN } from '../../constants'
+import { CHAIN, weiScale } from '../../constants'
 import { MENTO_POOL_INFO } from '../../constants/mento'
 import { useWeb3Context } from '../../hooks'
 import { useMentoContract } from '../../hooks/useContract'
@@ -35,10 +35,10 @@ export function UpdateMento() {
           updateMento({
             mento: {
               ...poolInfo,
-              fee: new Percent(swapFee),
+              fee: new Percent(swapFee, weiScale),
               address: contract.address,
-              stableReserve: new TokenAmount(stableToToken(poolInfo.stable), balances[0]),
-              celoReserve: new TokenAmount(CELO[CHAIN], balances[1]),
+              celoReserve: new TokenAmount(CELO[CHAIN], balances[0]),
+              stableReserve: new TokenAmount(stableToToken(poolInfo.stable), balances[1]),
             },
           })
         )

@@ -158,8 +158,6 @@ export function useMentoTradeInfo(): {
 
   const pool = useCurrentPool(stable)
 
-  console.log(pool)
-
   const to: string | null = connected ? address : null
   const relevantTokenBalances = useCurrencyBalances(connected ? address : undefined, [
     inputCurrency ?? undefined,

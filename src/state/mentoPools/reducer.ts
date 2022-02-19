@@ -28,7 +28,6 @@ const initialState: MentoPools = {
 
 export default createReducer<MentoPools>(initialState, (builder) =>
   builder.addCase(updateMento, (state, { payload: { mento } }) => {
-    console.log(mento)
     return {
       pools: state.pools.map((p) => (p.stable === mento.stable ? mento : p)),
     }

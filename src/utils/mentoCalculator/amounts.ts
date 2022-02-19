@@ -29,7 +29,13 @@ export const calculateEstimatedSwapOutputAmount = (
       fee: zero,
     }
   }
-  const [amountOut, feeAmount] = getAmountOut(fromAmount.raw, fromReserves.raw, toReserves.raw, exchange.fee.quotient)
+
+  const [amountOut, feeAmount] = getAmountOut(
+    fromAmount.raw,
+    fromReserves.raw,
+    toReserves.raw,
+    JSBI.BigInt(exchange.fee.toFixed(0))
+  )
 
   const fee = new TokenAmount(fromReserves.token, feeAmount)
 
@@ -64,7 +70,12 @@ export const calculateEstimatedSwapInputAmount = (
       fee: zero,
     }
   }
-  const [amountOut, feeAmount] = getAmountIn(toAmount.raw, fromReserves.raw, toReserves.raw, exchange.fee.quotient)
+  const [amountOut, feeAmount] = getAmountIn(
+    toAmount.raw,
+    fromReserves.raw,
+    toReserves.raw,
+    JSBI.BigInt(exchange.fee.toFixed(0))
+  )
 
   const fee = new TokenAmount(fromReserves.token, feeAmount)
 
@@ -76,7 +87,7 @@ export const calculateEstimatedSwapInputAmount = (
   }
 }
 
-const big = JSBI.BigInt(1000000)
+const big = JSBI.BigInt(100000000)
 
 function getAmountIn(outAmount: JSBI, bucketIn: JSBI, bucketOut: JSBI, swapFee: JSBI): [JSBI, JSBI] {
   const feeMult = JSBI.subtract(big, swapFee)
