@@ -1,11 +1,10 @@
 // To-Do: Implement Hooks to update Client-Side contract representation
-import { ChainId } from '@celo-tools/use-contractkit'
-import { JSBI, Price, Token, TokenAmount } from '@ubeswap/sdk'
+import { ChainId, JSBI, Price, Token, TokenAmount } from '@ubeswap/sdk'
 import { ConstantSum, ConstantSumInfo } from 'constants/ConstantSum'
-import { useActiveContractKit } from 'hooks'
 import { useSelector } from 'react-redux'
 import { tryParseAmount } from 'state/swap/hooks'
 
+import { CHAIN } from '../../constants'
 import { AppState } from '..'
 import { ConstantSumPool } from './reducer'
 
@@ -32,24 +31,22 @@ export function useOpenPools(): readonly ConstantSumPool[] {
 }
 
 export function useOpenSumTokenPair(inputToken: string): { [address: string]: Token } {
-  const { chainId } = useActiveContractKit()
-  const tradeableTokens = ConstantSum[chainId]
-    ?.filter(({ tokens }) => tokens[0].address === inputToken || tokens[1].address === inputToken)
-    .reduce(
-      (accum: { [address: string]: Token }, { tokens }: ConstantSumInfo) => ({
-        ...accum,
-        [tokens[0].address]: tokens[0],
-        [tokens[1].address]: tokens[1],
-      }),
-      {}
-    )
+  const tradeableTokens = ConstantSum[CHAIN]?.filter(
+    ({ tokens }) => tokens[0].address === inputToken || tokens[1].address === inputToken
+  ).reduce(
+    (accum: { [address: string]: Token }, { tokens }: ConstantSumInfo) => ({
+      ...accum,
+      [tokens[0].address]: tokens[0],
+      [tokens[1].address]: tokens[1],
+    }),
+    {}
+  )
   if (tradeableTokens && tradeableTokens[inputToken]) delete tradeableTokens[inputToken]
   return tradeableTokens ?? {}
 }
 
 export function useOpenSumTradeableTokens(): { [address: string]: Token } {
-  const { chainId } = useActiveContractKit()
-  const openSumTokens = ConstantSum[chainId]?.reduce(
+  const openSumTokens = ConstantSum[CHAIN]?.reduce(
     (accum: { [address: string]: Token }, { tokens }: ConstantSumInfo) => ({
       ...accum,
       [tokens[0].address]: tokens[0],
@@ -111,32 +108,16 @@ export function useOpenSumTrade(
     input: inputAmount,
     poolAddress: pool.address,
     executionPrice: new Price(tokenIn, tokenOut, '1', '1'),
-    fee: new TokenAmount(tokenIn, 0),
+    fee: new TokenAmount(tokenIn, '0'),
   }
 }
 
-export function useOpticsV1Tokens(): { [address: string]: Token } {
-  const { chainId } = useActiveContractKit()
-  const openSumTokens = ConstantSum[chainId]?.reduce(
-    (accum: { [address: string]: Token }, { tokens }: ConstantSumInfo) => ({
-      ...accum,
-      [tokens[0].address]: tokens[0],
-    }),
-    {}
-  )
-  return openSumTokens ?? {}
+export function useOpticsV1Tokens(): Token[] {
+  return ConstantSum[CHAIN].map(({ tokens }) => tokens[0])
 }
 
-export function useOpticsV2Tokens(): { [address: string]: Token } {
-  const { chainId } = useActiveContractKit()
-  const openSumTokens = ConstantSum[chainId]?.reduce(
-    (accum: { [address: string]: Token }, { tokens }: ConstantSumInfo) => ({
-      ...accum,
-      [tokens[1].address]: tokens[1],
-    }),
-    {}
-  )
-  return openSumTokens ?? {}
+export function useOpticsV2Tokens(): Token[] {
+  return ConstantSum[CHAIN].map(({ tokens }) => tokens[1])
 }
 
 export function getPairedToken(selectedTokenAddress: string, chainId: ChainId): Token | undefined {

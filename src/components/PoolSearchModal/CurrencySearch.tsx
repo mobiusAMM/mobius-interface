@@ -10,7 +10,7 @@ import { Text } from 'rebass'
 import { WrappedTokenInfo } from 'state/lists/hooks'
 import styled from 'styled-components'
 
-import { useActiveContractKit } from '../../hooks'
+import { CHAIN } from '../../constants'
 import { CloseIcon, TYPE } from '../../theme'
 import Column from '../Column'
 import { RowBetween } from '../Row'
@@ -31,13 +31,12 @@ interface CurrencySearchProps {
 }
 
 export function CurrencySearch({ selectedCurrency, onCurrencySelect, onDismiss }: CurrencySearchProps) {
-  const { chainId } = useActiveContractKit()
   const theme = useTheme()
 
   // refs for fixed size lists
   const fixedList = useRef<FixedSizeList>()
 
-  const tokensToSelect = STATIC_POOL_INFO[chainId].map(
+  const tokensToSelect = STATIC_POOL_INFO[CHAIN].map(
     ({ lpToken, name }) =>
       new WrappedTokenInfo(
         {

@@ -1,6 +1,7 @@
-import { useActiveContractKit } from 'hooks'
+import { useWeb3Context } from 'hooks'
 import { useEffect, useMemo } from 'react'
 
+import { CHAIN } from '../../constants'
 import { useBlockNumber } from '../application/hooks'
 import { useAppDispatch, useAppSelector } from '../hooks'
 import { fetchedLogs, fetchedLogsError, fetchingLogs } from './slice'
@@ -9,14 +10,14 @@ import { EventFilter, keyToFilter } from './utils'
 export default function Updater(): null {
   const dispatch = useAppDispatch()
   const state = useAppSelector((state) => state.logs)
-  const { chainId, library } = useActiveContractKit()
+  const { provider } = useWeb3Context()
 
   const blockNumber = useBlockNumber()
 
   const filtersNeedFetch: EventFilter[] = useMemo(() => {
-    if (!chainId || typeof blockNumber !== 'number') return []
+    if (typeof blockNumber !== 'number') return []
 
-    const active = state[chainId]
+    const active = state[CHAIN]
     if (!active) return []
 
     return Object.keys(active)
@@ -28,14 +29,14 @@ export default function Updater(): null {
         return true
       })
       .map((key) => keyToFilter(key))
-  }, [blockNumber, chainId, state])
+  }, [blockNumber, state])
 
   useEffect(() => {
-    if (!library || !chainId || typeof blockNumber !== 'number' || filtersNeedFetch.length === 0) return
+    if (!provider || typeof blockNumber !== 'number' || filtersNeedFetch.length === 0) return
 
-    dispatch(fetchingLogs({ chainId, filters: filtersNeedFetch, blockNumber }))
+    dispatch(fetchingLogs({ chainId: CHAIN, filters: filtersNeedFetch, blockNumber }))
     filtersNeedFetch.forEach((filter) => {
-      library
+      provider
         .getLogs({
           ...filter,
           fromBlock: 0,
@@ -44,7 +45,7 @@ export default function Updater(): null {
         .then((logs) => {
           dispatch(
             fetchedLogs({
-              chainId,
+              chainId: CHAIN,
               filter,
               results: { logs, blockNumber },
             })
@@ -54,14 +55,14 @@ export default function Updater(): null {
           console.error('Failed to get logs', filter, error)
           dispatch(
             fetchedLogsError({
-              chainId,
+              chainId: CHAIN,
               filter,
               blockNumber,
             })
           )
         })
     })
-  }, [blockNumber, chainId, dispatch, filtersNeedFetch, library])
+  }, [blockNumber, dispatch, filtersNeedFetch, provider])
 
   return null
 }

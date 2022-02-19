@@ -1,9 +1,7 @@
-import { useContractKit } from '@celo-tools/use-contractkit'
-import { CELO, ChainId as UbeswapChainId, currencyEquals, cUSD, Fraction, Price, Token } from '@ubeswap/sdk'
-import { useMemo } from 'react'
+import { cUSD, Fraction, Price, Token } from '@ubeswap/sdk'
 import { TokenPrices } from 'state/application/reducer'
 
-import { usePairs } from '../data/Reserves'
+import { CHAIN } from '../constants'
 import { priceStringToFraction, useTokenPrice } from '../state/application/hooks'
 
 type TokenPair = [Token | undefined, Token | undefined]
@@ -22,13 +20,10 @@ export function getCUSDPrices(prices?: TokenPrices): { [address: string]: Fracti
  * @param currency currency to compute the cUSD price of
  */
 export function useCUSDPrice(tokens?: Token[] | Token): Price | undefined {
-  const {
-    network: { chainId },
-  } = useContractKit()
+  const CUSD = cUSD[CHAIN]
   if (tokens instanceof Token) {
     tokens = [tokens]
   }
-  const CUSD = cUSD[chainId as unknown as UbeswapChainId]
 
   const p1 = useTokenPrice(tokens?.[0]?.address)
   const p2 = useTokenPrice(tokens?.[1]?.address)
@@ -81,49 +76,4 @@ export function useCUSDPrice(tokens?: Token[] | Token): Price | undefined {
   //   })
   //   return prices.filter((p: Price | undefined) => !p)[0] ?? undefined
   // }, [chainId, tokens, CUSD, celo, pairs])
-}
-
-/**
- * Returns the price in cUSD of the input currency
- * @param currency currency to compute the cUSD price of
- */
-export function _useCUSDPrice(token?: Token): Price | undefined {
-  const {
-    network: { chainId },
-  } = useContractKit()
-  const CUSD = cUSD[chainId as unknown as UbeswapChainId]
-  const celo = CELO[chainId as unknown as UbeswapChainId]
-  const tokenPairs: [Token | undefined, Token | undefined][] = useMemo(
-    () => [
-      [token && currencyEquals(token, CUSD) ? undefined : token, CUSD],
-      [token && currencyEquals(token, celo) ? undefined : token, celo],
-      [celo, CUSD],
-    ],
-    [CUSD, celo, token]
-  )
-  const [[, cUSDPair], [, celoPair], [, celoCUSDPair]] = usePairs(tokenPairs)
-
-  return useMemo(() => {
-    if (!token || !chainId) {
-      return undefined
-    }
-
-    // handle cUSD
-    if (token.equals(CUSD)) {
-      return new Price(CUSD, CUSD, '1', '1')
-    }
-
-    let price: Price | undefined = undefined
-
-    if (celoPair && celoCUSDPair) {
-      price = celoPair.priceOf(token).multiply(celoCUSDPair.priceOf(celo))
-    }
-
-    if (cUSDPair) {
-      const newPrice = cUSDPair.priceOf(token)
-      price = !price || newPrice.greaterThan(new Fraction(price.numerator, price.denominator)) ? newPrice : price
-    }
-
-    return price
-  }, [chainId, token, CUSD, cUSDPair, celo, celoCUSDPair, celoPair])
 }

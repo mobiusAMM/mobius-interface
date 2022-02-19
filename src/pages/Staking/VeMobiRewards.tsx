@@ -3,7 +3,7 @@ import { ButtonEmpty, ButtonPrimary } from 'components/Button'
 import { AutoColumn } from 'components/Column'
 import Loader from 'components/Loader'
 import { RowBetween, RowFixed } from 'components/Row'
-import { useActiveContractKit } from 'hooks'
+import { useWeb3Context } from 'hooks'
 import { useStakingContract } from 'hooks/useContract'
 import React, { useState } from 'react'
 import { useSNXRewardInfo } from 'state/staking/hooks'
@@ -118,7 +118,7 @@ const StyledButton = styled(ButtonEmpty)`
 export default function VeMobiRewards() {
   const { rewardToken, rewardRate, avgApr, userRewardRate, leftToClaim, snxAddress } = useSNXRewardInfo()
   const tokenColor = '#ab9325' //useColor(rewardToken)
-  const { account } = useActiveContractKit()
+  const { connected } = useWeb3Context()
   const stakingContract = useStakingContract(snxAddress)
   const addTransaction = useTransactionAdder()
   const [attempting, setAttempting] = useState(false)
@@ -224,7 +224,7 @@ export default function VeMobiRewards() {
                 <TYPE.largeHeader>{`${leftToClaim.toSignificant(4, { groupSeparator: ',' })} ${
                   rewardToken.symbol
                 }`}</TYPE.largeHeader>
-              ) : account ? (
+              ) : connected ? (
                 <Loader />
               ) : (
                 <TYPE.red>Connect Wallet</TYPE.red>

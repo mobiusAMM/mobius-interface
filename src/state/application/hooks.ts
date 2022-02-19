@@ -1,17 +1,15 @@
-import { useContractKit } from '@celo-tools/use-contractkit'
 import { Fraction } from '@ubeswap/sdk'
+import { useWeb3Context } from 'hooks'
 import JSBI from 'jsbi'
 import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { CHAIN } from '../../constants'
 import { AppDispatch, AppState } from '../index'
 import { addPopup, ApplicationModal, PopupContent, removePopup, setOpenModal } from './actions'
 
 export function useBlockNumber(): number | undefined {
-  const { network } = useContractKit()
-  const chainId = network.chainId
-
-  return useSelector((state: AppState) => state.application.blockNumber[chainId ?? -1])
+  return useSelector((state: AppState) => state.application.blockNumber[CHAIN])
 }
 
 export function useModalOpen(modal: ApplicationModal): boolean {
@@ -36,7 +34,7 @@ export function useCloseModals(): () => void {
 }
 
 export function useWalletModalToggle(): () => void {
-  const { connect, address } = useContractKit()
+  const { connect, address } = useWeb3Context()
   const toggle = useToggleModal(ApplicationModal.WALLET)
   return address === null ? connect : toggle
 }

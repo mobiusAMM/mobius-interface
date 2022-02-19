@@ -1,17 +1,15 @@
-import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
+import { JSBI, TokenAmount } from '@ubeswap/sdk'
 import { describeTrade } from 'components/swap/routing/describeTrade'
-import { MoolaDirectTrade } from 'components/swap/routing/moola/MoolaDirectTrade'
 import { useMentoTradeCallback } from 'components/swap/routing/useMentoTradeCallback'
-import { useIsTransactionUnsupported } from 'hooks/Trades'
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { ArrowDown } from 'react-feather'
 import ReactGA from 'react-ga'
 import { Text } from 'rebass'
-import { useDefaultsFromURLSearch, useMentoTradeInfo, useSwapActionHandlers, useSwapState } from 'state/mento/hooks'
+import { useMentoTradeInfo, useSwapActionHandlers, useSwapState } from 'state/mento/hooks'
 import styled, { ThemeContext } from 'styled-components'
 
-import { ButtonConfirmed, ButtonError, ButtonPrimary } from '../../components/Button'
+import { ButtonConfirmed, ButtonError } from '../../components/Button'
 import Card, { GreyCard } from '../../components/Card'
 import Column, { AutoColumn } from '../../components/Column'
 import CurrencyInputPanel from '../../components/CurrencyInputPanel'
@@ -25,18 +23,12 @@ import { ArrowWrapper, BottomGrouping, InfoWrapper, SwapCallbackError, Wrapper }
 import SwapHeader from '../../components/swap/SwapHeader'
 import TradePrice from '../../components/swap/TradePrice'
 import { INITIAL_ALLOWED_SLIPPAGE } from '../../constants'
-import { useActiveContractKit } from '../../hooks'
-import { useCurrency } from '../../hooks/Tokens'
+import { useWeb3Context } from '../../hooks'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
-import { useToggleSettingsMenu, useWalletModalToggle } from '../../state/application/hooks'
+import { useToggleSettingsMenu } from '../../state/application/hooks'
+import { Field } from '../../state/mento/actions'
 import { MentoTrade } from '../../state/mento/hooks'
-import { Field } from '../../state/swap/actions'
-import {
-  useExpertModeManager,
-  useIsDarkMode,
-  useUserSingleHopOnly,
-  useUserSlippageTolerance,
-} from '../../state/user/hooks'
+import { useExpertModeManager, useUserSlippageTolerance } from '../../state/user/hooks'
 import { ExternalLink, TYPE } from '../../theme'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { computeMentoTradePriceBreakdown, warningSeverity } from '../../utils/prices'
@@ -50,26 +42,10 @@ const VoteCard = styled(DataCard)`
 `
 
 export default function Mento() {
-  const loadedUrlParams = useDefaultsFromURLSearch()
-  const isDarkMode = useIsDarkMode()
-
-  // token warning stuff
-  const [loadedInputCurrency, loadedOutputCurrency] = [
-    useCurrency(true, loadedUrlParams?.inputCurrencyId),
-    useCurrency(true, loadedUrlParams?.outputCurrencyId),
-  ]
-  const urlLoadedTokens: Token[] = useMemo(
-    () => [loadedInputCurrency, loadedOutputCurrency]?.filter((c): c is Token => c instanceof Token) ?? [],
-    [loadedInputCurrency, loadedOutputCurrency]
-  )
-
-  // dismiss warning if all imported tokens are in active lists
-
-  const { account } = useActiveContractKit()
+  const { connect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)
 
   // toggle wallet when disconnected
-  const toggleWalletModal = useWalletModalToggle()
 
   // for expert mode
   const toggleSettings = useToggleSettingsMenu()
@@ -121,10 +97,7 @@ export default function Mento() {
 
   const formattedAmounts = {
     [independentField]: typedValue,
-    [dependentField]:
-      (trade instanceof MoolaDirectTrade
-        ? parsedAmounts[dependentField]?.toExact()
-        : parsedAmounts[dependentField]?.toSignificant(6)) ?? '',
+    [dependentField]: parsedAmounts[dependentField]?.toSignificant(6) ?? '',
   }
 
   const userHasSpecifiedInputOutput = Boolean(
@@ -151,8 +124,6 @@ export default function Mento() {
   const { callback: swapCallback, error: swapCallbackError } = useMentoTradeCallback(trade, allowedSlippage, null)
   const { priceImpactWithoutFee } = computeMentoTradePriceBreakdown(trade)
 
-  const [singleHopOnly] = useUserSingleHopOnly()
-
   const handleSwap = useCallback(() => {
     setSwapState({ attemptingTxn: true, tradeToConfirm, showConfirm, swapErrorMessage: undefined, txHash: undefined })
     swapCallback()
@@ -164,11 +135,6 @@ export default function Mento() {
           action: 'Swap',
           label: [trade?.input?.currency?.symbol, trade?.output?.currency?.symbol].join('/'),
         })
-
-        ReactGA.event({
-          category: 'Routing',
-          action: singleHopOnly ? 'Swap with multihop disabled' : 'Swap with multihop enabled',
-        })
       })
       .catch((error) => {
         setSwapState({
@@ -179,7 +145,7 @@ export default function Mento() {
           txHash: undefined,
         })
       })
-  }, [swapCallback, tradeToConfirm, showConfirm, account, trade, singleHopOnly])
+  }, [swapCallback, tradeToConfirm, showConfirm, trade])
 
   // errors
   const [showInverted, setShowInverted] = useState<boolean>(false)
@@ -225,8 +191,6 @@ export default function Mento() {
     [onCurrencySelection]
   )
 
-  const swapIsUnsupported = useIsTransactionUnsupported(currencies?.INPUT, currencies?.OUTPUT)
-
   const { isEstimate, makeLabel } = describeTrade(true)
   const actionLabel = makeLabel(independentField !== Field.INPUT)
 
@@ -244,7 +208,7 @@ export default function Mento() {
               <RowBetween>
                 <TYPE.white
                   fontSize={14}
-                >{`Mint cUSD and cEUR by depositing CELO to the Celo Reserve. This exchange includes a 0.25% fee that is collected by the Celo Reserve.`}</TYPE.white>
+                >{`Mint cUSD, cEUR, and cREAL by depositing CELO to the Celo Reserve. This exchange includes a 0.25% fee that is collected by the Celo Reserve.`}</TYPE.white>
               </RowBetween>
               <ExternalLink
                 style={{ color: 'white', textDecoration: 'underline' }}
@@ -336,12 +300,8 @@ export default function Mento() {
             </Card>
           </AutoColumn>
           <BottomGrouping>
-            {swapIsUnsupported ? (
-              <ButtonPrimary disabled={true}>
-                <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
-              </ButtonPrimary>
-            ) : !account ? (
-              <ButtonError disabledStyle={true} onClick={toggleWalletModal}>
+            {!connected ? (
+              <ButtonError disabledStyle={true} onClick={connect}>
                 Connect Wallet
               </ButtonError>
             ) : noRoute && userHasSpecifiedInputOutput ? (
@@ -412,7 +372,7 @@ export default function Mento() {
                 disabled={!isValid || !!swapCallbackError}
                 error={isValid && priceImpactSeverity > 2 && !swapCallbackError}
               >
-                <Text fontSize={20} fontWeight={500} color={isValid && actionLabel && (isDarkMode ? 'black' : 'white')}>
+                <Text fontSize={20} fontWeight={500}>
                   {swapInputError
                     ? swapInputError
                     : priceImpactSeverity > 3 && isExpertMode

@@ -1,8 +1,8 @@
 import { createReducer } from '@reduxjs/toolkit'
 
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
+import { Field, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 
-export interface SwapState {
+export interface MentoState {
   readonly independentField: Field
   readonly typedValue: string
   readonly [Field.INPUT]: {
@@ -15,36 +15,20 @@ export interface SwapState {
   readonly recipient: string | null
 }
 
-const initialState: SwapState = {
-  independentField: Field.INPUT,
+const initialState: MentoState = {
+  independentField: Field.OUTPUT,
   typedValue: '',
   [Field.INPUT]: {
-    currencyId: '',
+    currencyId: '0x471EcE3750Da237f93B8E339c536989b8978a438',
   },
   [Field.OUTPUT]: {
-    currencyId: '',
+    currencyId: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
   },
   recipient: null,
 }
 
-export default createReducer<SwapState>(initialState, (builder) =>
+export default createReducer<MentoState>(initialState, (builder) =>
   builder
-    .addCase(
-      replaceSwapState,
-      (state, { payload: { typedValue, recipient, field, inputCurrencyId, outputCurrencyId } }) => {
-        return {
-          [Field.INPUT]: {
-            currencyId: inputCurrencyId,
-          },
-          [Field.OUTPUT]: {
-            currencyId: outputCurrencyId,
-          },
-          independentField: field,
-          typedValue: typedValue,
-          recipient,
-        }
-      }
-    )
     .addCase(selectCurrency, (state, { payload: { currencyId, field } }) => {
       const otherField = field === Field.INPUT ? Field.OUTPUT : Field.INPUT
       if (currencyId === state[otherField].currencyId) {

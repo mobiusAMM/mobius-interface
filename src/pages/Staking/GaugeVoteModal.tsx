@@ -11,7 +11,7 @@ import Modal from '../../components/Modal'
 import { LoadingView, SubmittedView } from '../../components/ModalViews'
 import { RowBetween, RowFixed } from '../../components/Row'
 import Slider from '../../components/Slider'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { useGaugeControllerContract } from '../../hooks/useContract'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { CloseIcon, TYPE } from '../../theme'
@@ -36,7 +36,7 @@ function daysBetween(d1: Date, d2: Date): number {
 }
 
 export default function GaugeVoteModal({ isOpen, onDismiss, summary, disabled }: GaugeVoteModalProps) {
-  const { account } = useActiveContractKit()
+  const { connected } = useWeb3Context()
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
@@ -74,7 +74,7 @@ export default function GaugeVoteModal({ isOpen, onDismiss, summary, disabled }:
   }
 
   let error: string | undefined
-  if (!account) {
+  if (!connected) {
     error = 'Connect Wallet'
   }
 

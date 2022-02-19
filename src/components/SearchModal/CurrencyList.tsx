@@ -5,18 +5,15 @@ import { Text } from 'rebass'
 import styled from 'styled-components'
 
 import checkedLogo from '../../assets/svg/mobius.svg'
-import { useActiveContractKit } from '../../hooks'
-import { useAllInactiveTokens, useIsUserAddedToken } from '../../hooks/Tokens'
-import { useCombinedActiveList, WrappedTokenInfo } from '../../state/lists/hooks'
+import { useWeb3Context } from '../../hooks'
+import { WrappedTokenInfo } from '../../state/lists/hooks'
 import { useCurrencyBalance } from '../../state/wallet/hooks'
 import { TYPE } from '../../theme'
-import { isTokenOnList } from '../../utils'
 import Column from '../Column'
 import CurrencyLogo from '../CurrencyLogo'
 import Loader from '../Loader'
 import { RowFixed } from '../Row'
 import { MouseoverTooltip } from '../Tooltip'
-import ImportRow from './ImportRow'
 import { MenuItem } from './styleds'
 
 function currencyKey(currency: Token): string {
@@ -104,12 +101,9 @@ function CurrencyRow({
   otherSelected: boolean
   style: CSSProperties
 }) {
-  const { account } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
   const key = currencyKey(currency)
-  const selectedTokenList = useCombinedActiveList()
-  const isOnSelectedList = isTokenOnList(selectedTokenList, currency)
-  const customAdded = useIsUserAddedToken(currency)
-  const balance = useCurrencyBalance(account ?? undefined, currency)
+  const balance = useCurrencyBalance(connected ? address : undefined, currency)
   if (isSelected || otherSelected)
     currency = {
       ...currency,
@@ -131,12 +125,12 @@ function CurrencyRow({
           {currency.symbol}
         </Text>
         <TYPE.darkGray ml="0px" fontSize={'12px'} fontWeight={300}>
-          {currency.name} {!isOnSelectedList && customAdded && '• Added by user'}
+          {currency.name}
         </TYPE.darkGray>
       </Column>
       <TokenTags currency={currency} />
       <RowFixed style={{ justifySelf: 'flex-end' }}>
-        {balance ? <Balance balance={balance} /> : account ? <Loader /> : null}
+        {balance ? <Balance balance={balance} /> : connected ? <Loader /> : null}
       </RowFixed>
     </MenuItem>
   )
@@ -149,8 +143,6 @@ export default function CurrencyList({
   onCurrencySelect,
   otherCurrency,
   fixedListRef,
-  showImportView,
-  setImportToken,
 }: {
   height: number
   currencies: Token[]
@@ -158,16 +150,9 @@ export default function CurrencyList({
   onCurrencySelect: (currency: Token) => void
   otherCurrency?: Token | null
   fixedListRef?: MutableRefObject<FixedSizeList | undefined>
-  showETH: boolean
-  showImportView: () => void
-  setImportToken: (token: Token) => void
 }) {
   currencies = currencies.filter((token) => !token.symbol?.includes('LP'))
   const itemData = currencies
-
-  const inactiveTokens: {
-    [address: string]: Token
-  } = useAllInactiveTokens()
 
   const Row = useCallback(
     ({ data, index, style }) => {
@@ -176,31 +161,15 @@ export default function CurrencyList({
       const otherSelected = Boolean(otherCurrency && currencyEquals(otherCurrency, currency))
       const handleSelect = () => onCurrencySelect(currency)
 
-      const token = currency
-
-      const showImport = inactiveTokens && token && Object.keys(inactiveTokens).includes(token.address)
-
-      if (showImport && token) {
-        return (
-          <ImportRow
-            style={style}
-            token={token}
-            showImportView={showImportView}
-            setImportToken={setImportToken}
-            dim={true}
-          />
-        )
-      } else {
-        return (
-          <CurrencyRow
-            style={style}
-            currency={currency}
-            isSelected={isSelected}
-            onSelect={handleSelect}
-            otherSelected={otherSelected}
-          />
-        )
-      }
+      return (
+        <CurrencyRow
+          style={style}
+          currency={currency}
+          isSelected={isSelected}
+          onSelect={handleSelect}
+          otherSelected={otherSelected}
+        />
+      )
     },
     [onCurrencySelect, otherCurrency, selectedCurrency]
   )

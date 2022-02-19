@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import styled, { css, keyframes } from 'styled-components'
 
 import { ReactComponent as DropDown } from '../../assets/images/dropdown.svg'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import useTheme from '../../hooks/useTheme'
 import { useIsDarkMode } from '../../state/user/hooks'
 import { useCurrencyBalance } from '../../state/wallet/hooks'
@@ -16,28 +16,6 @@ import DoubleCurrencyLogo from '../DoubleLogo'
 import { Input as NumericalInput } from '../NumericalInput'
 import { RowBetween } from '../Row'
 import CurrencySearchModal from '../SearchModal/CurrencySearchModal'
-
-// const ColorShift = keyframes`
-// 0% { background: #1b09f5;}
-// 5% { background: #8879bf;}
-// 10% { background: #0792f7;}
-// 15% { background: #348cec;}
-// 20% { background: #ab9325;}
-// 25% { background: #ab9325;}
-// 30% { background: #7f22dc;}
-// 35% { background: #989858;}
-// 40% { background: #ac9406;}
-// 45% { background: #ab9325;}
-// 50% { background: #23a963;}
-// 55% { background: #ab9325;}
-// 60% { background: #23a963;}
-// 65% { background: #00a2c6;}
-// 70% { background: #d38219;}
-// 75% { background: #27a966;}
-// 80% { background: #d2830b;}
-// 85% { background: #23a963;}
-// 90% { background: #52D07F;}
-// 95% { background: #52D07F;}`
 
 const ColorShift = keyframes`
 0% { background: #FB7C6D;}
@@ -153,34 +131,6 @@ const StyledTokenName = styled.span<{ active?: boolean }>`
   color: ${({ theme, active }) => (active ? theme.text1 : theme.white)};
 `
 
-const StyledBalanceMax = styled.button`
-  marginleft: auto;
-  height: 28px;
-  background-color: ${({ theme }) => theme.bg5};
-  border: 1px solid ${({ theme }) => theme.bg3};
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  transition: all 0.2s ease-in-out;
-
-  font-weight: 500;
-  cursor: pointer;
-  margin-right: 0.5rem;
-  color: ${({ theme }) => theme.white};
-  :hover {
-    border: 1px solid ${({ theme }) => theme.primary1};
-    background-color: ${({ theme }) => theme.primary5};
-  }
-  :focus {
-    border: 1px solid ${({ theme }) => theme.primary1};
-    background-color: ${({ theme }) => theme.primary5};
-    outline: none;
-  }
-
-  ${({ theme }) => theme.mediaWidth.upToExtraSmall`
-    margin-right: 0.5rem;
-  `};
-`
-
 export enum TokenType {
   OpticsV1 = 1,
   OpticsV2 = 2,
@@ -210,7 +160,6 @@ export default function CurrencyInputPanel({
   value,
   onUserInput,
   onMax,
-  showMaxButton,
   label = 'Input',
   onCurrencySelect,
   currency,
@@ -231,8 +180,8 @@ export default function CurrencyInputPanel({
   const isDarkMode = useIsDarkMode()
 
   const [modalOpen, setModalOpen] = useState(false)
-  const { account } = useActiveContractKit()
-  const selectedCurrencyBalance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
+  const { address, connected } = useWeb3Context()
+  const selectedCurrencyBalance = useCurrencyBalance(connected ? address : undefined, currency ?? undefined)
   const theme = useTheme()
 
   const handleDismissSearch = useCallback(() => {
@@ -248,7 +197,7 @@ export default function CurrencyInputPanel({
               <TYPE.body color={theme.text2} fontWeight={500} fontSize={14}>
                 {label}
               </TYPE.body>
-              {account && (
+              {connected && (
                 <TYPE.body
                   onClick={onMax}
                   color={theme.text2}
@@ -265,12 +214,11 @@ export default function CurrencyInputPanel({
           </LabelRow>
         )}
         <InputRow style={hideInput ? { padding: '0', borderRadius: '8px' } : {}} selected={disableCurrencySelect}>
-          {/* <div style={{ display: 'flex', alignItems: 'center' }}> */}
           <CurrencySelect
             isDarkMode={isDarkMode}
             bgColor={tokenSelectBackground}
             selected={!!currency}
-            walletConnected={!!account}
+            walletConnected={connected}
             pair={!!pair}
             className="open-currency-select-button"
             onClick={() => {
@@ -301,10 +249,6 @@ export default function CurrencyInputPanel({
               {!disableCurrencySelect && <StyledDropDown selected={!!currency} />}
             </Aligner>
           </CurrencySelect>
-          {false && account && currency && showMaxButton && label !== 'To' && (
-            <StyledBalanceMax onClick={onMax}>MAX</StyledBalanceMax>
-          )}
-          {/* </div> */}
           {!hideInput && (
             <InputDiv>
               <NumericalInput

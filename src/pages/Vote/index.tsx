@@ -1,14 +1,13 @@
 import { TokenAmount } from '@ubeswap/sdk'
+import { ButtonPrimary } from 'components/Button'
 import { CardNoise } from 'components/claim/styled'
-// import { ButtonPrimary } from 'components/Button'
 import { AutoColumn } from 'components/Column'
 import { CardSection, DataCard } from 'components/earn/styled'
 import FormattedCurrencyAmount from 'components/FormattedCurrencyAmount'
 import Loader from 'components/Loader'
 import { AutoRow, RowBetween } from 'components/Row'
-// import { SwitchLocaleLink } from 'components/SwitchLocaleLink'
 import ProposalEmptyState from 'components/vote/ProposalEmptyState'
-import { useActiveContractKit } from 'hooks'
+import { useWeb3Context } from 'hooks'
 import { darken } from 'polished'
 import React from 'react'
 import { Link } from 'react-router-dom'
@@ -18,6 +17,7 @@ import { useTokenBalance } from 'state/wallet/hooks'
 import styled from 'styled-components/macro'
 import { ExternalLink, TYPE } from 'theme'
 
+import { CHAIN } from '../../constants'
 import { VEMOBI } from '../../constants/tokens'
 import { ProposalStatus } from './styled'
 
@@ -73,17 +73,14 @@ const WrapSmall = styled(RowBetween)`
 `
 
 export default function Vote() {
-  const { account, chainId } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
 
   // get data to list all proposals
   const { data: allProposals, loading: loadingProposals } = useAllProposalData()
 
   // user data
   const { loading: loadingAvailableVotes, votes: availableVotes } = useUserVotes()
-  const uniBalance: TokenAmount | undefined = useTokenBalance(
-    account ?? undefined,
-    chainId ? VEMOBI[chainId] : undefined
-  )
+  const uniBalance: TokenAmount | undefined = useTokenBalance(connected ? address : undefined, VEMOBI[CHAIN])
 
   return (
     <>
@@ -126,14 +123,14 @@ export default function Vote() {
                 </TYPE.main>
               </TYPE.body>
 
-              {/* <ButtonPrimary
+              <ButtonPrimary
                 as={Link}
-                to="/create-proposal"
+                to="/vote/create-proposal"
                 style={{ width: 'fit-content', borderRadius: '8px' }}
                 padding="8px"
               >
-                <TYPE.main>Create Proposal</TYPE.main>
-              </ButtonPrimary> */}
+                <TYPE.white>Create Proposal</TYPE.white>
+              </ButtonPrimary>
             </AutoRow>
           </WrapSmall>
           {allProposals?.length === 0 && <ProposalEmptyState />}

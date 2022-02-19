@@ -1,39 +1,28 @@
 import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
-// Hooks
 import { MentoConstants } from 'state/mentoPools/reducer'
 import { StableSwapConstants } from 'state/stablePools/reducer'
+import { dedupeTokens } from 'utils/tokens'
 
+// Hooks
+import { CHAIN } from '../../constants'
 import { MENTO_POOL_INFO, STATIC_POOL_INFO } from '../../constants/StablePools'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { tryParseAmount } from '../swap/hooks'
 
-export function useTokensTradeable(
-  mento: boolean,
-  tokenIn: Token | null | undefined
-): readonly [{ [address: string]: Token }] {
-  const tradeable: { [address: string]: Token } = {}
-  const poolMap: { [name: string]: StableSwapConstants } = {}
-  const pools: StableSwapConstants[][] | MentoConstants[][] = mento ? MENTO_POOL_INFO : STATIC_POOL_INFO
-  const { chainId } = useActiveContractKit()
+function inPool(token: Token, pool: MentoConstants | StableSwapConstants): boolean {
+  return pool.tokens.map((t) => t.address === token.address && t.chainId === token.chainId).includes(true)
+}
 
-  if (!tokenIn) return [{}]
-
-  if (!mento) pools[chainId].forEach((pool: StableSwapConstants) => (poolMap[pool.name] = pool))
-
-  pools[chainId]
-    .filter(
-      ({ tokens, disabled }) =>
-        tokens
-          .filter(({ name }) => name !== 'Mob LP')
-          .map(({ address }) => address)
-          .includes(tokenIn.address) && !disabled
-    )
-    .flatMap(({ tokens }) => tokens)
-    .forEach((token) => {
-      if (token !== tokenIn) tradeable[token.address] = token
-    })
-
-  return [tradeable]
+export function useTokensTradeable(mento: boolean, tokenIn: Token | null | undefined): Token[] {
+  if (!tokenIn) return []
+  const pools = mento
+    ? MENTO_POOL_INFO[CHAIN].filter((pool) => inPool(tokenIn, pool))
+        .flatMap(({ tokens }) => tokens)
+        .filter((token) => token !== tokenIn)
+    : STATIC_POOL_INFO[CHAIN].filter((pool) => !pool.disabled && inPool(tokenIn, pool))
+        .flatMap(({ tokens }) => tokens)
+        .filter((token) => token !== tokenIn)
+  return dedupeTokens(pools)
 }
 
 // based on typed value
@@ -45,7 +34,7 @@ export function useDerivedStakeInfo(
   parsedAmount?: TokenAmount
   error?: string
 } {
-  const { account } = useActiveContractKit()
+  const { connected } = useWeb3Context()
 
   const parsedInput: TokenAmount | undefined = tryParseAmount(typedValue, stakingToken)
 
@@ -55,7 +44,7 @@ export function useDerivedStakeInfo(
       : undefined
 
   let error: string | undefined
-  if (!account) {
+  if (!connected) {
     error = 'Connect Wallet'
   }
   if (!parsedAmount) {

@@ -6,7 +6,7 @@ import { useBlockNumber } from 'state/application/hooks'
 import { StablePoolInfo, useExternalRewards } from 'state/stablePools/hooks'
 import styled from 'styled-components'
 
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { useLiquidityGaugeContract, useMobiMinterContract } from '../../hooks/useContract'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { CloseIcon, TYPE } from '../../theme'
@@ -28,7 +28,7 @@ interface StakingModalProps {
 }
 
 export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }: StakingModalProps) {
-  const { account, chainId } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
   const mobi = useMobi()
   const externalRewards = useExternalRewards({ address: stakingInfo.poolAddress ?? '' })
   // monitor call to help UI loading state
@@ -51,16 +51,16 @@ export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }:
 
   useEffect(() => {
     const updateMobi = async () => {
-      const bigInt = await stakingContract?.claimable_tokens(account)
+      const bigInt = await stakingContract?.claimable_tokens(address)
       setEarnedMobi(new TokenAmount(mobi, bigInt.toString()))
     }
-    account && updateMobi()
-  }, [stakingContract, setEarnedMobi, account])
+    connected && updateMobi()
+  }, [stakingContract, setEarnedMobi, connected, address, mobi])
 
   async function onClaimReward() {
     if (stakingContract && stakingInfo?.stakedAmount) {
       setAttempting(true)
-      await stakingContract['claim_rewards(address)'](account, { gasLimit: 1000000 })
+      await stakingContract['claim_rewards(address)'](address, { gasLimit: 1000000 })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
             summary: `Claim accumulated rewards`,
@@ -75,7 +75,7 @@ export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }:
   }
 
   let error: string | undefined
-  if (!account) {
+  if (!connected) {
     error = 'Connect Wallet'
   }
   if (!stakingInfo?.stakedAmount) {

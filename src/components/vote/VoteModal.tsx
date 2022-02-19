@@ -1,4 +1,3 @@
-import { useActiveContractKit } from 'hooks'
 import React, { useContext, useState } from 'react'
 import { ArrowUpCircle, X } from 'react-feather'
 import styled, { ThemeContext } from 'styled-components/macro'
@@ -41,7 +40,6 @@ interface VoteModalProps {
 }
 
 export default function VoteModal({ isOpen, onDismiss, proposalId, voteOption }: VoteModalProps) {
-  const { chainId } = useActiveContractKit()
   const { voteCallback } = useVoteCallback()
   const { votes: availableVotes } = useUserVotes()
 
@@ -144,13 +142,11 @@ export default function VoteModal({ isOpen, onDismiss, proposalId, voteOption }:
                 <TYPE.main>Transaction Submitted</TYPE.main>
               </TYPE.largeHeader>
             </AutoColumn>
-            {chainId && (
-              <ExternalLink href={`https://explorer.celo.org/tx/${hash}`} style={{ marginLeft: '4px' }}>
-                <TYPE.subHeader>
-                  <TYPE.main>View transaction on Explorer</TYPE.main>
-                </TYPE.subHeader>
-              </ExternalLink>
-            )}
+            <ExternalLink href={`https://explorer.celo.org/tx/${hash}`} style={{ marginLeft: '4px' }}>
+              <TYPE.subHeader>
+                <TYPE.main>View transaction on Explorer</TYPE.main>
+              </TYPE.subHeader>
+            </ExternalLink>
           </AutoColumn>
         </ConfirmOrLoadingWrapper>
       )}

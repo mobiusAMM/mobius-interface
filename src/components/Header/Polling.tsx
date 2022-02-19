@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import styled, { keyframes } from 'styled-components'
 
+import { CHAIN } from '../../constants'
 import { getExplorerLink } from '../../constants/NetworkInfo'
-import { useActiveContractKit } from '../../hooks'
 import { useBlockNumber } from '../../state/application/hooks'
 import { ExternalLink, TYPE } from '../../theme'
 
@@ -63,8 +63,6 @@ const Spinner = styled.div`
 `
 
 export default function Polling() {
-  const { chainId } = useActiveContractKit()
-
   const blockNumber = useBlockNumber()
 
   const [isMounted, setIsMounted] = useState(true)
@@ -84,7 +82,7 @@ export default function Polling() {
   )
 
   return (
-    <ExternalLink href={chainId && blockNumber ? getExplorerLink(chainId, blockNumber.toString(), 'block') : ''}>
+    <ExternalLink href={blockNumber ? getExplorerLink(CHAIN, blockNumber.toString(), 'block') : ''}>
       <StyledPolling>
         <TYPE.small style={{ opacity: isMounted ? '0.2' : '0.6' }}>{blockNumber}</TYPE.small>
         <StyledPollingDot>{!isMounted && <Spinner />}</StyledPollingDot>

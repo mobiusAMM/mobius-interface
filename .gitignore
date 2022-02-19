@@ -31,7 +31,6 @@ package-lock.json
 
 /src/generated
 .eslintcache
-.vscode
 
 .yarn/*
 !.yarn/patches

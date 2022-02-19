@@ -1,11 +1,6 @@
-import '@celo-tools/use-contractkit/lib/styles.css'
-
 import { DappKitResponseStatus } from '@celo/utils'
-import { useContractKit } from '@celo-tools/use-contractkit'
 import { ErrorBoundary } from '@sentry/react'
-import { ChainId } from '@ubeswap/sdk'
 import WarningModal from 'components/WarningModal'
-import { NETWORK, NETWORK_CHAIN_ID } from 'connectors'
 import React, { Suspense, useState } from 'react'
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
@@ -14,11 +9,11 @@ import Header from '../components/Header'
 import Polling from '../components/Header/Polling'
 import URLWarning from '../components/Header/URLWarning'
 import Popups from '../components/Popups'
-import DarkModeQueryParamReader from '../theme/DarkModeQueryParamReader'
 import { getMobileOperatingSystem, Mobile } from '../utils/mobile'
 import ApeViewer from './ApeViewer'
 import Charts from './Charts'
 import Claim from './Claim'
+import CreateProposal from './CreateProposal'
 import Mento from './Mento'
 import OpenSum from './OpenSum'
 import Pool from './Pool'
@@ -72,10 +67,10 @@ const localStorageKey = 'valoraRedirect'
 
 export default function App() {
   const location = useLocation()
-  const { network, updateNetwork } = useContractKit()
-  const chainId = network.chainId as unknown as ChainId
+  // const { network, updateNetwork } = useContractKit()
+  // const chainId = network.chainId as unknown as ChainId
   const [showWarning, setShowWarning] = useState(true)
-  const wrongNetwork = !location.pathname.includes('optics') && chainId !== NETWORK_CHAIN_ID
+  // const wrongNetwork = !location.pathname.includes('optics') && chainId !== NETWORK_CHAIN_ID
   React.useEffect(() => {
     // Close window if search params from Valora redirect are present (handles Valora connection issue)
     if (typeof window !== 'undefined') {
@@ -93,14 +88,13 @@ export default function App() {
         }
       }
     }
-    if (wrongNetwork) {
-      updateNetwork(NETWORK)
-    }
+    // if (wrongNetwork) {
+    //   updateNetwork(NETWORK)
+    // }
   }, [location])
 
   return (
     <Suspense fallback={null}>
-      <Route component={DarkModeQueryParamReader} />
       <AppWrapper giveSpace={location.pathname !== '/'}>
         {location.pathname !== '/' && (
           <>
@@ -124,6 +118,7 @@ export default function App() {
                 <Redirect to="/swap" />
               </Route>
               <Route exact strict path="/vote" component={Vote} />
+              <Route exact strict path="/vote/create-proposal" component={CreateProposal} />
               <Route exact strict path="/vote/:id" component={VotePage} />
               <Route exact strict path="/swap" component={Swap} />
               <Route exact path="/mint" component={Mento} />

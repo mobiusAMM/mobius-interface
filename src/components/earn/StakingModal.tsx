@@ -1,14 +1,13 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { JSBI, Pair, Token, TokenAmount } from '@ubeswap/sdk'
+import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import Loader from 'components/Loader'
 import { useMobi } from 'hooks/Tokens'
 import React, { useCallback, useState } from 'react'
 import { StablePoolInfo } from 'state/stablePools/hooks'
 import styled from 'styled-components'
 
-import { useActiveContractKit } from '../../hooks'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
-import { useLiquidityGaugeContract, usePairContract } from '../../hooks/useContract'
+import { useLiquidityGaugeContract } from '../../hooks/useContract'
 import useTransactionDeadline from '../../hooks/useTransactionDeadline'
 import { useDerivedStakeInfo } from '../../state/stake/hooks'
 import { useTransactionAdder } from '../../state/transactions/hooks'
@@ -48,7 +47,6 @@ const calcNewRewardRate = (totalMobiRate: JSBI, totalStaked: JSBI, stakedByUser:
   new TokenAmount(token, JSBI.multiply(totalMobiRate, JSBI.divide(stakedByUser, totalStaked)))
 
 export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiquidityUnstaked }: StakingModalProps) {
-  const { chainId, library, account } = useActiveContractKit()
   const addTransaction = useTransactionAdder()
   const mobi = useMobi()
 
@@ -79,10 +77,6 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
     setAttempting(false)
     onDismiss()
   }, [onDismiss])
-
-  // pair contract for this token to be staked
-  const dummyPair = new Pair(new TokenAmount(stakingInfo.tokens[0], '0'), new TokenAmount(stakingInfo.tokens[1], '0'))
-  const pairContract = usePairContract(dummyPair.liquidityToken.address)
 
   // approval data for stake
   const deadline = useTransactionDeadline()
@@ -123,7 +117,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
   }, [maxAmountInput, onUserInput])
 
   async function onAttemptToApprove() {
-    if (!pairContract || !library || !deadline) throw new Error('missing dependencies')
+    if (!deadline) throw new Error('missing dependencies')
     const liquidityAmount = parsedAmount
     if (!liquidityAmount) throw new Error('missing liquidity amount')
 
@@ -144,7 +138,6 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
             onMax={handleMax}
             showMaxButton={!atMaxAmount}
             currency={stakingInfo.totalDeposited.token}
-            pair={dummyPair}
             label={''}
             disableCurrencySelect={true}
             customBalanceText={'Available to deposit: '}

@@ -1,9 +1,9 @@
-import { useContractKit } from '@celo-tools/use-contractkit'
 import { TransactionResponse } from '@ethersproject/providers'
-import { ChainId } from '@ubeswap/sdk'
+import { useWeb3Context } from 'hooks'
 import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { CHAIN } from '../../constants'
 import { AppDispatch, AppState } from '../index'
 import { addTransaction } from './actions'
 import { TransactionDetails } from './reducer'
@@ -13,8 +13,7 @@ export function useTransactionAdder(): (
   response: TransactionResponse,
   customData?: { summary?: string; approval?: { tokenAddress: string; spender: string }; claim?: { recipient: string } }
 ) => void {
-  const { network, address: account } = useContractKit()
-  const chainId = network.chainId as unknown as ChainId
+  const { connected, address } = useWeb3Context()
   const dispatch = useDispatch<AppDispatch>()
 
   return useCallback(
@@ -26,27 +25,23 @@ export function useTransactionAdder(): (
         claim,
       }: { summary?: string; claim?: { recipient: string }; approval?: { tokenAddress: string; spender: string } } = {}
     ) => {
-      if (!account) return
-      if (!chainId) return
+      if (!connected) return
 
       const { hash } = response
       if (!hash) {
         throw Error('No transaction hash found.')
       }
-      dispatch(addTransaction({ hash, from: account, chainId, approval, summary, claim }))
+      dispatch(addTransaction({ hash, from: address, chainId: CHAIN, approval, summary, claim }))
     },
-    [dispatch, chainId, account]
+    [connected, dispatch, address]
   )
 }
 
 // returns all the transactions for the current chain
 export function useAllTransactions(): { [txHash: string]: TransactionDetails } {
-  const { network } = useContractKit()
-  const chainId = network.chainId
-
   const state = useSelector<AppState, AppState['transactions']>((state) => state.transactions)
 
-  return chainId ? state[chainId] ?? {} : {}
+  return state[CHAIN] ?? {}
 }
 
 export function useIsTransactionPending(transactionHash?: string): boolean {

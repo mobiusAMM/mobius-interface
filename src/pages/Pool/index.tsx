@@ -3,7 +3,6 @@ import { cUSD, JSBI, TokenAmount } from '@ubeswap/sdk'
 import QuestionHelper from 'components/QuestionHelper'
 import { RowFixed } from 'components/Row'
 import { Chain, Coins, PRICE } from 'constants/StablePools'
-import { useActiveContractKit } from 'hooks'
 import { useMobi } from 'hooks/Tokens'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
@@ -16,6 +15,7 @@ import { CardNoise, CardSection, DataCard } from '../../components/earn/styled'
 import Loader from '../../components/Loader'
 import { Row, RowBetween } from '../../components/Row'
 import { InfoWrapper } from '../../components/swap/styleds'
+import { CHAIN } from '../../constants'
 import { StablePoolInfo, useStablePoolInfo } from '../../state/stablePools/hooks'
 import { Sel, TYPE } from '../../theme'
 
@@ -61,10 +61,7 @@ const HeaderLinks = styled(Row)`
 const OtherChains = new Set<Chain>([Chain.Avax, Chain.Polygon, Chain.Celo])
 
 export default function Pool() {
-  const { chainId } = useActiveContractKit()
-
   const stablePools = useStablePoolInfo()
-
   const [selection, setSelection] = React.useState<Chain>(Chain.All)
   const [showDeprecated, setShowDeprecated] = React.useState(false)
   const tvl = stablePools
@@ -83,9 +80,8 @@ export default function Pool() {
       const priceDeposited = JSBI.multiply(poolInfo?.totalDeposited?.raw ?? JSBI.BigInt('0'), lpPrice)
       return JSBI.add(accum, priceDeposited)
     }, JSBI.BigInt('0'))
-  const tvlAsTokenAmount = new TokenAmount(cUSD[chainId], tvl)
+  const tvlAsTokenAmount = new TokenAmount(cUSD[CHAIN], tvl)
   const mobiprice = useCUSDPrice(useMobi())
-
   const sortCallback = (pool1: StablePoolInfo, pool2: StablePoolInfo) => {
     if (!pool1 || !pool2) return true
     const isStaking1 = pool1.amountDeposited?.greaterThan(JSBI.BigInt('0')) || pool1.stakedAmount?.greaterThan('0')
