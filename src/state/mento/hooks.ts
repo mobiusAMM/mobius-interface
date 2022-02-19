@@ -1,5 +1,5 @@
 import { parseUnits } from '@ethersproject/units'
-import { JSBI, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
+import { JSBI, Percent, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
 import { IMentoExchangeInfo } from 'constants/mento'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -92,6 +92,7 @@ export type MentoTrade = {
   executionPrice: Price
   tradeType: TradeType
   fee: TokenAmount
+  priceImpact: Percent
 }
 
 function calcInputOutput(
@@ -219,11 +220,14 @@ export function useMentoTradeInfo(): {
     inputError = 'Insufficient Balance'
   }
 
-  const executionPrice = calculateSwapPrice(pool)
+  const executionPrice = new Price(inputCurrency, outputCurrency, input?.raw, output?.raw)
+  const basisPrice = calculateSwapPrice(pool)
   const tradeType = isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
+  const priceImpactFraction = basisPrice.subtract(executionPrice).divide(basisPrice)
+  const priceImpact = new Percent(priceImpactFraction.numerator, priceImpactFraction.denominator)
 
   const mentoTrade: MentoTrade | undefined =
-    input && output && pool ? { input, output, pool, executionPrice, tradeType, fee } : undefined
+    input && output && pool ? { input, output, pool, executionPrice, tradeType, fee, priceImpact } : undefined
   return {
     currencies,
     currencyBalances,

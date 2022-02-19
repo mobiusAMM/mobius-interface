@@ -31,7 +31,7 @@ import { MentoTrade } from '../../state/mento/hooks'
 import { useExpertModeManager, useUserSlippageTolerance } from '../../state/user/hooks'
 import { ExternalLink, TYPE } from '../../theme'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
-import { computeMentoTradePriceBreakdown, warningSeverity } from '../../utils/prices'
+import { warningSeverity } from '../../utils/prices'
 import AppBody from '../AppBody'
 import { ClickableText } from '../Pool/styleds'
 
@@ -126,7 +126,7 @@ export default function Mento() {
   const atMaxAmountInput = Boolean(maxAmountInput && parsedAmounts[Field.INPUT]?.equalTo(maxAmountInput))
   // the callback to execute the swap
   const { callback: swapCallback, error: swapCallbackError } = useMentoTradeCallback(trade, allowedSlippage, null)
-  const { priceImpactWithoutFee } = computeMentoTradePriceBreakdown(trade)
+  const priceImpactWithoutFee = trade?.priceImpact
 
   const handleSwap = useCallback(() => {
     setSwapState({ attemptingTxn: true, tradeToConfirm, showConfirm, swapErrorMessage: undefined, txHash: undefined })

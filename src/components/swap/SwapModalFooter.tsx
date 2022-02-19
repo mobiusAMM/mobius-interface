@@ -6,12 +6,7 @@ import { MentoTrade } from 'state/mento/hooks'
 import { MobiusTrade } from 'state/swap/hooks'
 import { ThemeContext } from 'styled-components'
 
-import {
-  computeMentoTradePriceBreakdown,
-  computeTradePriceBreakdown,
-  formatExecutionPrice,
-  warningSeverity,
-} from '../../utils/prices'
+import { formatExecutionPrice, warningSeverity } from '../../utils/prices'
 import { ButtonError } from '../Button'
 import { AutoColumn } from '../Column'
 import { AutoRow, RowBetween } from '../Row'
@@ -37,10 +32,7 @@ export default function SwapModalFooter({
   const { label } = describeTrade(mento)
   const [showInverted, setShowInverted] = useState<boolean>(false)
   const theme = useContext(ThemeContext)
-  const { priceImpactWithoutFee } = useMemo(
-    () => (mento ? computeMentoTradePriceBreakdown(trade) : computeTradePriceBreakdown(trade)),
-    [mento, trade]
-  )
+  const priceImpactWithoutFee = useMemo(() => trade?.priceImpact, [trade])
   const severity = warningSeverity(priceImpactWithoutFee)
 
   let info: React.ReactNode = null

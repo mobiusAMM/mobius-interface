@@ -29,7 +29,7 @@ import { Field } from '../../state/swap/actions'
 import { MobiusTrade, useMobiusTradeInfo, useSwapActionHandlers, useSwapState } from '../../state/swap/hooks'
 import { useExpertModeManager, useUserSlippageTolerance } from '../../state/user/hooks'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
-import { computeTradePriceBreakdown, warningSeverity } from '../../utils/prices'
+import { warningSeverity } from '../../utils/prices'
 import AppBody from '../AppBody'
 import { ClickableText } from '../Pool/styleds'
 
@@ -111,7 +111,7 @@ export default function Swap() {
   // the callback to execute the swap
   const { callback: swapCallback, error: swapCallbackError } = useTradeCallback(trade, allowedSlippage, null)
 
-  const { priceImpactWithoutFee } = computeTradePriceBreakdown(trade)
+  const priceImpactWithoutFee = trade?.fee
 
   const handleSwap = useCallback(() => {
     setSwapState({ attemptingTxn: true, tradeToConfirm, showConfirm, swapErrorMessage: undefined, txHash: undefined })
