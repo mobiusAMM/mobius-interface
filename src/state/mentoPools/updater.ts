@@ -35,7 +35,7 @@ export function UpdateMento() {
           updateMento({
             mento: {
               ...poolInfo,
-              fee: new Percent(swapFee, weiScale),
+              fee: new Percent(swapFee, JSBI.multiply(weiScale, JSBI.BigInt('10000'))),
               address: contract.address,
               celoReserve: new TokenAmount(CELO[CHAIN], balances[0]),
               stableReserve: new TokenAmount(stableToToken(poolInfo.stable), balances[1]),

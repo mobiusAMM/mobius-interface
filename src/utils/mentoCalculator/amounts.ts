@@ -1,6 +1,7 @@
 import { TokenAmount } from '@ubeswap/sdk'
 import JSBI from 'jsbi'
 
+import { BIPS_BASE } from '../../constants'
 import type { IMentoExchangeInfo } from '../../constants/mento'
 
 const ZERO = JSBI.BigInt(0)
@@ -30,6 +31,8 @@ export const calculateEstimatedSwapOutputAmount = (
     }
   }
 
+  console.log(exchange.fee.toFixed(0))
+
   const [amountOut, feeAmount] = getAmountOut(
     fromAmount.raw,
     fromReserves.raw,
@@ -38,14 +41,22 @@ export const calculateEstimatedSwapOutputAmount = (
   )
 
   const fee = new TokenAmount(fromReserves.token, feeAmount)
-  console.log('fee', feeAmount)
 
   const outputAmount = new TokenAmount(toReserves.token, amountOut)
 
   return {
     outputAmount,
-    fee: fee,
+    fee,
   }
+}
+
+function getAmountOut(inAmount: JSBI, bucketIn: JSBI, bucketOut: JSBI, swapFee: JSBI): [JSBI, JSBI] {
+  const amountInWithFee = JSBI.multiply(inAmount, JSBI.subtract(BIPS_BASE, swapFee))
+  const numerator = JSBI.multiply(amountInWithFee, bucketOut)
+  const denominator = JSBI.add(JSBI.multiply(bucketIn, BIPS_BASE), amountInWithFee)
+  const amountOut = JSBI.divide(numerator, denominator)
+  const fee = JSBI.divide(JSBI.multiply(inAmount, swapFee), BIPS_BASE)
+  return [amountOut, fee]
 }
 
 /**
@@ -88,8 +99,6 @@ export const calculateEstimatedSwapInputAmount = (
   }
 }
 
-const big = JSBI.BigInt(100000000)
-
 function getAmountIn(outAmount: JSBI, bucketIn: JSBI, bucketOut: JSBI, swapFee: JSBI): [JSBI, JSBI] {
   const feeMult = JSBI.subtract(big, swapFee)
   const numerator = JSBI.multiply(JSBI.multiply(outAmount, bucketIn), big)
@@ -97,14 +106,4 @@ function getAmountIn(outAmount: JSBI, bucketIn: JSBI, bucketOut: JSBI, swapFee: 
   const amountIn = JSBI.add(JSBI.divide(numerator, denominator), ONE)
   const fee = JSBI.divide(JSBI.multiply(feeMult, amountIn), big)
   return [amountIn, fee]
-}
-
-function getAmountOut(inAmount: JSBI, bucketIn: JSBI, bucketOut: JSBI, swapFee: JSBI): [JSBI, JSBI] {
-  const feeMult = JSBI.subtract(big, swapFee)
-  const amountInWithFee = JSBI.multiply(inAmount, feeMult)
-  const numerator = JSBI.multiply(amountInWithFee, bucketOut)
-  const denominator = JSBI.add(JSBI.multiply(bucketIn, big), amountInWithFee)
-  const amountOut = JSBI.divide(numerator, denominator)
-  const fee = JSBI.divide(JSBI.subtract(JSBI.multiply(inAmount, feeMult), amountInWithFee), big)
-  return [amountOut, fee]
 }
