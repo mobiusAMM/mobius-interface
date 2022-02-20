@@ -203,6 +203,7 @@ export function useMentoTradeInfo(): {
       mentoTrade: undefined,
     }
   }
+  console.log('o', outputCurrency, inputCurrency)
   const [input, output, fee] = calcInputOutput(inputCurrency, outputCurrency, isExactIn, parsedAmount, pool)
   if (!input || !output || !fee) {
     return {
@@ -221,7 +222,7 @@ export function useMentoTradeInfo(): {
   const executionPrice = new Price(inputCurrency, outputCurrency, input?.raw, output?.raw)
   const basisPrice = calculateSwapPrice(pool)
   const tradeType = isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
-  const priceImpactFraction = basisPrice.subtract(executionPrice).add(fee).divide(basisPrice)
+  const priceImpactFraction = basisPrice.subtract(executionPrice).divide(basisPrice)
   const priceImpact = new Percent(priceImpactFraction.numerator, priceImpactFraction.denominator)
 
   const mentoTrade: MentoTrade | undefined =

@@ -1,4 +1,4 @@
-import { ChainId, Token } from '@ubeswap/sdk'
+import { ChainId } from '@ubeswap/sdk'
 import mapValues from 'lodash/mapValues'
 import { WrappedTokenInfo } from 'state/lists/hooks'
 
@@ -6,10 +6,14 @@ const makeTokens = (
   addresses: { [net in ChainId]: string },
   decimals: number,
   symbol: string,
-  name: string
-): { [net in ChainId]: Token } => {
+  name: string,
+  logoURI: string
+): { [net in ChainId]: WrappedTokenInfo } => {
   return mapValues(addresses, (tokenAddress, network) => {
-    return new Token(parseInt(network), tokenAddress, decimals, symbol, name)
+    return new WrappedTokenInfo(
+      { chainId: parseInt(network), address: tokenAddress, decimals, symbol, name, logoURI },
+      []
+    )
   })
 }
 
@@ -21,7 +25,8 @@ export const MOBI = makeTokens(
   },
   18,
   'MOBI',
-  'Mobius DAO Token'
+  'Mobius DAO Token',
+  'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_MOBI.png'
 )
 
 export const CELO = makeTokens(
@@ -32,7 +37,8 @@ export const CELO = makeTokens(
   },
   18,
   'CELO',
-  'Celo native asset'
+  'Celo native asset',
+  'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_CELO.png'
 )
 
 export const CUSD = makeTokens(
@@ -43,7 +49,8 @@ export const CUSD = makeTokens(
   },
   18,
   'cUSD',
-  'Celo Dollar'
+  'Celo Dollar',
+  'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cUSD.png'
 )
 
 export const CEUR = makeTokens(
@@ -54,7 +61,8 @@ export const CEUR = makeTokens(
   },
   18,
   'cEUR',
-  'Celo Euro'
+  'Celo Euro',
+  'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cEUR.png'
 )
 
 export const CREAL = makeTokens(
@@ -65,7 +73,8 @@ export const CREAL = makeTokens(
   },
   18,
   'cREAL',
-  'Celo Brazilian Real'
+  'Celo Brazilian Real',
+  'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cREAL.png'
 )
 
 export const VEMOBI = makeTokens(
@@ -76,7 +85,8 @@ export const VEMOBI = makeTokens(
   },
   18,
   'veMOBI',
-  'Voting Escrow MOBI'
+  'Voting Escrow MOBI',
+  'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_MOBI.png'
 )
 
 export const ExternalRewards: { [K in ChainId]: WrappedTokenInfo[] } = {

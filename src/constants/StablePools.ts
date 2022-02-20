@@ -1,8 +1,6 @@
-import { StableToken } from '@celo/contractkit'
 import { ChainId, JSBI, Token } from '@ubeswap/sdk'
 import { VestType } from 'state/claim/reducer'
 import { WrappedTokenInfo } from 'state/lists/hooks'
-import { MentoConstants } from 'state/mentoPools/reducer'
 
 import celoLogo from '../assets/images/celo-chain-logo.png'
 import ethLogo from '../assets/images/ethereum-chain-logo.png'
@@ -1228,94 +1226,6 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
     //   disabled: true,
     //   isKilled: true,
     // },
-  ],
-  [ChainId.ALFAJORES]: [],
-  [ChainId.BAKLAVA]: [],
-}
-
-export const MENTO_POOL_INFO: { [K in ChainId]: MentoConstants[] } = {
-  [ChainId.MAINNET]: [
-    {
-      stable: StableToken.cUSD,
-      tokens: [
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.MAINNET,
-            address: '0x471EcE3750Da237f93B8E339c536989b8978a438',
-            decimals: 18,
-            symbol: 'CELO',
-            name: 'Celo native asset',
-            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_CELO.png',
-          },
-          []
-        ),
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.MAINNET,
-            address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
-            decimals: 18,
-            symbol: 'cUSD',
-            name: 'Celo Dollar',
-            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cUSD.png',
-          },
-          []
-        ),
-      ],
-    },
-    {
-      stable: StableToken.cEUR,
-      tokens: [
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.MAINNET,
-            address: '0x471EcE3750Da237f93B8E339c536989b8978a438',
-            decimals: 18,
-            symbol: 'CELO',
-            name: 'Celo native asset',
-            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_CELO.png',
-          },
-          []
-        ),
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.MAINNET,
-            address: '0xD8763CBa276a3738E6DE85b4b3bF5FDed6D6cA73',
-            decimals: 18,
-            symbol: 'cEUR',
-            name: 'Celo Euro',
-            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cEUR.png',
-          },
-          []
-        ),
-      ],
-    },
-    {
-      stable: StableToken.cREAL,
-      tokens: [
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.MAINNET,
-            address: '0x471EcE3750Da237f93B8E339c536989b8978a438',
-            decimals: 18,
-            symbol: 'CELO',
-            name: 'Celo native asset',
-            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_CELO.png',
-          },
-          []
-        ),
-        new WrappedTokenInfo(
-          {
-            chainId: ChainId.MAINNET,
-            address: '0xe8537a3d056DA446677B9E9d6c5dB704EaAb4787',
-            decimals: 18,
-            symbol: 'cREAL',
-            name: 'Celo Brazilian Real',
-            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cREAL.png',
-          },
-          []
-        ),
-      ],
-    },
   ],
   [ChainId.ALFAJORES]: [],
   [ChainId.BAKLAVA]: [],
