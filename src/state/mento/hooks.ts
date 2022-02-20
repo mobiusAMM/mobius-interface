@@ -1,6 +1,7 @@
 import { parseUnits } from '@ethersproject/units'
 import { JSBI, Percent, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
 import { IMentoExchangeInfo } from 'constants/mento'
+import { CELO } from 'constants/tokens'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import invariant from 'tiny-invariant'
@@ -10,6 +11,7 @@ import {
   calculateSwapPrice,
 } from 'utils/mentoCalculator'
 
+import { CHAIN } from '../../constants'
 import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { isAddress } from '../../utils'
@@ -203,7 +205,6 @@ export function useMentoTradeInfo(): {
       mentoTrade: undefined,
     }
   }
-  console.log('o', outputCurrency, inputCurrency)
   const [input, output, fee] = calcInputOutput(inputCurrency, outputCurrency, isExactIn, parsedAmount, pool)
   if (!input || !output || !fee) {
     return {
@@ -220,9 +221,11 @@ export function useMentoTradeInfo(): {
   }
 
   const executionPrice = new Price(inputCurrency, outputCurrency, input?.raw, output?.raw)
-  const basisPrice = calculateSwapPrice(pool)
+  const basisPrice = input.token !== CELO[CHAIN] ? calculateSwapPrice(pool) : calculateSwapPrice(pool).invert()
+  console.log('p', executionPrice.toSignificant(3), basisPrice.toSignificant(3), fee.toSignificant(3))
   const tradeType = isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
   const priceImpactFraction = basisPrice.subtract(executionPrice).divide(basisPrice)
+  console.log(priceImpactFraction.toSignificant(3))
   const priceImpact = new Percent(priceImpactFraction.numerator, priceImpactFraction.denominator)
 
   const mentoTrade: MentoTrade | undefined =

@@ -12,7 +12,7 @@ export const calculateSwapPrice = (exchangeInfo: IMentoExchangeInfo): Price => {
   return new Price(
     exchangeInfo.stableReserve.token,
     exchangeInfo.celoReserve.token,
-    exchangeInfo.celoReserve.raw,
-    exchangeInfo.stableReserve.raw
+    exchangeInfo.stableReserve.raw,
+    exchangeInfo.celoReserve.raw
   )
 }
