@@ -11,7 +11,7 @@ import {
   calculateSwapPrice,
 } from 'utils/mentoCalculator'
 
-import { CHAIN } from '../../constants'
+import { BIPS_BASE, CHAIN } from '../../constants'
 import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { isAddress } from '../../utils'
@@ -222,10 +222,11 @@ export function useMentoTradeInfo(): {
 
   const executionPrice = new Price(inputCurrency, outputCurrency, input?.raw, output?.raw)
   const basisPrice = input.token !== CELO[CHAIN] ? calculateSwapPrice(pool) : calculateSwapPrice(pool).invert()
-  console.log('p', executionPrice.toSignificant(3), basisPrice.toSignificant(3), fee.toSignificant(3))
   const tradeType = isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
-  const priceImpactFraction = basisPrice.subtract(executionPrice).divide(basisPrice)
-  console.log(priceImpactFraction.toSignificant(3))
+  const priceImpactFraction = basisPrice
+    .subtract(executionPrice)
+    .divide(basisPrice)
+    .subtract(pool.fee.divide(BIPS_BASE).multiply('100'))
   const priceImpact = new Percent(priceImpactFraction.numerator, priceImpactFraction.denominator)
 
   const mentoTrade: MentoTrade | undefined =
