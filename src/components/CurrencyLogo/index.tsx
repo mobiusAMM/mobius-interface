@@ -31,7 +31,7 @@ export default function CurrencyLogo({
         return [...uriLocations, currency.logoURI ?? currency.address]
       }
 
-      return ['https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_MOBI.png']
+      return []
     }
     return []
   }, [currency, uriLocations])
