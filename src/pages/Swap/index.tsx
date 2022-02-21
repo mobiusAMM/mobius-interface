@@ -46,7 +46,14 @@ export default function Swap() {
 
   // swap state
   const { independentField, typedValue } = useSwapState()
-  const { v2Trade, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useMobiusTradeInfo()
+  const {
+    v2Trade,
+    currencyBalances,
+    parsedAmount,
+    currencies,
+    inputError: swapInputError,
+    priceImpact,
+  } = useMobiusTradeInfo()
 
   const trade = v2Trade
 
@@ -111,8 +118,6 @@ export default function Swap() {
   // the callback to execute the swap
   const { callback: swapCallback, error: swapCallbackError } = useTradeCallback(trade, allowedSlippage, null)
 
-  const priceImpactWithoutFee = trade?.fee
-
   const handleSwap = useCallback(() => {
     setSwapState({ attemptingTxn: true, tradeToConfirm, showConfirm, swapErrorMessage: undefined, txHash: undefined })
     invariant(swapCallback)
@@ -141,7 +146,7 @@ export default function Swap() {
   const [showInverted, setShowInverted] = useState<boolean>(false)
 
   // warnings on slippage
-  const priceImpactSeverity = warningSeverity(priceImpactWithoutFee)
+  const priceImpactSeverity = warningSeverity(priceImpact)
 
   // show approve flow when: no error on inputs, not approved or pending, or approved in current session
   // never show if price impact is above threshold in non expert mode

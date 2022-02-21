@@ -12,6 +12,8 @@ import {
 } from '../../hooks/useContract'
 import { updateSNX, updateStaking } from './actions'
 
+// pools, general staking, general gauges, user staking, user gauges
+
 export default function StakingUpdater() {
   const snxAddress: string = useSelector((state: AppState) => state.staking.snx.address)
   const dispatch = useDispatch<AppDispatch>()

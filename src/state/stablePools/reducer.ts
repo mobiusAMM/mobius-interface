@@ -51,7 +51,6 @@ export type GaugeOnlyInfo = {
   gaugeAddress?: string
   relativeGaugeWeight?: Fraction
   lastClaim: Date
-  loadingGauge: boolean
 }
 
 export type StableSwapVariable = PoolOnlyInfo & GaugeOnlyInfo

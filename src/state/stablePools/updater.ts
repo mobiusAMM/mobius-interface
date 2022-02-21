@@ -21,7 +21,6 @@ import { AppDispatch } from '../index'
 import { updateGauges, updatePools } from './actions'
 import { GaugeOnlyInfo, PoolOnlyInfo, StableSwapConstants } from './reducer'
 
-const SECONDS_PER_BLOCK = JSBI.BigInt('5')
 const SwapInterface = new Interface(SWAP.abi)
 const lpInterface = new Interface(LP.abi)
 const gaugeInterface = new Interface(GAUGE_V3.abi)
