@@ -11,16 +11,10 @@ import useTransactionDeadline from '../../hooks/useTransactionDeadline'
 import { StablePoolInfo, useExpectedLpTokens } from '../../state/stablePools/hooks'
 import { tryParseAmount } from '../../state/swap/hooks'
 import { useTransactionAdder } from '../../state/transactions/hooks'
-import { useTokenBalance, useTokenBalance } from '../../state/wallet/hooks'
+import { useTokenBalance } from '../../state/wallet/hooks'
 import { TYPE } from '../../theme'
 import { ButtonError, ButtonPrimary } from '../Button'
-import { AutoColumn } from '../Column'
 import { Input as NumericalInput } from '../NumericalInput'
-
-const ContentWrapper = styled(AutoColumn)`
-  width: 100%;
-  padding: 1rem;
-`
 
 interface WithdrawModalProps {
   setAttempting: (attempting: boolean) => void
@@ -132,10 +126,6 @@ type CurrencyRowProps = {
   readOnly: boolean | undefined
 }
 
-const InputRowLeft = styled.div``
-
-const TokenInfo = styled.div``
-
 const InputRow = styled.div<{ selected: boolean }>`
   ${({ theme }) => theme.flexRowNoWrap};
   align-items: center;
@@ -152,22 +142,6 @@ const Aligner = styled.span`
   display: flex;
   align-items: center;
   justify-content: space-between;
-`
-
-const InputPanel = styled.div<{ hideInput?: boolean }>`
-  ${({ theme }) => theme.flexColumnNoWrap}
-  position: relative;
-  border-radius: ${({ hideInput }) => (hideInput ? '8px' : '20px')};
-  background-color: ${({ theme }) => theme.bg2};
-  z-index: 1;
-  width: 100%;
-`
-
-const Container = styled.div<{ hideInput: boolean }>`
-  border-radius: ${({ hideInput }) => (hideInput ? '8px' : '20px')};
-  border: 1px solid ${({ theme }) => theme.bg2};
-  background-color: ${({ theme }) => theme.bg1};
-  padding: 0.5rem;
 `
 
 const StyledTokenName = styled.span<{ active?: boolean }>`
@@ -187,7 +161,6 @@ const CurrencyRow = ({ tokenAmount, setTokenAmount, readOnly }: CurrencyRowProps
   const ZERO_TOK = new TokenAmount(currency, JSBI.BigInt('0'))
 
   const scaledDown = (num: JSBI) => JSBI.divide(num, JSBI.exponentiate(TEN, JSBI.BigInt(currency.decimals)))
-  const scaleUp = (num: JSBI) => JSBI.multiply(num, JSBI.exponentiate(TEN, JSBI.BigInt(currency.decimals)))
 
   const mainRow = (
     <InputRow>
@@ -231,12 +204,4 @@ const CurrencyRow = ({ tokenAmount, setTokenAmount, readOnly }: CurrencyRowProps
       {mainRow}
     </div>
   )
-}
-
-const insertDecimal = (tokenAmount: TokenAmount) => {
-  const { token } = tokenAmount
-  const amount = tokenAmount.divide(
-    new TokenAmount(token, JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt(token.decimals)))
-  )
-  return amount.toFixed(2)
 }
