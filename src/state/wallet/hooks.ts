@@ -1,13 +1,32 @@
+import { invariant } from '@apollo/client/utilities/globals'
 import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import { getAllTokens } from 'hooks/Tokens'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useBlockNumber } from 'state/application/hooks'
 
 import { CHAIN } from '../../constants'
 import ERC20_INTERFACE from '../../constants/abis/erc20'
 import { MOBI } from '../../constants/tokens'
 import { useWeb3Context } from '../../hooks'
+import { useTokenContract } from '../../hooks/useContract'
 import { isAddress } from '../../utils'
 import { useMultipleContractSingleData } from '../multicall/hooks'
+
+export function useTokenBalance(address?: string, token?: Token | undefined): TokenAmount | undefined {
+  const tokenContract = useTokenContract(token?.address ?? undefined)
+  const [tokenBalance, setTokenBalance] = useState<TokenAmount>()
+  const block = useBlockNumber()
+  useEffect(() => {
+    const update = async () => {
+      invariant(address && token)
+      const amt = await tokenContract?.balanceOf(address)
+      const balance = JSBI.BigInt(amt?.toString() || '0')
+      setTokenBalance(new TokenAmount(token, balance))
+    }
+    token && address && update()
+  }, [address, token, block, tokenContract])
+  return token ? tokenBalance : undefined
+}
 
 /**
  * Returns a map of token addresses to their eventually consistent token balances for a single account.
@@ -53,11 +72,11 @@ export function useTokenBalances(
 }
 
 // get the balance for a single token/account combo
-export function useTokenBalance(account?: string, token?: Token): TokenAmount | undefined {
-  const tokenBalances = useTokenBalances(account, [token])
-  if (!token) return undefined
-  return tokenBalances[token.address]
-}
+// export function useTokenBalance(account?: string, token?: Token): TokenAmount | undefined {
+//   const tokenBalances = useTokenBalances(account, [token])
+//   if (!token) return undefined
+//   return tokenBalances[token.address]
+// }
 
 export function useCurrencyBalances(account?: string, currencies?: (Token | undefined)[]): (TokenAmount | undefined)[] {
   const tokens = useMemo(
