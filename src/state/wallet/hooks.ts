@@ -12,7 +12,7 @@ import { useTokenContract } from '../../hooks/useContract'
 import { isAddress } from '../../utils'
 import { useMultipleContractSingleData } from '../multicall/hooks'
 
-export function useTokenBalance(address?: string, token?: Token | undefined): TokenAmount | undefined {
+export function useTokenBalance(address?: string, token?: Token): TokenAmount | undefined {
   const tokenContract = useTokenContract(token?.address ?? undefined)
   const [tokenBalance, setTokenBalance] = useState<TokenAmount>()
   const block = useBlockNumber()
