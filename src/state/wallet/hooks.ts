@@ -31,7 +31,7 @@ export function useTokenBalance(address?: string, token?: Token | undefined): To
 /**
  * Returns a map of token addresses to their eventually consistent token balances for a single account.
  */
-export function useTokenBalancesWithLoadingIndicator(
+function useTokenBalancesWithLoadingIndicator(
   address?: string,
   tokens?: (Token | undefined)[]
 ): [{ [tokenAddress: string]: TokenAmount | undefined }, boolean] {
@@ -64,7 +64,7 @@ export function useTokenBalancesWithLoadingIndicator(
   ]
 }
 
-export function useTokenBalances(
+function useTokenBalances(
   address?: string,
   tokens?: (Token | undefined)[]
 ): { [tokenAddress: string]: TokenAmount | undefined } {
