@@ -47,6 +47,7 @@ export type SNXRewardInfo = {
   avgApr?: Percent
   userRewardRate?: TokenAmount
 }
+
 export function calculateBoostedBalance(
   votingPower: JSBI,
   totalVotingPower: JSBI,
