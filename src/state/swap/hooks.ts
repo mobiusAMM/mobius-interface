@@ -11,7 +11,7 @@ import { useCurrency } from '../../hooks/Tokens'
 import { isAddress } from '../../utils'
 import { AppDispatch, AppState } from '../index'
 import { useCurrentPool, useMathUtil, usePools } from '../stablePools/hooks'
-import { useCurrencyBalances } from '../wallet/hooks'
+import { useTokenBalances } from '../wallet/hooks'
 import { Field, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 
 export function useSwapState(): AppState['swap'] {
@@ -160,7 +160,7 @@ export function useMobiusTradeInfo(): {
   const mathUtil = useMathUtil(pool ?? '')
 
   const to: string | null = connected ? address : null
-  const relevantTokenBalances = useCurrencyBalances(connected ? address : undefined, [
+  const relevantTokenBalances = useTokenBalances(connected ? address : undefined, [
     inputCurrency ?? undefined,
     outputCurrency ?? undefined,
   ])
