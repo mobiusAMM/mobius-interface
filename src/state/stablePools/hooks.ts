@@ -14,7 +14,7 @@ import invariant from 'tiny-invariant'
 import WARNINGS from '../../constants/PoolWarnings.json'
 import { StableSwapMath } from '../../utils/stableSwapMath'
 import { AppState } from '..'
-import { StableSwapConstants, StableSwapPool, WarningType } from './reducer'
+import { StableSwapPool, WarningType } from './reducer'
 import { BigIntToJSBI } from './updater'
 
 export type WarningModifications = 'require-equal-deposit' | 'none'
@@ -53,31 +53,6 @@ export interface StablePoolInfo {
   readonly poolLoading: boolean
   readonly gaugeLoading: boolean
   readonly isKilled?: boolean
-}
-
-export function useCurrentPool(tok1: string, tok2: string): readonly [StableSwapPool | undefined] {
-  const withMetaPools = useSelector<AppState, (StableSwapPool | StableSwapConstants)[]>((state) =>
-    Object.values(state.stablePools.pools).map(({ pool }) => {
-      if (!pool.metaPool || pool.disabled) return pool
-      const underlying = state.stablePools.pools[pool.metaPool]?.pool
-      return {
-        ...pool,
-        tokenAddresses: pool.tokenAddresses.concat(underlying.tokenAddresses),
-      }
-    })
-  )
-  const pools = withMetaPools.filter(({ tokenAddresses }) => {
-    return tokenAddresses.includes(tok1) && tokenAddresses.includes(tok2)
-  })
-
-  return [pools.length > 0 ? pools[0] : null]
-}
-
-export function usePools(): readonly StableSwapPool[] {
-  const pools = useSelector<AppState, StableSwapPool[]>((state) =>
-    Object.values(state.stablePools.pools).map(({ pool }) => pool)
-  )
-  return pools
 }
 
 const tokenAmountScaled = (token: Token, amount: JSBI): TokenAmount =>
@@ -211,14 +186,6 @@ export function useMathUtil(pool: StableSwapPool | string): StableSwapMath | und
   const name = !pool ? '' : typeof pool == 'string' ? pool : pool.address
   const math = useSelector<AppState, StableSwapMath>((state) => state.stablePools.pools[name.toLowerCase()]?.math)
   return math
-}
-
-export function usePool(): readonly [StableSwapPool] {
-  const [tok1, tok2] = useSelector<AppState, [string, string]>((state) => [
-    state.swap.INPUT.currencyId,
-    state.swap.OUTPUT.currencyId,
-  ])
-  return useCurrentPool(tok1, tok2)
 }
 
 export function usePriceOfLp(address: string, amountOfLp: TokenAmount): TokenAmount | undefined {

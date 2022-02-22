@@ -10,33 +10,10 @@ import useTheme from 'hooks/useTheme'
 import { useWindowSize } from 'hooks/useWindowSize'
 import React, { useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { usePools } from 'state/stablePools/hooks'
+import { usePools } from 'state/mobiusPools/hooks'
 import { StableSwapPool } from 'state/stablePools/reducer'
 import styled from 'styled-components'
 import { Sel, TYPE } from 'theme'
-
-const TextContainer = styled.div`
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  margin-left: auto;
-  margin-right: auto;
-  justify-content: center;
-`
-
-const PositionsContainer = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  ${({ theme }) => theme.mediaWidth.upToSmall`
-    width: 100%;
-  `}
-  flex-wrap: wrap;
-`
 
 const OuterContainer = styled.div`
   width: min(1280px, 100%);
