@@ -11,7 +11,7 @@ import useTransactionDeadline from '../../hooks/useTransactionDeadline'
 import { StablePoolInfo, useExpectedLpTokens } from '../../state/stablePools/hooks'
 import { tryParseAmount } from '../../state/swap/hooks'
 import { useTransactionAdder } from '../../state/transactions/hooks'
-import { useCurrencyBalance, useTokenBalance } from '../../state/wallet/hooks'
+import { useTokenBalance, useTokenBalance } from '../../state/wallet/hooks'
 import { TYPE } from '../../theme'
 import { ButtonError, ButtonPrimary } from '../Button'
 import { AutoColumn } from '../Column'
@@ -182,7 +182,7 @@ const BalanceText = styled(TYPE.subHeader)`
 const CurrencyRow = ({ tokenAmount, setTokenAmount, readOnly }: CurrencyRowProps) => {
   const { address, connected } = useWeb3Context()
   const currency = tokenAmount.currency
-  const tokenBalance = useCurrencyBalance(connected ? address : undefined, currency ?? undefined)
+  const tokenBalance = useTokenBalance(connected ? address : undefined, currency ?? undefined)
   const TEN = JSBI.BigInt('10')
   const ZERO_TOK = new TokenAmount(currency, JSBI.BigInt('0'))
 

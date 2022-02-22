@@ -90,10 +90,6 @@ export function useCurrencyBalances(account?: string, currencies?: (Token | unde
   )
 }
 
-export function useCurrencyBalance(account?: string, currency?: Token): TokenAmount | undefined {
-  return useCurrencyBalances(account, [currency])[0]
-}
-
 // mimics useAllBalances
 export function useAllTokenBalances(): { [tokenAddress: string]: TokenAmount | undefined } {
   const { address, connected } = useWeb3Context()
