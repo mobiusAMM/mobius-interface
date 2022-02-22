@@ -8,9 +8,6 @@ import { getDepositValues } from 'utils/stableSwaps'
 
 import { IStakingState, IUserStakingState } from './reducer'
 
-const SECONDS_IN_YEAR = JSBI.BigInt(365 * 24 * 60 * 60)
-const SECONDS_IN_WEEK = JSBI.BigInt(7 * 24 * 60 * 60)
-
 export type GaugeSummary = {
   pool: string
   poolAddress: string

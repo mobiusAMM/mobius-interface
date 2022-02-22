@@ -1,9 +1,9 @@
 import Column from 'components/Column'
 import Loader from 'components/Loader'
-import { useMobi } from 'hooks/Tokens'
+import { useExternalStakingRewards } from 'hooks/useExternalStakingRewards'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
-import { MobiStakingInfo, usePriceOfDeposits, useSNXRewardInfo } from 'state/staking/hooks'
+import { MobiStakingInfo, usePriceOfDeposits } from 'state/staking/hooks'
 import { useIsDarkMode } from 'state/user/hooks'
 import styled from 'styled-components'
 import { TYPE } from 'theme'
@@ -67,8 +67,7 @@ type PropType = {
 }
 function StatsHeader({ stakingInfo }: PropType) {
   const priceOfDeposits = usePriceOfDeposits()
-  const mobi = useMobi()
-  const { avgApr } = useSNXRewardInfo()
+  const { avgApr } = useExternalStakingRewards()
   const isDarkMode = useIsDarkMode()
 
   const displayData = [

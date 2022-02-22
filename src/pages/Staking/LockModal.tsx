@@ -1,9 +1,9 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { ButtonConfirmed } from 'components/Button'
 import Loader from 'components/Loader'
+import { ExternalStakingRewards } from 'constants/staking'
 import { useStakingContract } from 'hooks/useContract'
 import React, { useState } from 'react'
-import { useSNXRewardInfo } from 'state/staking/hooks'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import styled from 'styled-components'
 
@@ -11,6 +11,7 @@ import { AutoColumn } from '../../components/Column'
 import Modal from '../../components/Modal'
 import { LoadingView, SubmittedView } from '../../components/ModalViews'
 import { RowBetween } from '../../components/Row'
+import { CHAIN } from '../../constants'
 import { CloseIcon, TYPE } from '../../theme'
 import ExtendLock from './ExtendLock'
 import IncreaseLockAmount from './IncreaseLockAmount'
@@ -42,8 +43,7 @@ const ModifiedWrapper = styled(ContentWrapper)`
 
 export default function LockModal({ isOpen, onDismiss, lockType = LockType.initial }: LockModalProps) {
   // monitor call to help UI loading state
-  const { snxAddress } = useSNXRewardInfo()
-  const stakingContract = useStakingContract(snxAddress)
+  const stakingContract = useStakingContract(ExternalStakingRewards[CHAIN])
   const addTransaction = useTransactionAdder()
   const [hash, setHash] = useState<string | undefined>()
   const [hasSnapshot, setHasSnapshot] = useState(0)
