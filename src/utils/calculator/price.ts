@@ -1,8 +1,8 @@
-import { Price, TokenAmount } from '@saberhq/token-utils'
+import { Price, TokenAmount } from '@ubeswap/sdk'
 import BN from 'bn.js'
 
-import type { IExchangeInfo } from '..'
-import { calculateEstimatedSwapOutputAmount } from '..'
+import type { IExchangeInfo } from '../../constants/pools'
+import { calculateEstimatedSwapOutputAmount } from './'
 
 /**
  * Gets the price of the second token in the swap, i.e. "Token 1", with respect to "Token 0".
@@ -11,8 +11,8 @@ import { calculateEstimatedSwapOutputAmount } from '..'
  * @returns
  */
 export const calculateSwapPrice = (exchangeInfo: IExchangeInfo): Price => {
-  const reserve0 = exchangeInfo.reserves[0].amount
-  const reserve1 = exchangeInfo.reserves[1].amount
+  const reserve0 = exchangeInfo.reserves[0]
+  const reserve1 = exchangeInfo.reserves[1]
 
   // We try to get at least 4 decimal points of precision here
   // Otherwise, we attempt to swap 1% of total supply of the pool

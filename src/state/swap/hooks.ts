@@ -1,11 +1,10 @@
 import { parseUnits } from '@ethersproject/units'
 import { JSBI, Percent, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
+import { IExchangeInfo } from 'constants/pools'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useCurrentPool, usePools } from 'state/mobiusPools/hooks'
-import { StableSwapPool } from 'state/stablePools/reducer'
 import invariant from 'tiny-invariant'
-import { StableSwapMath } from 'utils/stableSwapMath'
 
 import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
@@ -84,7 +83,7 @@ export function tryParseAmount(value?: string, currency?: Token): TokenAmount | 
 export type MobiusTrade = {
   input: TokenAmount
   output: TokenAmount
-  pool: StableSwapPool
+  pool: IExchangeInfo
   indexFrom: number
   indexTo: number
   executionPrice: Price
@@ -96,15 +95,13 @@ export type MobiusTrade = {
 function calcInputOutput(
   input: Token | undefined,
   output: Token | undefined,
-  isExactIn: boolean,
   parsedAmount: TokenAmount | undefined,
-  math: StableSwapMath,
-  poolInfo: StableSwapPool
+  poolInfo: IExchangeInfo
 ): readonly [TokenAmount | undefined, TokenAmount | undefined, TokenAmount | undefined] {
   if (!input && !output) {
     return [undefined, undefined, undefined]
   }
-  const { tokens } = poolInfo
+  const tokens = poolInfo.reserves.map(({ token }) => token)
   if (!output) {
     return [parsedAmount, undefined, undefined]
   }
@@ -122,17 +119,12 @@ function calcInputOutput(
   ]
 
   invariant(parsedAmount)
-  if (isExactIn) {
-    details[0] = parsedAmount
-    const [expectedOut, fee] = math.calculateSwap(indexFrom, indexTo, parsedAmount.raw, math.calc_xp())
-    details[1] = new TokenAmount(output, expectedOut)
-    details[2] = new TokenAmount(input, fee)
-  } else {
-    details[1] = parsedAmount
-    const requiredIn = math.get_dx(indexFrom, indexTo, parsedAmount.raw, math.calc_xp())
-    details[0] = new TokenAmount(input, requiredIn)
-    details[2] = new TokenAmount(input, JSBI.BigInt('0'))
-  }
+
+  details[0] = parsedAmount
+  const [expectedOut, fee] = math.calculateSwap(indexFrom, indexTo, parsedAmount.raw, math.calc_xp())
+  details[1] = new TokenAmount(output, expectedOut)
+  details[2] = new TokenAmount(input, fee)
+
   return details
 }
 
@@ -146,7 +138,6 @@ export function useMobiusTradeInfo(): {
   const { address, connected } = useWeb3Context()
 
   const {
-    independentField,
     typedValue,
     [Field.INPUT]: { currencyId: inputCurrencyId },
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
@@ -164,8 +155,7 @@ export function useMobiusTradeInfo(): {
     outputCurrency ?? undefined,
   ])
 
-  const isExactIn: boolean = independentField === Field.INPUT
-  const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
+  const parsedAmount = tryParseAmount(typedValue, inputCurrency ?? undefined)
 
   const currencyBalances = {
     [Field.INPUT]: relevantTokenBalances[0],
@@ -221,9 +211,9 @@ export function useMobiusTradeInfo(): {
   const indexFrom = inputCurrency ? tokens.map(({ address }) => address).indexOf(inputCurrency.address) : 0
   const indexTo = outputCurrency ? tokens.map(({ address }) => address).indexOf(outputCurrency.address) : 0
 
-  const tradeData = calcInputOutput(inputCurrency, outputCurrency, isExactIn, parsedAmount, pool)
+  const tradeData = calcInputOutput(inputCurrency, outputCurrency, parsedAmount, pool)
 
-  const basisTrade = calcInputOutput(inputCurrency, outputCurrency, isExactIn, tryParseAmount('1', inputCurrency), pool)
+  const basisTrade = calcInputOutput(inputCurrency, outputCurrency, tryParseAmount('1', inputCurrency), pool)
   const input = tradeData[0]
   const output = tradeData[1]
   const fee = tradeData[2]
