@@ -9,6 +9,7 @@ import logs from './logs/slice'
 import mento from './mento/reducer'
 import mentoPools from './mentoPools/reducer'
 import mint from './mint/reducer'
+import pools from './mobiusPools/reducer'
 import multicall from './multicall/reducer'
 import openSum from './openSum/reducer'
 import stablePools from './stablePools/reducer'
@@ -29,6 +30,7 @@ const store = configureStore({
     burn,
     multicall,
     stablePools,
+    pools,
     mentoPools,
     mento,
     claim,

@@ -1,5 +1,7 @@
-import { ChainId, cUSD, Percent, Token, TokenAmount } from '@ubeswap/sdk'
-import type JSBI from 'jsbi'
+import { ChainId, Percent, Token, TokenAmount } from '@ubeswap/sdk'
+import JSBI from 'jsbi'
+
+import { CUSD } from './tokens'
 
 export type Fees = {
   trade: Percent
@@ -28,11 +30,21 @@ export interface IExchangeInfo {
 }
 
 export interface IGauge {
-  exchange: IExchange
   address: string
   additionalRewards?: string[]
   additionalRewardRate?: string[]
+}
+
+export interface IGaugeInfo {
   isKilled?: boolean
+}
+
+export interface Volume {
+  volume: {
+    total: number
+    day: number
+    week: number
+  } | null
 }
 
 export enum Coins {
@@ -102,7 +114,8 @@ export interface DisplayPool {
   name: string
   chain: Chain
   peg: Peg
-  pool: IGauge | IExchange
+  pool: IExchange
+  gauge: IGauge | null
   warningType?: WarningType
 }
 
@@ -126,23 +139,7 @@ export const RECOMMENDED_FEES: Fees = {
   deposit: new Percent(recommendedFeesRaw.depositFeeNumerator, recommendedFeesRaw.depositFeeDenominator),
 }
 
-export const Pools: { [K in ChainId]: IExchange[] } = {
-  [ChainId.MAINNET]: [
-    {
-      address: '0x9F4AdBD0af281C69a582eB2E6fa2A594D4204CAe',
-      lpToken: new Token(
-        ChainId.MAINNET,
-        '0x9438e7281D7E3e99A9dD21e0EAd9c6a254e17ab2',
-        18,
-        'MobLP',
-        'Mobius cUSD/aUST LP'
-      ),
-      tokens: [cUSD[ChainId.MAINNET], UST],
-    },
-  ],
-  [ChainId.ALFAJORES]: [],
-  [ChainId.BAKLAVA]: [],
-}
+export const RECOMMENDED_AMP = JSBI.BigInt('100')
 
 export const StablePools: { [K in ChainId]: DisplayPool[] } = {
   [ChainId.MAINNET]: [
@@ -151,17 +148,17 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
       chain: Chain.Terra,
       peg: Dollar,
       pool: {
-        exchange: {
-          address: '0x9F4AdBD0af281C69a582eB2E6fa2A594D4204CAe',
-          lpToken: new Token(
-            ChainId.MAINNET,
-            '0x9438e7281D7E3e99A9dD21e0EAd9c6a254e17ab2',
-            18,
-            'MobLP',
-            'Mobius cUSD/aUST LP'
-          ),
-          tokens: [cUSD[ChainId.MAINNET], UST],
-        },
+        address: '0x9F4AdBD0af281C69a582eB2E6fa2A594D4204CAe',
+        lpToken: new Token(
+          ChainId.MAINNET,
+          '0x9438e7281D7E3e99A9dD21e0EAd9c6a254e17ab2',
+          18,
+          'MobLP',
+          'Mobius cUSD/aUST LP'
+        ),
+        tokens: [CUSD[ChainId.MAINNET], UST],
+      },
+      gauge: {
         address: '0x107F94409746E8c8E6eFF139A100D17D9ca7FdfE',
         additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
         additionalRewardRate: ['12000000000000000'],

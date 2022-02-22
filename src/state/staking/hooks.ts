@@ -34,32 +34,23 @@ export type MobiStakingInfo = {
   positions?: GaugeSummary[]
 }
 
-export type SNXRewardInfo = {
-  snxAddress: string
-  rewardToken: Token
-  rewardRate?: TokenAmount
-  leftToClaim?: TokenAmount
-  avgApr?: Percent
-  userRewardRate?: TokenAmount
-}
-
-export function calculateBoostedBalance(
-  votingPower: JSBI,
-  totalVotingPower: JSBI,
-  liquidity: JSBI,
-  totalLiquidity: JSBI
-): JSBI {
-  let boosted = JSBI.BigInt('0')
-  if (!JSBI.equal(totalVotingPower, JSBI.BigInt('0')))
-    boosted = JSBI.add(
-      JSBI.divide(JSBI.multiply(JSBI.BigInt(4), liquidity), JSBI.BigInt(10)),
-      JSBI.divide(
-        JSBI.multiply(JSBI.BigInt(6), JSBI.multiply(totalLiquidity, votingPower)),
-        JSBI.multiply(totalVotingPower, JSBI.BigInt(10))
-      )
-    )
-  return JSBI.greaterThan(boosted, liquidity) ? boosted : liquidity
-}
+// export function calculateBoostedBalance(
+//   votingPower: JSBI,
+//   totalVotingPower: JSBI,
+//   liquidity: JSBI,
+//   totalLiquidity: JSBI
+// ): JSBI {
+//   let boosted = JSBI.BigInt('0')
+//   if (!JSBI.equal(totalVotingPower, JSBI.BigInt('0')))
+//     boosted = JSBI.add(
+//       JSBI.divide(JSBI.multiply(JSBI.BigInt(4), liquidity), JSBI.BigInt(10)),
+//       JSBI.divide(
+//         JSBI.multiply(JSBI.BigInt(6), JSBI.multiply(totalLiquidity, votingPower)),
+//         JSBI.multiply(totalVotingPower, JSBI.BigInt(10))
+//       )
+//     )
+//   return JSBI.greaterThan(boosted, liquidity) ? boosted : liquidity
+// }
 
 export function useMobiStakingInfo(): MobiStakingInfo {
   const stakingInfo = useSelector<AppState, StakingState>((state) => state.staking)
