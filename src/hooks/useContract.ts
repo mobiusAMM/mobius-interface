@@ -6,7 +6,7 @@ import { useMemo } from 'react'
 
 import { CHAIN } from '../constants'
 import CONSTANT_SUM from '../constants/abis/ConstantSum.json'
-import ERC20_ABI, { ERC20_BYTES32_ABI } from '../constants/abis/erc20'
+import ERC20_ABI from '../constants/abis/erc20'
 import ERC20_MOBI from '../constants/abis/ERC20MOBI.json'
 import EXCHANGE from '../constants/abis/Exchange.json'
 import GAUGE_CONTROLLER from '../constants/abis/GaugeController.json'
@@ -85,10 +85,6 @@ export function useGaugeControllerContract(address?: string, withSignerIfPossibl
 
 export function useConstantSumContract(address?: string, withSignerIfPossible?: boolean): ConstantSum | null {
   return useContract(address, CONSTANT_SUM.abi, withSignerIfPossible) as ConstantSum
-}
-
-export function useBytes32TokenContract(tokenAddress?: string, withSignerIfPossible?: boolean): Contract | null {
-  return useContract(tokenAddress, ERC20_BYTES32_ABI, withSignerIfPossible)
 }
 
 export function useStableSwapContract(swapAddress?: string, withSignerIfPossible?: boolean): Swap | null {
