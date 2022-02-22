@@ -1,14 +1,8 @@
-import { Pair, Token } from '@ubeswap/sdk'
 import { useCallback } from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
 import { AppDispatch, AppState } from '../index'
 import {
-  addSerializedPair,
-  addSerializedToken,
-  removeSerializedToken,
-  SerializedPair,
-  SerializedToken,
   toggleURLWarning,
   updateUserDarkMode,
   updateUserDeadline,
@@ -16,26 +10,6 @@ import {
   updateUserMinApprove,
   updateUserSlippageTolerance,
 } from './actions'
-
-function serializeToken(token: Token): SerializedToken {
-  return {
-    chainId: token.chainId,
-    address: token.address,
-    decimals: token.decimals,
-    symbol: token.symbol,
-    name: token.name,
-  }
-}
-
-function deserializeToken(serializedToken: SerializedToken): Token {
-  return new Token(
-    serializedToken.chainId,
-    serializedToken.address,
-    serializedToken.decimals,
-    serializedToken.symbol,
-    serializedToken.name
-  )
-}
 
 export function useIsDarkMode(): boolean {
   const { userDarkMode, matchesDarkMode } = useSelector<
@@ -120,44 +94,6 @@ export function useUserTransactionTTL(): [number, (slippage: number) => void] {
   )
 
   return [userDeadline, setUserDeadline]
-}
-
-export function useAddUserToken(): (token: Token) => void {
-  const dispatch = useDispatch<AppDispatch>()
-  return useCallback(
-    (token: Token) => {
-      dispatch(addSerializedToken({ serializedToken: serializeToken(token) }))
-    },
-    [dispatch]
-  )
-}
-
-export function useRemoveUserAddedToken(): (chainId: number, address: string) => void {
-  const dispatch = useDispatch<AppDispatch>()
-  return useCallback(
-    (chainId: number, address: string) => {
-      dispatch(removeSerializedToken({ chainId, address }))
-    },
-    [dispatch]
-  )
-}
-
-function serializePair(pair: Pair): SerializedPair {
-  return {
-    token0: serializeToken(pair.token0),
-    token1: serializeToken(pair.token1),
-  }
-}
-
-export function usePairAdder(): (pair: Pair) => void {
-  const dispatch = useDispatch<AppDispatch>()
-
-  return useCallback(
-    (pair: Pair) => {
-      dispatch(addSerializedPair({ serializedPair: serializePair(pair) }))
-    },
-    [dispatch]
-  )
 }
 
 export function useURLWarningVisible(): boolean {
