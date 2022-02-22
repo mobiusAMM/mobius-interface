@@ -18,19 +18,7 @@ export function getMentoTokens(): Token[] {
   return MENTO_POOL_INFO[CHAIN].map((m) => stableToToken(m.stable)).concat(CELO[CHAIN])
 }
 
-export function useDefaultTokens(): { [address: string]: Token } {
-  return {}
-}
-
-export function useAllTokens(): { [address: string]: Token } {
-  return {}
-}
-
-export function useAllInactiveTokens(): { [address: string]: Token } {
-  return {}
-}
-
-function getAllTokens(): Token[] | null {
+export function getAllTokens(): Token[] | null {
   const StableTokensWithDup = STATIC_POOL_INFO[CHAIN].flatMap((pools) => pools.tokens)
   const MentoTokensWithDup = getMentoTokens()
   return dedupeTokens(MentoTokensWithDup.concat(StableTokensWithDup).concat(ExternalRewards[CHAIN]))

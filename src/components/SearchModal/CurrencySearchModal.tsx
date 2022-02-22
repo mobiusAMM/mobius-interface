@@ -13,7 +13,6 @@ interface CurrencySearchModalProps {
   selectedCurrency?: Token | null
   onCurrencySelect: (currency: Token) => void
   otherSelectedCurrency?: Token | null
-  showCommonBases?: boolean
   tokenType?: TokenType
 }
 
@@ -30,7 +29,6 @@ export default function CurrencySearchModal({
   onCurrencySelect,
   selectedCurrency,
   otherSelectedCurrency,
-  showCommonBases = false,
   tokenType,
 }: CurrencySearchModalProps) {
   const location = useLocation()
@@ -51,9 +49,6 @@ export default function CurrencySearchModal({
     [onDismiss, onCurrencySelect]
   )
 
-  // used for import token flow
-  const [importToken, setImportToken] = useState<Token | undefined>()
-
   // change min height if not searching
   const minHeight = modalView === CurrencyModalView.importToken || modalView === CurrencyModalView.importList ? 40 : 80
 
@@ -65,10 +60,6 @@ export default function CurrencySearchModal({
         onCurrencySelect={handleCurrencySelect}
         selectedCurrency={selectedCurrency}
         otherSelectedCurrency={otherSelectedCurrency}
-        showCommonBases={showCommonBases}
-        showImportView={() => setModalView(CurrencyModalView.importToken)}
-        setImportToken={setImportToken}
-        showManageView={() => setModalView(CurrencyModalView.manage)}
         tokenType={tokenType}
         mento={location.pathname.includes('mint')}
       />

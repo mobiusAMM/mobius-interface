@@ -1,51 +1,13 @@
 import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
-import { useEffect, useMemo, useState } from 'react'
-import { useBlockNumber } from 'state/application/hooks'
+import { getAllTokens } from 'hooks/Tokens'
+import { useMemo } from 'react'
 
 import { CHAIN } from '../../constants'
 import ERC20_INTERFACE from '../../constants/abis/erc20'
 import { MOBI } from '../../constants/tokens'
 import { useWeb3Context } from '../../hooks'
-import { useAllTokens } from '../../hooks/Tokens'
-import { useTokenContract } from '../../hooks/useContract'
 import { isAddress } from '../../utils'
 import { useMultipleContractSingleData } from '../multicall/hooks'
-
-export function useTokenBalanceSingle(address?: string, token?: Token | undefined): TokenAmount | undefined {
-  const tokenContract = useTokenContract(token?.address ?? undefined)
-  const [tokenBalance, setTokenBalance] = useState<TokenAmount>()
-  const block = useBlockNumber()
-  useEffect(() => {
-    const update = async () => {
-      const amt = await tokenContract?.balanceOf(address)
-      const balance = JSBI.BigInt(amt?.toString() || '0')
-      setTokenBalance(new TokenAmount(token, balance))
-    }
-    token && address && update()
-  }, [address, token, block])
-  return token ? tokenBalance : undefined
-}
-
-export function useTokenBalanceDirect(
-  address?: string,
-  tokens?: (Token | undefined)[]
-): [{ [tokenAddress: string]: TokenAmount | undefined }, boolean] {
-  const tokenContract = useTokenContract(tokens.length > 0 ? tokens[0].address : undefined)
-  const [tokenBalances, setTokenBalances] = useState<{ [tokenAddress: string]: TokenAmount | undefined }>()
-  const loading = false
-  useEffect(() => {
-    const updateToken = async (token: Token) => {
-      const contract = tokenContract?.attach(token.address)
-      const balance = JSBI.BigInt((await contract?.balanceOf(address))?.toString() || '0')
-      setTokenBalances({
-        ...tokenBalances,
-        [token.address]: new TokenAmount(token, balance),
-      })
-    }
-    tokens?.filter((t) => !!t).forEach((t) => updateToken(t))
-  }, [address, tokens])
-  return tokenBalances ? [tokenBalances, loading] : [{}, loading]
-}
 
 /**
  * Returns a map of token addresses to their eventually consistent token balances for a single account.
@@ -123,7 +85,7 @@ export function useCurrencyBalance(account?: string, currency?: Token): TokenAmo
 // mimics useAllBalances
 export function useAllTokenBalances(): { [tokenAddress: string]: TokenAmount | undefined } {
   const { address, connected } = useWeb3Context()
-  const allTokens = useAllTokens()
+  const allTokens = getAllTokens()
   const allTokensArray = useMemo(() => Object.values(allTokens ?? {}), [allTokens])
   const balances = useTokenBalances(connected ? address : undefined, allTokensArray)
   return balances ?? {}

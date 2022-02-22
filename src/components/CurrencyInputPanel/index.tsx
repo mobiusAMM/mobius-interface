@@ -151,7 +151,6 @@ interface CurrencyInputPanelProps {
   disableInput?: boolean
   otherCurrency?: Token | null
   id: string
-  showCommonBases?: boolean
   customBalanceText?: string
   tokenType?: TokenType
 }
@@ -170,7 +169,6 @@ export default function CurrencyInputPanel({
   hideInput = false,
   otherCurrency,
   id,
-  showCommonBases,
   customBalanceText,
   tokenType,
   ...rest
@@ -270,7 +268,6 @@ export default function CurrencyInputPanel({
           onCurrencySelect={onCurrencySelect}
           selectedCurrency={currency}
           otherSelectedCurrency={otherCurrency}
-          showCommonBases={showCommonBases}
           tokenType={tokenType}
         />
       )}
