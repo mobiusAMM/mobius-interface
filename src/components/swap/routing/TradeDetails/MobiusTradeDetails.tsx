@@ -1,30 +1,24 @@
 import { TradeType } from '@ubeswap/sdk'
 import React, { useContext } from 'react'
+import { MentoTrade } from 'state/mento/hooks'
 import { Field } from 'state/swap/actions'
 import { MobiusTrade } from 'state/swap/hooks'
 import { ThemeContext } from 'styled-components'
 
 import { TYPE } from '../../../../theme'
-import {
-  computeMentoTradePriceBreakdown,
-  computeSlippageAdjustedAmounts,
-  computeTradePriceBreakdown,
-} from '../../../../utils/prices'
+import { computeSlippageAdjustedAmounts } from '../../../../utils/prices'
 import QuestionHelper from '../../../QuestionHelper'
 import { RowBetween, RowFixed } from '../../../Row'
 import FormattedPriceImpact from '../../FormattedPriceImpact'
 
 interface Props {
-  trade: MobiusTrade
+  trade: MobiusTrade | MentoTrade
   allowedSlippage: number
-  mento?: boolean
 }
 
-export const MobiusTradeDetails: React.FC<Props> = ({ trade, allowedSlippage, mento }: Props) => {
+export const MobiusTradeDetails: React.FC<Props> = ({ trade, allowedSlippage }: Props) => {
   const theme = useContext(ThemeContext)
-  const { priceImpactWithoutFee, realizedLPFee } = mento
-    ? computeMentoTradePriceBreakdown(trade)
-    : computeTradePriceBreakdown(trade)
+  const realizedLPFee = trade?.fee
   const isExactIn = trade.tradeType === TradeType.EXACT_INPUT
   const slippageAdjustedAmounts = computeSlippageAdjustedAmounts(trade, allowedSlippage)
 

@@ -79,7 +79,7 @@ export default function OpenSum() {
     }
   }, [approval, approvalSubmitted])
 
-  const maxAmountInput: TokenAmount | undefined = useTokenBalance(connected ? address : null, inputToken)
+  const maxAmountInput: TokenAmount | undefined = useTokenBalance(connected ? address : undefined, inputToken)
   const atMaxAmountInput = Boolean(maxAmountInput && input?.equalTo(maxAmountInput))
   const swapContract = useConstantSumContract(poolAddress)
   const deadline = useTransactionDeadline()

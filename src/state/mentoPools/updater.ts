@@ -1,43 +1,44 @@
-import { Connection } from '@celo/connect'
-import { CeloContract, ContractKit, StableToken } from '@celo/contractkit'
-import { JSBI } from '@ubeswap/sdk'
+import { invariant } from '@apollo/client/utilities/globals'
+import { newKit } from '@celo/contractkit'
+import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
+import { IMentoExchange } from 'constants/mento'
+import { CELO } from 'constants/tokens'
 import { Exchange } from 'generated'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useBlockNumber } from 'state/application/hooks'
-import Web3 from 'web3'
 
-import { CHAIN } from '../../constants'
-import { MENTO_POOL_INFO } from '../../constants/StablePools'
+import { CHAIN, weiScale } from '../../constants'
+import { MENTO_POOL_INFO } from '../../constants/mento'
 import { useWeb3Context } from '../../hooks'
-import { UseMentoContract } from '../../hooks/useContract'
+import { useMentoContract } from '../../hooks/useContract'
 import { AppDispatch } from '../index'
-import { initPool } from './actions'
-import { MentoConstants } from './reducer'
+import { updateMento } from './actions'
+import { stableToToken } from './hooks'
 
-export function UpdateMento(): null {
-  const web3 = new Web3('https://forno.celo.org')
-  const kit = new ContractKit(new Connection(web3))
+export function UpdateMento() {
+  const kit = newKit('https://forno.celo.org')
   const { provider } = useWeb3Context()
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()
-  const pools: MentoConstants[] = MENTO_POOL_INFO[CHAIN]
-  const mentoContract = UseMentoContract('0x12364a15F52b822F12dd858FAeEdC49F472fbA57')
+  const mentoPools = MENTO_POOL_INFO[CHAIN]
+  const mentoContract = useMentoContract('0x12364a15F52b822F12dd858FAeEdC49F472fbA57')
 
   useEffect(() => {
-    const updatePool = async (poolInfo: MentoConstants, contract: Exchange | undefined) => {
+    const updatePool = async (poolInfo: IMentoExchange, contract: Exchange | null) => {
       if (!contract) return
       try {
         const balances = (await contract.getBuyAndSellBuckets(false)).map((x) => JSBI.BigInt(x))
+        invariant(balances.length === 2, 'mento balances')
         const swapFee = JSBI.BigInt(await contract.spread())
         dispatch(
-          initPool({
-            address: contract.address,
-            pool: {
+          updateMento({
+            mento: {
               ...poolInfo,
-              balances,
+              fee: new Percent(swapFee, JSBI.multiply(weiScale, JSBI.BigInt('10000'))),
               address: contract.address,
-              swapFee,
+              celoReserve: new TokenAmount(CELO[CHAIN], balances[0]),
+              stableReserve: new TokenAmount(stableToToken(poolInfo.stable), balances[1]),
             },
           })
         )
@@ -45,18 +46,11 @@ export function UpdateMento(): null {
         console.error(error)
       }
     }
-    pools.forEach(async (pool) => {
-      let address: string
-      if (pool.stable === StableToken.cUSD) {
-        address = await kit.registry.addressFor(CeloContract.Exchange)
-      } else if (pool.stable === StableToken.cEUR) {
-        address = await kit.registry.addressFor(CeloContract.ExchangeEUR)
-      } else {
-        address = await kit.registry.addressFor(CeloContract.ExchangeBRL)
-      }
-      updatePool(pool, mentoContract?.attach(address))
+    mentoPools.forEach(async (pool) => {
+      const address = await kit.registry.addressFor(pool.contract)
+      updatePool(pool, mentoContract?.attach(address) ?? null)
     })
-  }, [blockNumber, provider, dispatch, pools, kit.contracts, mentoContract, kit.registry])
+  }, [blockNumber, provider, dispatch, kit.contracts, mentoContract, kit.registry, mentoPools])
 
   return null
 }

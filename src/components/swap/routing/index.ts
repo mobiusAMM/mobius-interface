@@ -1,7 +1,5 @@
-import { Signer } from '@ethersproject/abstract-signer'
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
 import { CallOverrides, Contract, ContractTransaction, PayableOverrides } from '@ethersproject/contracts'
-import { ChainId, Trade } from '@ubeswap/sdk'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { calculateGasMargin } from 'utils'
 
@@ -24,17 +22,6 @@ type DoTransactionFn = <
     claim?: { recipient: string }
   }
 ) => Promise<string>
-
-export interface TradeExecutor<T extends Trade> {
-  (args: {
-    trade: T
-    signer: Signer
-    chainId: ChainId.MAINNET | ChainId.ALFAJORES
-    doTransaction: DoTransactionFn
-  }): Promise<{
-    hash: string
-  }>
-}
 
 type ContractCall = {
   contract: Contract

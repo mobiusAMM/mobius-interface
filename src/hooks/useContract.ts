@@ -49,7 +49,7 @@ function useContract(address: string | undefined, ABI: any, withSignerIfPossible
       console.error('Failed to get contract', error)
       return null
     }
-  }, [address, ABI, provider, connected])
+  }, [address, ABI, provider, connected, withSignerIfPossible])
 }
 
 export function useTokenContract(tokenAddress?: string, withSignerIfPossible?: boolean): Erc20 | null {
@@ -99,7 +99,7 @@ export function useLpTokenContract(tokenAddress?: string, withSignerIfPossible?:
   return useContract(tokenAddress, LP.abi, withSignerIfPossible) as Erc20 | null
 }
 
-export function UseMentoContract(exchangeAddress: string, withSignerIfPossible?: boolean): Exchange | null {
+export function useMentoContract(exchangeAddress: string, withSignerIfPossible?: boolean): Exchange | null {
   return useContract(exchangeAddress, EXCHANGE, withSignerIfPossible) as Exchange | null
 }
 

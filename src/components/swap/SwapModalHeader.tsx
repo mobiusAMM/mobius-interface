@@ -9,12 +9,7 @@ import { ThemeContext } from 'styled-components'
 import { Field } from '../../state/swap/actions'
 import { TYPE } from '../../theme'
 import { isAddress, shortenAddress } from '../../utils'
-import {
-  computeMentoTradePriceBreakdown,
-  computeSlippageAdjustedAmounts,
-  computeTradePriceBreakdown,
-  warningSeverity,
-} from '../../utils/prices'
+import { computeSlippageAdjustedAmounts, warningSeverity } from '../../utils/prices'
 import { ButtonPrimary } from '../Button'
 import { AutoColumn } from '../Column'
 import CurrencyLogo from '../CurrencyLogo'
@@ -27,23 +22,18 @@ export default function SwapModalHeader({
   recipient,
   showAcceptChanges,
   onAcceptChanges,
-  mento,
 }: {
   trade: MobiusTrade | MentoTrade
   allowedSlippage: number
   recipient: string | null
   showAcceptChanges: boolean
   onAcceptChanges: () => void
-  mento?: boolean
 }) {
   const slippageAdjustedAmounts = useMemo(
     () => computeSlippageAdjustedAmounts(trade, allowedSlippage),
     [trade, allowedSlippage]
   )
-  const { priceImpactWithoutFee } = useMemo(
-    () => (mento ? computeMentoTradePriceBreakdown(trade) : computeTradePriceBreakdown(trade)),
-    [trade, mento]
-  )
+  const priceImpactWithoutFee = useMemo(() => trade?.priceImpact, [trade])
   const priceImpactSeverity = warningSeverity(priceImpactWithoutFee)
 
   const theme = useContext(ThemeContext)

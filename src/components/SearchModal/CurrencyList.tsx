@@ -4,7 +4,6 @@ import { FixedSizeList } from 'react-window'
 import { Text } from 'rebass'
 import styled from 'styled-components'
 
-import checkedLogo from '../../assets/svg/mobius.svg'
 import { useWeb3Context } from '../../hooks'
 import { WrappedTokenInfo } from '../../state/lists/hooks'
 import { useCurrencyBalance } from '../../state/wallet/hooks'
@@ -104,11 +103,6 @@ function CurrencyRow({
   const { address, connected } = useWeb3Context()
   const key = currencyKey(currency)
   const balance = useCurrencyBalance(connected ? address : undefined, currency)
-  if (isSelected || otherSelected)
-    currency = {
-      ...currency,
-      logoURI: checkedLogo,
-    } as WrappedTokenInfo
 
   // only show add or remove buttons if not on selected list
   return (

@@ -1,16 +1,22 @@
 import { parseUnits } from '@ethersproject/units'
-import { JSBI, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
+import { JSBI, Percent, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
+import { IMentoExchangeInfo } from 'constants/mento'
+import { CELO } from 'constants/tokens'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { MentoPool } from 'state/mentoPools/reducer'
 import invariant from 'tiny-invariant'
-import { MentoMath } from 'utils/mentoMath'
+import {
+  calculateEstimatedSwapInputAmount,
+  calculateEstimatedSwapOutputAmount,
+  calculateSwapPrice,
+} from 'utils/mentoCalculator'
 
+import { BIPS_BASE, CHAIN } from '../../constants'
 import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { isAddress } from '../../utils'
 import { AppDispatch, AppState } from '../index'
-import { useCurrentPool, useMathUtil, usePools } from '../mentoPools/hooks'
+import { tokenToStable, useCurrentPool, usePools } from '../mentoPools/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
 import { Field, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 
@@ -84,10 +90,11 @@ export function tryParseAmount(value?: string, currency?: Token): TokenAmount | 
 export type MentoTrade = {
   input: TokenAmount
   output: TokenAmount
-  pool: MentoPool
+  pool: IMentoExchangeInfo
   executionPrice: Price
   tradeType: TradeType
   fee: TokenAmount
+  priceImpact: Percent
 }
 
 function calcInputOutput(
@@ -95,8 +102,7 @@ function calcInputOutput(
   output: Token | undefined,
   isExactIn: boolean,
   parsedAmount: TokenAmount | undefined,
-  math: MentoMath,
-  poolInfo: MentoPool
+  poolInfo: IMentoExchangeInfo
 ): readonly [TokenAmount | undefined, TokenAmount | undefined, TokenAmount | undefined] {
   if (!input && !output) {
     return [undefined, undefined, undefined]
@@ -112,25 +118,17 @@ function calcInputOutput(
     undefined,
     undefined,
   ]
-
-  const [balanceIn, balanceOut] =
-    input.address === poolInfo.tokens[0].address
-      ? [poolInfo.balances[0], poolInfo.balances[1]]
-      : [poolInfo.balances[1], poolInfo.balances[0]]
-
-  const swapFee = JSBI.divide(poolInfo.swapFee, JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18)))
-
   invariant(parsedAmount)
   if (isExactIn) {
     details[0] = parsedAmount
-    const [expectedOut, fee] = math.getAmountOut(parsedAmount.raw, balanceIn, balanceOut, swapFee)
-    details[1] = new TokenAmount(output, expectedOut)
-    details[2] = new TokenAmount(input, fee)
+    const { outputAmount, fee } = calculateEstimatedSwapOutputAmount(poolInfo, new TokenAmount(input, parsedAmount.raw))
+    details[1] = outputAmount
+    details[2] = fee
   } else {
     details[1] = parsedAmount
-    const [requiredIn, fee] = math.getAmountIn(parsedAmount.raw, balanceIn, balanceOut, swapFee)
-    details[0] = new TokenAmount(input, requiredIn)
-    details[2] = new TokenAmount(input, fee)
+    const { fee, inputAmount } = calculateEstimatedSwapInputAmount(poolInfo, new TokenAmount(output, parsedAmount.raw))
+    details[0] = inputAmount
+    details[2] = fee
   }
   return details
 }
@@ -139,7 +137,7 @@ export function useMentoTradeInfo(): {
   currencies: { [field in Field]?: Token }
   currencyBalances: { [field in Field]?: TokenAmount }
   parsedAmount: TokenAmount | undefined
-  v2Trade: MentoTrade | undefined
+  mentoTrade: MentoTrade | undefined
   inputError?: string
 } {
   const { address, connected } = useWeb3Context()
@@ -154,8 +152,13 @@ export function useMentoTradeInfo(): {
   const outputCurrency = useCurrency(outputCurrencyId)
   const pools = usePools()
   const poolsLoading = pools.length === 0
-  const [pool] = useCurrentPool(inputCurrency?.address ?? '', outputCurrency?.address ?? '')
-  const mathUtil = useMathUtil(pool)
+
+  const inputStable = inputCurrency ? tokenToStable(inputCurrency) : null
+  const outputStable = outputCurrency ? tokenToStable(outputCurrency) : null
+
+  const stable = inputStable ?? outputStable
+
+  const pool = useCurrentPool(stable)
 
   const to: string | null = connected ? address : null
   const relevantTokenBalances = useCurrencyBalances(connected ? address : undefined, [
@@ -193,23 +196,23 @@ export function useMentoTradeInfo(): {
   if (!to || !formattedTo) {
     inputError = inputError ?? 'Enter a recipient'
   }
-  if (!inputCurrency || !outputCurrency || !parsedAmount || poolsLoading || !mathUtil) {
+  if (!inputCurrency || !outputCurrency || !parsedAmount || !pool || poolsLoading) {
     return {
       currencies,
       currencyBalances,
       parsedAmount,
       inputError,
-      v2Trade: undefined,
+      mentoTrade: undefined,
     }
   }
-  const [input, output, fee] = calcInputOutput(inputCurrency, outputCurrency, isExactIn, parsedAmount, mathUtil, pool)
+  const [input, output, fee] = calcInputOutput(inputCurrency, outputCurrency, isExactIn, parsedAmount, pool)
   if (!input || !output || !fee) {
     return {
       currencies,
       currencyBalances,
       parsedAmount,
       inputError,
-      v2Trade: undefined,
+      mentoTrade: undefined,
     }
   }
 
@@ -218,15 +221,21 @@ export function useMentoTradeInfo(): {
   }
 
   const executionPrice = new Price(inputCurrency, outputCurrency, input?.raw, output?.raw)
+  const basisPrice = input.token !== CELO[CHAIN] ? calculateSwapPrice(pool) : calculateSwapPrice(pool).invert()
   const tradeType = isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
+  const priceImpactFraction = basisPrice
+    .subtract(executionPrice)
+    .divide(basisPrice)
+    .subtract(pool.fee.divide(BIPS_BASE).multiply('100'))
+  const priceImpact = new Percent(priceImpactFraction.numerator, priceImpactFraction.denominator)
 
-  const v2Trade: MentoTrade | undefined =
-    input && output && pool ? { input, output, pool, executionPrice, tradeType, fee } : undefined
+  const mentoTrade: MentoTrade | undefined =
+    input && output && pool ? { input, output, pool, executionPrice, tradeType, fee, priceImpact } : undefined
   return {
     currencies,
     currencyBalances,
     parsedAmount,
-    v2Trade,
+    mentoTrade,
     inputError,
   }
 }

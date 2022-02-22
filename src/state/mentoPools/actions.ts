@@ -1,9 +1,4 @@
 import { createAction } from '@reduxjs/toolkit'
+import { IMentoExchange, IMentoExchangeInfo } from 'constants/mento'
 
-import { MentoPool, MentoVariable } from './reducer'
-
-export const initPool = createAction<{ address: string; pool: MentoPool }>('mentoPools/initPools')
-
-export const updateVariableData = createAction<{ address: string; variableData: MentoVariable }>(
-  'mentoPools/updateVariableData'
-)
+export const updateMento = createAction<{ mento: IMentoExchangeInfo & IMentoExchange }>('mentoPools/initPools')

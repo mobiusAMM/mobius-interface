@@ -29,7 +29,7 @@ import { Field } from '../../state/swap/actions'
 import { MobiusTrade, useMobiusTradeInfo, useSwapActionHandlers, useSwapState } from '../../state/swap/hooks'
 import { useExpertModeManager, useUserSlippageTolerance } from '../../state/user/hooks'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
-import { computeTradePriceBreakdown, warningSeverity } from '../../utils/prices'
+import { warningSeverity } from '../../utils/prices'
 import AppBody from '../AppBody'
 import { ClickableText } from '../Pool/styleds'
 
@@ -46,7 +46,14 @@ export default function Swap() {
 
   // swap state
   const { independentField, typedValue } = useSwapState()
-  const { v2Trade, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useMobiusTradeInfo()
+  const {
+    v2Trade,
+    currencyBalances,
+    parsedAmount,
+    currencies,
+    inputError: swapInputError,
+    priceImpact,
+  } = useMobiusTradeInfo()
 
   const trade = v2Trade
 
@@ -111,8 +118,6 @@ export default function Swap() {
   // the callback to execute the swap
   const { callback: swapCallback, error: swapCallbackError } = useTradeCallback(trade, allowedSlippage, null)
 
-  const { priceImpactWithoutFee } = computeTradePriceBreakdown(trade)
-
   const handleSwap = useCallback(() => {
     setSwapState({ attemptingTxn: true, tradeToConfirm, showConfirm, swapErrorMessage: undefined, txHash: undefined })
     invariant(swapCallback)
@@ -141,7 +146,7 @@ export default function Swap() {
   const [showInverted, setShowInverted] = useState<boolean>(false)
 
   // warnings on slippage
-  const priceImpactSeverity = warningSeverity(priceImpactWithoutFee)
+  const priceImpactSeverity = warningSeverity(priceImpact)
 
   // show approve flow when: no error on inputs, not approved or pending, or approved in current session
   // never show if price impact is above threshold in non expert mode

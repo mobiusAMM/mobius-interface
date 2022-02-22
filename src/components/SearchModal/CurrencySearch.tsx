@@ -70,7 +70,7 @@ export function CurrencySearch({
   const opticsV1 = useOpticsV1Tokens()
   const opticsV2 = useOpticsV2Tokens()
   let tokensToSelect = allTokens
-  if (otherSelectedCurrency && !selectedCurrency) tokensToSelect = tokensInSamePool
+  if (otherSelectedCurrency) tokensToSelect = tokensInSamePool
   if (tokenType) {
     if (tokenType === TokenType.OpticsV1) {
       tokensToSelect = opticsV1

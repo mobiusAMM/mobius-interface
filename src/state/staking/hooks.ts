@@ -1,4 +1,4 @@
-import { Fraction, JSBI, Percent, Token, TokenAmount } from '@ubeswap/sdk'
+import { JSBI, Percent, Token, TokenAmount } from '@ubeswap/sdk'
 import { calcApy } from 'components/earn/StablePoolCard'
 import { addressToToken, useMobi, useVeMobi } from 'hooks/Tokens'
 import { useSelector } from 'react-redux'
@@ -12,7 +12,6 @@ import { StakingState } from './reducer'
 
 const SECONDS_IN_YEAR = JSBI.BigInt(365 * 24 * 60 * 60)
 const SECONDS_IN_WEEK = JSBI.BigInt(7 * 24 * 60 * 60)
-const ONE_FRACTION = new Fraction('1', '1')
 
 export type GaugeSummary = {
   pool: string

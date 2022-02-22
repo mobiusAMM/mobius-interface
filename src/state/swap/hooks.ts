@@ -1,5 +1,5 @@
 import { parseUnits } from '@ethersproject/units'
-import { JSBI, Percent, Price, Token, TokenAmount } from '@ubeswap/sdk'
+import { JSBI, Percent, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { StableSwapPool } from 'state/stablePools/reducer'
@@ -90,6 +90,7 @@ export type MobiusTrade = {
   executionPrice: Price
   fee: TokenAmount
   priceImpact: Percent
+  tradeType: TradeType
 }
 
 function calcInputOutput(
@@ -256,7 +257,9 @@ export function useMobiusTradeInfo(): {
   const priceImpact = new Percent(priceImpactFraction.numerator, priceImpactFraction.denominator)
 
   const v2Trade: MobiusTrade | undefined =
-    input && output && pool ? { input, output, pool, indexFrom, indexTo, executionPrice, fee, priceImpact } : undefined
+    input && output && pool
+      ? { input, output, pool, indexFrom, indexTo, executionPrice, fee, priceImpact, tradeType: TradeType.EXACT_INPUT }
+      : undefined
 
   return {
     currencies,

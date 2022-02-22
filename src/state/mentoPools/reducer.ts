@@ -1,66 +1,35 @@
-import { StableToken } from '@celo/contractkit'
 import { createReducer } from '@reduxjs/toolkit'
-import { Token } from '@ubeswap/sdk'
-import JSBI from 'jsbi'
-import { MentoMath } from 'utils/mentoMath'
+import { Percent, TokenAmount } from '@ubeswap/sdk'
+import { IMentoExchange, IMentoExchangeInfo } from 'constants/mento'
+import { CELO } from 'constants/tokens'
 
-import { initPool, updateVariableData } from './actions'
+import { CHAIN } from '../../constants'
+import { MENTO_POOL_INFO } from '../../constants/mento'
+import { updateMento } from './actions'
+import { stableToToken } from './hooks'
 
-export type MentoVariable = {
-  balances: JSBI[]
-  address: string
-  swapFee: JSBI
+export interface MentoPools {
+  readonly pools: (IMentoExchangeInfo & IMentoExchange)[]
 }
 
-export type MentoConstants = {
-  tokens: Token[]
-  stable: StableToken
-}
-
-export type MentoPool = MentoConstants & MentoVariable
-
-export interface PoolState {
-  readonly pools: {
-    [address: string]: {
-      pool: MentoPool
-      math: MentoMath
-    }
+function emptyMentoExchangeInfo(mentoExchange: IMentoExchange): IMentoExchangeInfo & IMentoExchange {
+  return {
+    ...mentoExchange,
+    fee: new Percent('0'),
+    address: '',
+    stableReserve: new TokenAmount(stableToToken(mentoExchange.stable), '0'),
+    celoReserve: new TokenAmount(CELO[CHAIN], '0'),
   }
 }
 
-const initialState: PoolState = {
-  pools: {},
+const initialState: MentoPools = {
+  pools: MENTO_POOL_INFO[CHAIN].map((p) => emptyMentoExchangeInfo(p)),
 }
 
-export default createReducer<PoolState>(initialState, (builder) =>
-  builder
-    .addCase(initPool, (state, { payload: { address, pool } }) => {
-      const mathModel = new MentoMath(pool)
-      return {
-        ...state,
-        pools: {
-          ...state.pools,
-          [address]: {
-            pool,
-            math: mathModel,
-          },
-        },
-      }
-    })
-    .addCase(updateVariableData, (state, { payload: { address, variableData } }) => {
-      const pool = state.pools[address]
-      return {
-        ...state,
-        pools: {
-          ...state.pools,
-          [address]: {
-            ...pool,
-            pool: {
-              ...pool.pool,
-              ...variableData,
-            },
-          },
-        },
-      }
-    })
+export default createReducer<MentoPools>(initialState, (builder) =>
+  builder.addCase(updateMento, (state, { payload: { mento } }) => {
+    return {
+      pools: state.pools.map((p) => (p.stable === mento.stable ? mento : p)),
+    }
+  })
 )
