@@ -1,14 +1,12 @@
 import { JSBI, Percent, Token, TokenAmount } from '@ubeswap/sdk'
-import { calcApy } from 'components/earn/StablePoolCard'
-import { addressToToken, useMobi, useVeMobi } from 'hooks/Tokens'
+import { useMobi, useVeMobi } from 'hooks/Tokens'
 import { useSelector } from 'react-redux'
 import { AppState } from 'state'
-import { useTokenPrice } from 'state/application/hooks'
 import { getPoolInfo } from 'state/stablePools/hooks'
 import { StableSwapPool } from 'state/stablePools/reducer'
 import { getDepositValues } from 'utils/stableSwaps'
 
-import { StakingState } from './reducer'
+import { IStakingState, IUserStakingState } from './reducer'
 
 const SECONDS_IN_YEAR = JSBI.BigInt(365 * 24 * 60 * 60)
 const SECONDS_IN_WEEK = JSBI.BigInt(7 * 24 * 60 * 60)
@@ -140,7 +138,7 @@ export function usePriceOfDeposits() {
 }
 
 export function useLockEnd(): number {
-  const lockEnd = useSelector<AppState, number>((state) => state.staking?.locked?.end ?? 0)
+  const lockEnd = useSelector<AppState, number>((state) => state.staking?.lock?.end ?? 0)
   return lockEnd
 }
 
@@ -149,31 +147,14 @@ export function useVotePowerLeft(): number {
   return (10000 - parseInt(votePower.toString())) / 100
 }
 
-export function useSNXRewardInfo(): SNXRewardInfo {
-  const stakingInfo = useSelector<AppState, StakingState>((state) => state.staking)
-  const snxInfo = stakingInfo.snx
-  const mobi = useMobi()
+export function useStakingState(): IStakingState {
+  return useSelector<AppState, IStakingState>((state) => state.staking)
+}
 
-  const rewardToken = addressToToken(snxInfo?.rewardToken ?? '')
-  const priceOfReward = useTokenPrice(snxInfo?.rewardToken)
-  const priceOfMobi = useTokenPrice(mobi?.address)
-  if (!snxInfo || !snxInfo.tokenRate) return { snxAddress: snxInfo?.address, rewardToken }
-  const yearlyRate = JSBI.multiply(snxInfo.tokenRate, SECONDS_IN_YEAR)
-  const apy =
-    priceOfReward && priceOfMobi
-      ? calcApy(priceOfReward?.multiply(yearlyRate), priceOfMobi?.multiply(stakingInfo.totalVotingPower))[1]
-      : undefined
-  const rewardRate = new TokenAmount(rewardToken, JSBI.multiply(snxInfo.tokenRate, SECONDS_IN_WEEK))
-  const userRateJSBI = JSBI.divide(JSBI.multiply(rewardRate.raw, stakingInfo.votingPower), stakingInfo.totalVotingPower)
-  //rewardRate.multiply(stakingInfo.votingPower).divide(stakingInfo.totalVotingPower)
-  const userRewardRate = new TokenAmount(rewardToken, userRateJSBI)
+export function useUserStakingState(): IUserStakingState {
+  return useSelector<AppState, IUserStakingState>((state) => state.staking)
+}
 
-  return {
-    snxAddress: snxInfo.address,
-    rewardToken,
-    rewardRate,
-    leftToClaim: snxInfo.leftToClaim ? new TokenAmount(rewardToken, snxInfo.leftToClaim) : undefined,
-    avgApr: apy,
-    userRewardRate,
-  }
+export function useStakingStateCombined(): IStakingState & IUserStakingState {
+  return useSelector<AppState, IStakingState & IUserStakingState>((state) => state.staking)
 }

@@ -1,5 +1,5 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
-import { ButtonEmpty, ButtonPrimary } from 'components/Button'
+import { ButtonPrimary } from 'components/Button'
 import { AutoColumn } from 'components/Column'
 import Loader from 'components/Loader'
 import { RowBetween, RowFixed } from 'components/Row'
@@ -108,11 +108,6 @@ const Divider = styled.div`
   margin-bottom: 1rem;
   background: ${({ theme }) => theme.text1};
   opacity: 0.5;
-`
-
-const StyledButton = styled(ButtonEmpty)`
-  margin-left: auto;
-  margin-right: 0.5rem;
 `
 
 export default function VeMobiRewards() {
