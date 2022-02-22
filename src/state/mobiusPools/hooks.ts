@@ -4,7 +4,18 @@ import invariant from 'tiny-invariant'
 
 import { AppState } from '..'
 
-export function useCurrentPool(exchangeAddress: string): IExchangeInfo | null {
+export function useCurrentPool(token0: string, token1: string): IExchangeInfo | null {
+  const pools = useSelector<AppState, IExchangeInfo[]>((state) =>
+    state.pools.pools.filter((pool) => {
+      const tokens = pool.tokens.map((t) => t.address)
+      return tokens.includes(token0) && tokens.includes(token1)
+    })
+  )
+  if (pools.length === 0) return null
+  invariant(pools.length === 1)
+  return pools[0]
+}
+export function useCurrentPoolAddress(exchangeAddress: string): IExchangeInfo | null {
   const pools = useSelector<AppState, IExchangeInfo[]>((state) =>
     state.pools.pools.filter((pool) => pool.address === exchangeAddress)
   )

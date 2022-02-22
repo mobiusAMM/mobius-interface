@@ -17,7 +17,7 @@ import { updatePools } from './actions'
 const lpInterface = new Interface(LP.abi)
 const SwapInterface = new Interface(SWAP.abi)
 
-export function UpdateMento() {
+export function UpdatePools() {
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()
   const stablePools = StablePools[CHAIN]

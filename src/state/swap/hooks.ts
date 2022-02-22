@@ -2,6 +2,7 @@ import { parseUnits } from '@ethersproject/units'
 import { JSBI, Percent, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useCurrentPool, usePools } from 'state/mobiusPools/hooks'
 import { StableSwapPool } from 'state/stablePools/reducer'
 import invariant from 'tiny-invariant'
 import { StableSwapMath } from 'utils/stableSwapMath'
@@ -10,7 +11,6 @@ import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { isAddress } from '../../utils'
 import { AppDispatch, AppState } from '../index'
-import { useCurrentPool, useMathUtil, usePools } from '../stablePools/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
 import { Field, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 
@@ -156,8 +156,7 @@ export function useMobiusTradeInfo(): {
 
   const pools = usePools()
   const poolsLoading = pools.length === 0
-  const [pool] = useCurrentPool(inputCurrency?.address ?? '', outputCurrency?.address ?? '')
-  const mathUtil = useMathUtil(pool ?? '')
+  const pool = useCurrentPool(inputCurrency?.address ?? '', outputCurrency?.address ?? '')
 
   const to: string | null = connected ? address : null
   const relevantTokenBalances = useCurrencyBalances(connected ? address : undefined, [
@@ -186,11 +185,11 @@ export function useMobiusTradeInfo(): {
   if (!parsedAmount) {
     inputError = inputError ?? 'Enter an amount'
   }
-  if (!pool || pool.loadingPool) {
+  if (!pool) {
     inputError = inputError ?? 'Pool Info Loading'
   }
 
-  if (pool && JSBI.equal(pool.lpTotalSupply, JSBI.BigInt('0'))) {
+  if (pool && JSBI.equal(pool.lpTotalSupply.raw, JSBI.BigInt('0'))) {
     inputError = inputError ?? 'Insufficient Liquidity'
   }
 
@@ -206,9 +205,8 @@ export function useMobiusTradeInfo(): {
     !outputCurrency ||
     !parsedAmount ||
     !pool ||
-    !mathUtil ||
     poolsLoading ||
-    JSBI.equal(pool.lpTotalSupply, JSBI.BigInt('0'))
+    JSBI.equal(pool.lpTotalSupply.raw, JSBI.BigInt('0'))
   ) {
     return {
       currencies,
@@ -218,21 +216,14 @@ export function useMobiusTradeInfo(): {
       v2Trade: undefined,
     }
   }
-  const { tokens = [] } = pool || {}
+  const tokens = pool.reserves.map(({ token }) => token)
 
   const indexFrom = inputCurrency ? tokens.map(({ address }) => address).indexOf(inputCurrency.address) : 0
   const indexTo = outputCurrency ? tokens.map(({ address }) => address).indexOf(outputCurrency.address) : 0
 
-  const tradeData = calcInputOutput(inputCurrency, outputCurrency, isExactIn, parsedAmount, mathUtil, pool)
+  const tradeData = calcInputOutput(inputCurrency, outputCurrency, isExactIn, parsedAmount, pool)
 
-  const basisTrade = calcInputOutput(
-    inputCurrency,
-    outputCurrency,
-    isExactIn,
-    tryParseAmount('1', inputCurrency),
-    mathUtil,
-    pool
-  )
+  const basisTrade = calcInputOutput(inputCurrency, outputCurrency, isExactIn, tryParseAmount('1', inputCurrency), pool)
   const input = tradeData[0]
   const output = tradeData[1]
   const fee = tradeData[2]
