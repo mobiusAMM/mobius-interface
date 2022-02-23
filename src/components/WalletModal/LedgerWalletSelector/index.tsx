@@ -1,3 +1,4 @@
+import Card from 'components/Card'
 import Loader from 'components/Loader'
 import { darken } from 'polished'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -34,7 +35,9 @@ export default function LedgerConnectorModal({ handleSelectIndex, onClose }: Led
 
   return (
     <ModalDiv>
-      <LedgerWalletSelector handleSelectIndex={handleSelectIndex} />
+      <Card>
+        <LedgerWalletSelector handleSelectIndex={handleSelectIndex} />
+      </Card>
     </ModalDiv>
   )
 }

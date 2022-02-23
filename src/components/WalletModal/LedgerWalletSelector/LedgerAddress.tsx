@@ -1,11 +1,8 @@
-import { cUSD } from '@ubeswap/sdk'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import { LedgerConnector, LedgerKit } from 'connectors/ledger/LedgerConnector'
 import React from 'react'
-import { useTokenBalance } from 'state/wallet/hooks'
 import { shortenAddress } from 'utils'
 
-import { NETWORK_CHAIN_ID } from '../../../connectors'
 import { InfoCard } from '.'
 
 interface Props {
@@ -16,7 +13,6 @@ interface Props {
 }
 
 export const LedgerAddress = ({ address, kit, tryActivation, index }: Props) => {
-  const cusdBalance = useTokenBalance(address, cUSD[NETWORK_CHAIN_ID])
   return (
     <InfoCard
       onClick={() => {
@@ -25,7 +21,6 @@ export const LedgerAddress = ({ address, kit, tryActivation, index }: Props) => 
       }}
     >
       <span>{shortenAddress(address)}</span>
-      <span>{cusdBalance?.toFixed(2) ?? '0.00'} cUSD</span>
     </InfoCard>
   )
 }

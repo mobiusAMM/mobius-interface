@@ -127,7 +127,9 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
             const ledgerKit = await LedgerKit.init(CHAIN, [options.index])
             const re: LedgerConnector = new p({ kit: ledgerKit, index: options.index })
             re.loadModal()
+            console.log('before enable')
             await re.enable()
+            console.log('exited enable')
             return (await re.activate()).provider
           },
         },
