@@ -16,6 +16,7 @@ interface Window {
   }
   web3?: unknown
   MSStream: any
+  setShowLedgerModal: (b: boolean) => Promise<void>
 }
 
 declare module 'content-hash' {
