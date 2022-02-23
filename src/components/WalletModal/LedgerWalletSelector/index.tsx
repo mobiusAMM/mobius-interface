@@ -23,7 +23,6 @@ export default function LedgerConnectorModal({ handleSelectIndex }: LedgerConnec
 
 export const LedgerWalletSelector: React.FC<Props> = ({ handleSelectIndex }: Props) => {
   const [addresses, setAddresses] = useState<readonly string[] | null>(null)
-  const [kit, setKit] = useState<LedgerKit | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState<number>(0)
   const connectToLedger = useCallback(async () => {
@@ -34,7 +33,6 @@ export const LedgerWalletSelector: React.FC<Props> = ({ handleSelectIndex }: Pro
     try {
       const ledgerKit = await LedgerKit.init(NETWORK_CHAIN_ID, idxs)
       setAddresses(ledgerKit.wallet.getAccounts())
-      setKit(ledgerKit)
     } catch (e) {
       setError(e.message)
     }
@@ -63,7 +61,7 @@ export const LedgerWalletSelector: React.FC<Props> = ({ handleSelectIndex }: Pro
       ) : (
         <>
           <p style={{ color: 'grey' }}>Please select a wallet below.</p>
-          {addresses === null || kit === null ? (
+          {addresses === null ? (
             <InfoCard>
               <span>
                 Loading wallets... <Loader />
@@ -72,18 +70,11 @@ export const LedgerWalletSelector: React.FC<Props> = ({ handleSelectIndex }: Pro
           ) : (
             <OptionsGrid>
               {addresses.map((address, i) => (
-                <LedgerAddress
-                  key={address}
-                  address={address}
-                  kit={kit}
-                  tryActivation={() => handleSelectIndex(i)}
-                  index={i}
-                />
+                <LedgerAddress key={address} address={address} tryActivation={() => handleSelectIndex(i)} />
               ))}
               <InfoCard
                 onClick={() => {
                   setAddresses(null)
-                  setKit(null)
                   setPage(page + 1)
                 }}
               >

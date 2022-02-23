@@ -3330,11 +3330,6 @@
     "@typescript-eslint/types" "4.33.0"
     eslint-visitor-keys "^2.0.0"
 
-"@ubeswap/default-token-list@^4.0.29":
-  version "4.1.44"
-  resolved "https://registry.yarnpkg.com/@ubeswap/default-token-list/-/default-token-list-4.1.44.tgz#f5b2b2c3bb64fc7282cb487810c48d304e2702bf"
-  integrity sha512-EIUsqOkHRUH4Dt9B8W5XTABUpxs0UjWXsnhucqR2qxJDkmUUMzb7X706RQy9JgsyPCOwdoFBZRqa9/gRsZ/a6g==
-
 "@ubeswap/sdk@^2.1.0":
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/@ubeswap/sdk/-/sdk-2.1.2.tgz#e0dd4e44c1b9071668f493e8b35486aba694b198"
@@ -10012,7 +10007,7 @@ js-yaml@^3.13.1:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
-jsbi@^3.1.4, jsbi@^3.1.5:
+jsbi@^3.1.4:
   version "3.2.5"
   resolved "https://registry.yarnpkg.com/jsbi/-/jsbi-3.2.5.tgz#b37bb90e0e5c2814c1c2a1bcd8c729888a2e37d6"
   integrity sha512-aBE4n43IPvjaddScbvWRA2YlTzKEynHzu7MqOyTipdHucf/VxS63ViCjxYRg86M8Rxwbt/GfzHl1kKERkt45fQ==
