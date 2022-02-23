@@ -129,7 +129,7 @@ export default function Vote() {
                 style={{ width: 'fit-content', borderRadius: '8px' }}
                 padding="8px"
               >
-                <TYPE.main>Create Proposal</TYPE.main>
+                <TYPE.white>Create Proposal</TYPE.white>
               </ButtonPrimary>
             </AutoRow>
           </WrapSmall>

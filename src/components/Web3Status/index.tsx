@@ -40,13 +40,13 @@ const Web3StatusError = styled(Web3StatusGeneric)`
 `
 
 const Web3StatusConnect = styled(Web3StatusGeneric)<{ faded?: boolean }>`
-  background-color: ${({ theme }) => theme.primary4};
+  background-color: ${({ theme }) => theme.celoGreen};
   border: none;
   color: ${({ theme }) => theme.primaryText1};
   font-weight: 500;
   :hover,
   :focus {
-    border: 1px solid ${({ theme }) => darken(0.05, theme.primary4)};
+    border: 1px solid ${({ theme }) => darken(0.05, theme.celoGreen)};
     color: ${({ theme }) => theme.primaryText1};
   }
   ${({ faded }) =>
@@ -152,7 +152,7 @@ function Web3StatusInner() {
     }
   } else {
     return (
-      <Web3StatusConnect id="connect-wallet" onClick={() => connect().catch(console.warn)} faded={!address}>
+      <Web3StatusConnect id="connect-wallet" onClick={() => connect().catch(console.warn)}>
         <Text>{t('Connect to a wallet')}</Text>
       </Web3StatusConnect>
     )

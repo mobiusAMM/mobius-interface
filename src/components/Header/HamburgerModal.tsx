@@ -3,8 +3,9 @@ import '@reach/dialog/styles.css'
 import { DialogContent, DialogOverlay } from '@reach/dialog'
 import { RowBetween } from 'components/Row'
 import { darken, transparentize } from 'polished'
-import React from 'react'
+import React, { useState } from 'react'
 import { isMobile } from 'react-device-detect'
+import { ChevronDown, ChevronUp } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
 import { animated, useSpring, useTransition } from 'react-spring'
@@ -89,6 +90,7 @@ const StyledExternalLink = styled(ExternalLink).attrs({
 
 export default function HamburgerModal({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: () => void }) {
   const { t } = useTranslation()
+  const [expand, setExpand] = useState(false)
 
   return (
     <CustomModal isOpen={isOpen} onDismiss={onDismiss} maxHeight={90}>
@@ -104,13 +106,7 @@ export default function HamburgerModal({ isOpen, onDismiss }: { isOpen: boolean;
         <StyledNavLink
           id={`pool-nav-link`}
           to={'/pool'}
-          isActive={(match, { pathname }) =>
-            Boolean(match) ||
-            pathname.startsWith('/add') ||
-            pathname.startsWith('/remove') ||
-            pathname.startsWith('/create') ||
-            pathname.startsWith('/find')
-          }
+          isActive={(match, { pathname }) => Boolean(match) || pathname.startsWith('/farm')}
           onClick={onDismiss}
         >
           {t('Pool')}
@@ -121,21 +117,25 @@ export default function HamburgerModal({ isOpen, onDismiss }: { isOpen: boolean;
         <StyledNavLink id={`vote-nav-link`} to={'/vote'} onClick={onDismiss}>
           {t('Vote')}
         </StyledNavLink>
-        <StyledNavLink id={`mint-nav-link`} to={'/mint'} onClick={onDismiss}>
-          {t('Mint')}
-        </StyledNavLink>
-        <StyledNavLink id={`migrate-nav-link`} to={'/opensum'} onClick={onDismiss}>
-          {t('Migrate')}
-        </StyledNavLink>
-        <StyledNavLink id={`charts-nav-link`} to={'/charts'}>
-          {t('Charts')}
-        </StyledNavLink>
-        {/* <StyledExternalLink id="bridge-nav-link" target="_self" href="https://bridge.mobius.money/#/">
-          {t('Bridge')}
-        </StyledExternalLink> */}
         <StyledNavLink id={`swap-nav-link`} to={'/risk'} onClick={onDismiss}>
           {t('Risks')}
         </StyledNavLink>
+        {expand ? (
+          <>
+            <StyledNavLink id={`mint-nav-link`} to={'/mint'} onClick={onDismiss}>
+              {t('Mint')}
+            </StyledNavLink>
+            <StyledNavLink id={`migrate-nav-link`} to={'/opensum'} onClick={onDismiss}>
+              {t('Migrate')}
+            </StyledNavLink>
+            <StyledNavLink id={`charts-nav-link`} to={'/charts'}>
+              {t('Charts')}
+            </StyledNavLink>
+            <ChevronUp style={{ cursor: 'pointer' }} onClick={() => setExpand(false)} />
+          </>
+        ) : (
+          <ChevronDown style={{ cursor: 'pointer' }} onClick={() => setExpand(true)} />
+        )}
       </LinkContainer>
     </CustomModal>
   )
