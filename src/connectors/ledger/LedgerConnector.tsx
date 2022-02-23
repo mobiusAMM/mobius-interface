@@ -81,7 +81,7 @@ export class LedgerConnector extends AbstractConnector {
   public async enable(): Promise<number> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-      this.on(INDEX_SELECTED_EVENT, (index) => resolve(index))
+      this.eventController.on({ event: INDEX_SELECTED_EVENT, callback: (index) => resolve(index) })
       // this.on(ERROR_EVENT, (error) => reject(error))
       this.on(INDEX_SELECTOR_CLOSED, () => reject('Modal closed by user'))
       await this._toggleModal()
