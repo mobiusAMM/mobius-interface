@@ -7,6 +7,8 @@ import Web3Modal from 'web3modal'
 import Ledger from '../../assets/svg/ledger.svg'
 import { CHAIN } from '../../constants'
 
+const LEDGER_ID = 'custom-ledger'
+
 type onChainProvider = {
   connect: () => Promise<Web3Provider>
   disconnect: () => void
@@ -113,7 +115,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
             },
           },
         },
-        'custom-ledger': {
+        [LEDGER_ID]: {
           display: {
             logo: Ledger,
             name: 'Celo Ledger',
@@ -166,6 +168,9 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
   }
 
   const connect = useCallback(async () => {
+    if (web3Modal.cachedProvider === LEDGER_ID) {
+      web3Modal.clearCachedProvider()
+    }
     const rawProvider = await web3Modal.connect()
 
     _initListeners(rawProvider)
