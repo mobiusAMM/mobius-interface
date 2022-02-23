@@ -11,6 +11,7 @@ import LedgerConnectorModal from 'components/WalletModal/LedgerWalletSelector'
 import React from 'react'
 import * as ReactDOM from 'react-dom'
 import { EventController } from 'utils/EventController'
+import { MODAL_CARD_CLASSNAME, WEB3_CONNECT_MODAL_ID } from 'web3modal'
 
 import { NETWORK_CHAIN_ID } from '..'
 
@@ -104,12 +105,22 @@ export class LedgerConnector extends AbstractConnector {
   }
 
   public loadModal() {
+    console.log('Hi')
+    const APP_WRAPPER_ID = 'app-wrapper'
+    console.log(WEB3_CONNECT_MODAL_ID)
+    const [injectedDiv] = document.getElementsByClassName(MODAL_CARD_CLASSNAME)
+    console.log(injectedDiv)
     const el = document.createElement('div')
     el.id = LEDGER_MODAL_ID
-    document.body.appendChild(el)
+    // document.body.appendChild(el)
+    // injectedDiv?.appendChild(el)
+    injectedDiv?.replaceChildren(el)
 
     ReactDOM.render(
-      <LedgerConnectorModal handleSelectIndex={(i: number) => console.log(i)} onClose={() => console.log('closed')} />,
+      <LedgerConnectorModal
+        handleSelectIndex={(i: number) => this.eventController.trigger(INDEX_SELECTED_EVENT, i)}
+        onClose={() => console.log('closed')}
+      />,
       document.getElementById(LEDGER_MODAL_ID)
     )
   }
