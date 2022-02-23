@@ -118,8 +118,6 @@ export class LedgerConnector extends AbstractConnector {
     const [injectedDiv] = document.getElementsByClassName(MODAL_CARD_CLASSNAME)
     const el = document.createElement('div')
     el.id = LEDGER_MODAL_ID
-    // document.body.appendChild(el)
-    // injectedDiv?.appendChild(el)
     injectedDiv?.replaceChildren(el)
     ReactDOM.render(
       <LedgerConnectorModal
