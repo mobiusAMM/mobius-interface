@@ -31,8 +31,7 @@ export const LedgerWalletSelector: React.FC<Props> = ({ handleSelectIndex }: Pro
       .fill(null)
       .map((_, i) => page * ADDRESSES_PER_PAGE + i)
     try {
-      const ledgerKit = await LedgerKit.init(NETWORK_CHAIN_ID, idxs)
-      setAddresses(ledgerKit.wallet.getAccounts())
+      setAddresses(await LedgerKit.getAddresses(NETWORK_CHAIN_ID, idxs))
     } catch (e) {
       setError(e.message)
     }

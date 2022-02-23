@@ -35,6 +35,17 @@ export class LedgerKit {
     }
   }
 
+  public static async getAddresses(chainId: ChainId, idxs: number[]) {
+    const transport = await TransportWebUSB.create()
+    try {
+      const wallet = await newLedgerWalletWithSetup(transport, idxs, undefined, AddressValidation.never)
+      return wallet.getAccounts()
+    } catch (e) {
+      transport.close()
+      throw e
+    }
+  }
+
   close = () => {
     if (this.closed) {
       return
