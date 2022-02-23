@@ -1,6 +1,6 @@
 import { JsonRpcProvider, StaticJsonRpcProvider, Web3Provider } from '@ethersproject/providers'
 import WalletConnectProvider from '@walletconnect/web3-provider'
-import { LedgerConnector } from 'connectors/ledger/LedgerConnector'
+import { LedgerConnector, LedgerKit } from 'connectors/ledger/LedgerConnector'
 import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Web3Modal from 'web3modal'
 
@@ -125,9 +125,9 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
           },
           connector: async (p, options) => {
             console.log('1')
-            // const ledgerKit = await LedgerKit.init(CHAIN, [options.index])
+            const ledgerKit = await LedgerKit.init(CHAIN, [options.index])
             console.log('2')
-            const re: LedgerConnector = new p()
+            const re: LedgerConnector = new p({ ledgerKit, chainID: CHAIN })
             console.log('before load')
             re.loadModal()
             console.log('before enable')
