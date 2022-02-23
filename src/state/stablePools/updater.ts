@@ -2,7 +2,7 @@ import { gql, useQuery } from '@apollo/client'
 import { Interface } from '@ethersproject/abi'
 import { JSBI, Percent } from '@ubeswap/sdk'
 import { useMemo } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useBlockNumber } from 'state/application/hooks'
 import {
   useMultipleContractSingleData,
@@ -17,7 +17,7 @@ import SWAP from '../../constants/abis/Swap.json'
 import { STATIC_POOL_INFO } from '../../constants/StablePools'
 import { useWeb3Context } from '../../hooks'
 import { useGaugeControllerContract, useMobiContract } from '../../hooks/useContract'
-import { AppDispatch } from '../index'
+import { AppDispatch, AppState } from '../index'
 import { updateGauges, updatePools } from './actions'
 import { GaugeOnlyInfo, PoolOnlyInfo, StableSwapConstants } from './reducer'
 
@@ -33,7 +33,11 @@ export function UpdateVariablePoolInfo(): null {
   const { connected, address } = useWeb3Context()
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()
-  const pools: StableSwapConstants[] = STATIC_POOL_INFO[CHAIN] ?? []
+  const pools: StableSwapConstants[] = useSelector((state: AppState) =>
+    Object.values(state.stablePools.pools)
+      .filter(({ rehydrate }) => rehydrate)
+      .map(({ pool }) => pool)
+  )
   const poolAddresses = pools.map(({ address }) => address)
   const lpTokenAddresses = pools.map(({ lpToken: { address } }) => address)
   const lpTotalSupplies = useMultipleContractSingleData(lpTokenAddresses, lpInterface, 'totalSupply')

@@ -95,7 +95,7 @@ export default function App() {
 
   return (
     <Suspense fallback={null}>
-      <AppWrapper giveSpace={location.pathname !== '/'}>
+      <AppWrapper giveSpace={location.pathname !== '/'} id="app-wrapper">
         {location.pathname !== '/' && (
           <>
             <URLWarning />
