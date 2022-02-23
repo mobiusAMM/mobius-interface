@@ -2,7 +2,7 @@ import { cUSD, Fraction, JSBI, Percent, Price, TokenAmount } from '@ubeswap/sdk'
 import Loader from 'components/Loader'
 import QuestionHelper from 'components/QuestionHelper'
 import { ChainLogo, Coins } from 'constants/StablePools'
-import { useActiveContractKit } from 'hooks'
+import { useWeb3Context } from 'hooks'
 import { useMobi } from 'hooks/Tokens'
 import { darken } from 'polished'
 import React, { useState } from 'react'
@@ -13,9 +13,9 @@ import styled from 'styled-components'
 import { getDepositValues } from 'utils/stableSwaps'
 import { getCUSDPrices, useCUSDPrice } from 'utils/useCUSDPrice'
 
-import { BIG_INT_SECONDS_IN_WEEK, BIG_INT_SECONDS_IN_YEAR } from '../../constants'
+import { BIG_INT_SECONDS_IN_WEEK, BIG_INT_SECONDS_IN_YEAR, CHAIN } from '../../constants'
 import { useColor, usePoolColor } from '../../hooks/useColor'
-import { useTokenPrices, useWalletModalToggle } from '../../state/application/hooks'
+import { useTokenPrices } from '../../state/application/hooks'
 import { StablePoolInfo } from '../../state/stablePools/hooks'
 import { theme, TYPE } from '../../theme'
 import { ButtonPrimary } from '../Button'
@@ -161,7 +161,7 @@ interface Props {
 }
 
 export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
-  const { account, chainId } = useActiveContractKit()
+  const { connect, connected } = useWeb3Context()
   const {
     tokens,
     peggedTo,
@@ -184,7 +184,7 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
   const history = useHistory()
 
   const mobi = useMobi()
-  const priceOfMobi = useCUSDPrice(mobi) ?? new Price(mobi, cUSD[chainId], '100', '1')
+  const priceOfMobi = useCUSDPrice(mobi) ?? new Price(mobi, cUSD[CHAIN], '100', '1')
   const userLP = poolInfo.amountDeposited
   const { totalValueDeposited, valueOfDeposited } = getDepositValues(poolInfo, workingSupply)
   const coinPrice = tokens.reduce(
@@ -257,7 +257,6 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
   const formatNumber = (num: string) => {
     return num.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
   }
-  const toggleWalletModal = useWalletModalToggle()
 
   const totalDisplay = (amount: TokenAmount): string => {
     if (coin === Coins.Bitcoin || coin === Coins.Ether) {
@@ -340,7 +339,7 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
             />
           )}
         </RowFixed>
-        {apy ? (
+        {apy && boostedApy ? (
           <RowFixed>
             <StyledNavLink
               style={{ fontSize: 15, textAlign: 'right' }}
@@ -352,14 +351,6 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
               w/ boost
             </StyledNavLink>
           </RowFixed>
-        ) : feesGenerated ? (
-          <TYPE.subHeader color={backgroundColorStart} className="apr" fontWeight={800} fontSize={[14, 18]}>
-            Fees Generated: {pegComesAfter ? '' : peggedTo}
-            {feesGenerated.denominator.toString() !== '0'
-              ? `${feesGenerated.toFixed(displayDecimals, { groupSeparator: ',' })}`
-              : '-'}
-            {pegComesAfter ? peggedTo : ''}
-          </TYPE.subHeader>
         ) : null}
       </SecondSection>
       <InfoContainer>
@@ -442,7 +433,7 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
                         </TYPE.black>
                       </RowBetween>
                     ))}
-                  {!!account && isStaking && (
+                  {connected && isStaking && (
                     <RowBetween>
                       <TYPE.darkGray fontWeight={500}>Your share</TYPE.darkGray>
                       <RowFixed>
@@ -472,7 +463,7 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
               <StyledButton
                 background={poolColor}
                 backgroundHover={poolColor}
-                onClick={account ? () => (isStaking ? setOpenManage(true) : setOpenDeposit(true)) : toggleWalletModal}
+                onClick={connected ? () => (isStaking ? setOpenManage(true) : setOpenDeposit(true)) : connect}
                 eth={coin === Coins.Ether}
                 style={{
                   width: '10%',
@@ -493,14 +484,14 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
           <StyledButton
             background={poolColor}
             backgroundHover={poolColor}
-            onClick={account ? () => setOpenDeposit(true) : toggleWalletModal}
+            onClick={connected ? () => setOpenDeposit(true) : connect}
             eth={coin === Coins.Ether}
             style={{ fontWeight: 700, fontSize: 18 }}
           >
             DEPOSIT
           </StyledButton>
         )}
-        {!!account && isStaking && (openManage || isMobile) && (
+        {connected && isStaking && (openManage || isMobile) && (
           <div
             style={{
               display: 'flex',

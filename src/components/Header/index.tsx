@@ -5,7 +5,7 @@ import usePrevious from 'hooks/usePrevious'
 import { darken } from 'polished'
 import React, { useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { Moon, Sun } from 'react-feather'
+import { ChevronLeft, ChevronRight, Moon, Sun } from 'react-feather'
 import Hamburger from 'react-hamburger-menu'
 import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
@@ -13,11 +13,11 @@ import { Text } from 'rebass'
 import { useAggregateUbeBalance, useTokenBalance } from 'state/wallet/hooks'
 import styled from 'styled-components'
 import { TYPE } from 'theme'
-import { ExternalLink } from 'theme/components'
 import { CountUp } from 'use-count-up'
 
 import Logo from '../../assets/svg/mobius.svg'
-import { useActiveContractKit } from '../../hooks'
+import { CHAIN } from '../../constants'
+import { useWeb3Context } from '../../hooks'
 import useTheme from '../../hooks/useTheme'
 import { useDarkModeManager } from '../../state/user/hooks'
 import Menu from '../Menu'
@@ -89,11 +89,6 @@ const HeaderElement = styled.div`
   `};
 `
 
-const HeaderElementWrap = styled.div`
-  display: flex;
-  align-items: center;
-`
-
 const HeaderRow = styled(RowFixed)`
   ${({ theme }) => theme.mediaWidth.upToMedium`
    width: 100%;
@@ -129,19 +124,6 @@ const HideSmall = styled.span`
     display: none;
   `};
 `
-
-// const NetworkCard = styled(YellowCard)`
-//   border-radius: 12px;
-//   padding: 8px 12px;
-//   ${({ theme }) => theme.mediaWidth.upToSmall`
-//     margin: 0;
-//     margin-right: 0.5rem;
-//     width: initial;
-//     overflow: hidden;
-//     text-overflow: ellipsis;
-//     flex-shrink: 1;
-//   `};
-// `
 
 const BalanceText = styled(Text)`
   ${({ theme }) => theme.mediaWidth.upToExtraSmall`
@@ -204,37 +186,6 @@ const StyledNavLink = styled(NavLink).attrs({
   }
 `
 
-const StyledExternalLink = styled(ExternalLink).attrs({
-  activeClassName,
-})<{ isActive?: boolean }>`
-  ${({ theme }) => theme.flexRowNoWrap}
-  align-items: left;
-  border-radius: 3rem;
-  outline: none;
-  cursor: pointer;
-  text-decoration: none;
-  color: ${({ theme }) => theme.text2};
-  font-size: 1rem;
-  width: fit-content;
-  margin: 0 12px;
-  font-weight: 500;
-
-  &.${activeClassName} {
-    border-radius: 12px;
-    font-weight: 600;
-    color: ${({ theme }) => theme.text1};
-  }
-
-  :hover,
-  :focus {
-    color: ${({ theme }) => darken(0.1, theme.text1)};
-  }
-
-  ${({ theme }) => theme.mediaWidth.upToExtraSmall`
-      display: none;
-`}
-`
-
 export const StyledMenuButton = styled.button`
   position: relative;
   width: 100%;
@@ -265,22 +216,18 @@ export const StyledMenuButton = styled.button`
   }
 `
 
-// const NETWORK_LABELS: { [chainId in ChainId]?: string } = {
-//   [ChainId.ALFAJORES]: 'Alfajores',
-//   [ChainId.BAKLAVA]: 'Baklava',
-// }
-
 export default function Header() {
-  const { account, chainId } = useActiveContractKit()
+  const { address, connected } = useWeb3Context()
   const { t } = useTranslation()
   const theme = useTheme()
-  const userCELOBalance = useTokenBalance(account ?? undefined, CELO[chainId])
+  const userCELOBalance = useTokenBalance(connected ? address : undefined, CELO[CHAIN])
   const [darkMode, toggleDarkMode] = useDarkModeManager()
   const [showUbeBalanceModal, setShowUbeBalanceModal] = useState<boolean>(false)
   const [toggleMenu, setToggleMenu] = useState<boolean>(false)
   const aggregateBalance: TokenAmount | undefined = useAggregateUbeBalance()
   const countUpValue = aggregateBalance?.toFixed(0) ?? '0'
   const countUpValuePrevious = usePrevious(countUpValue) ?? '0'
+  const [desktopExpand, setDesktopExpand] = useState(false)
 
   return (
     <HeaderFrame>
@@ -313,27 +260,12 @@ export default function Header() {
               <StyledNavLink id={`swap-nav-link`} to={'/swap'}>
                 {t('Swap')}
               </StyledNavLink>
-              <StyledNavLink id={`mint-nav-link`} to={'/mint'}>
-                {t('Mint')}
-              </StyledNavLink>
-              <StyledNavLink id={`migrate-nav-link`} to={'/opensum'}>
-                {t('Migrate')}
-              </StyledNavLink>
               <StyledNavLink
                 id={`pool-nav-link`}
                 to={'/pool'}
-                isActive={(match, { pathname }) =>
-                  Boolean(match) ||
-                  pathname.startsWith('/add') ||
-                  pathname.startsWith('/remove') ||
-                  pathname.startsWith('/create') ||
-                  pathname.startsWith('/find')
-                }
+                isActive={(match, { pathname }) => Boolean(match) || pathname.startsWith('/farm')}
               >
                 {t('Pool')}
-              </StyledNavLink>
-              <StyledNavLink id={`charts-nav-link`} to={'/charts'}>
-                {t('Charts')}
               </StyledNavLink>
               <StyledNavLink id={`swap-nav-link`} to={'/stake'}>
                 {t('Stake')}
@@ -341,12 +273,25 @@ export default function Header() {
               <StyledNavLink id={`vote-nav-link`} to={'/vote'}>
                 {t('Vote')}
               </StyledNavLink>
-              {/* <StyledExternalLink id="bridge-nav-link" target="_self" href="https://bridge.mobius.money/#/">
-                {t('Bridge')}
-              </StyledExternalLink> */}
               <StyledNavLink id={`swap-nav-link`} to={'/risk'}>
                 {t('Risks')}
               </StyledNavLink>
+              {desktopExpand ? (
+                <>
+                  <StyledNavLink id={`mint-nav-link`} to={'/mint'}>
+                    {t('Mint')}
+                  </StyledNavLink>
+                  <StyledNavLink id={`migrate-nav-link`} to={'/opensum'}>
+                    {t('Migrate')}
+                  </StyledNavLink>
+                  <StyledNavLink id={`charts-nav-link`} to={'/charts'}>
+                    {t('Charts')}
+                  </StyledNavLink>
+                  <ChevronLeft style={{ cursor: 'pointer' }} onClick={() => setDesktopExpand(false)} />
+                </>
+              ) : (
+                <ChevronRight style={{ cursor: 'pointer' }} onClick={() => setDesktopExpand(true)} />
+              )}
             </>
           )}
         </HeaderLinks>
@@ -355,8 +300,8 @@ export default function Header() {
         <HeaderElement>
           {aggregateBalance && (
             <UBEWrapper onClick={() => setShowUbeBalanceModal(true)}>
-              <UBEAmount active={!!account} style={{ pointerEvents: 'auto' }}>
-                {account && (
+              <UBEAmount active={connected} style={{ pointerEvents: 'auto' }}>
+                {connected && (
                   <HideSmall>
                     <TYPE.white
                       style={{
@@ -380,8 +325,8 @@ export default function Header() {
             </UBEWrapper>
           )}
 
-          <AccountElement active={!!account} style={{ pointerEvents: 'auto' }}>
-            {account && userCELOBalance ? (
+          <AccountElement active={connected} style={{ pointerEvents: 'auto' }}>
+            {connected && userCELOBalance ? (
               <BalanceText style={{ flexShrink: 0 }} pl="0.75rem" pr="0.5rem" fontWeight={500}>
                 {userCELOBalance?.toFixed(2, { groupSeparator: ',' }) ?? '0.00'} CELO
               </BalanceText>

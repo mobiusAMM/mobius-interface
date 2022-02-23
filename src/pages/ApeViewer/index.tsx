@@ -1,18 +1,12 @@
 import { ButtonConfirmed } from 'components/Button'
 import Card from 'components/Card'
 import React from 'react'
-import Countdown from 'react-countdown'
 import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { colors, TYPE } from '../../theme'
 
 const { primary1: mobiGreen, bg4 } = colors(false)
-
-const StyledCountdown = styled(Countdown)`
-  padding: 2rem;
-  font-size: 3rem;
-`
 
 const Container = styled.div`
   width: 100vw;
@@ -25,25 +19,6 @@ const Container = styled.div`
     margin-top: 0;
 `}
   overflow: none;
-`
-
-const Footer = styled.div`
-  display: flex;
-  justify-content: space-around;
-`
-
-const ExternalLink = styled.a`
-  margin: 0.5rem;
-  height: 3rem;
-  width: 3rem;
-  border-radius: 2rem;
-  background: white;
-  cursor: pointer;
-`
-
-const LogoContainer = styled.div`
-  width: min(25rem, 95%);
-  margin-top: 2rem;
 `
 
 export const StyledMenuButton = styled(NavLink)`
@@ -80,15 +55,6 @@ export const StyledMenuButton = styled(NavLink)`
   }
 `
 
-const Divider = styled.div`
-  width: 100%;
-  background: ${({ theme, show }) => show && theme.primary3};
-  height: 1px;
-  margin: auto;
-  margin-top: 1rem;
-  margin-bottom: 2.5rem;
-`
-
 export const ComingSoon = styled.a`
   text-align: center;
   display: flex;
@@ -122,11 +88,6 @@ export const ComingSoon = styled.a`
     stroke: ${({ theme }) => theme.text1};
   }
 `
-
-// const NETWORK_LABELS: { [chainId in ChainId]?: string } = {
-//   [ChainId.ALFAJORES]: 'Alfajores',
-//   [ChainId.BAKLAVA]: 'Baklava',
-// }
 
 const Image = styled.img`
   width: 10rem;
@@ -194,7 +155,7 @@ const MyButton = styled(ButtonConfirmed)`
 
 export default function ApeViewer() {
   const [apeIDs, setApeIDs] = React.useState<string[]>([])
-  const [id, setId] = React.useState<string>()
+  const [id, setId] = React.useState<string>('')
   // for (let i = 293; i < 393; i++) apeIDs.push(i)
   const addApes = () => {
     const val: string = id

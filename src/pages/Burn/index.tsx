@@ -1,9 +1,8 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { ChainId } from '@ubeswap/sdk'
 import { ButtonConfirmed } from 'components/Button'
 import { AutoColumn } from 'components/Column'
 import { STATIC_POOL_INFO } from 'constants/StablePools'
-import { useChainId } from 'hooks'
+import { useWeb3Context } from 'hooks'
 import { useFeeDistributor, usePoolProxy } from 'hooks/useContract'
 import React, { useState } from 'react'
 import { isMobile } from 'react-device-detect'
@@ -31,9 +30,9 @@ export default function BurnPage() {
   const poolProxy = usePoolProxy()
   const feeDistributor = useFeeDistributor()
   const addTransaction = useTransactionAdder()
-  const chainId = useChainId()
+  const { chainID } = useWeb3Context()
   const tokenSeen: Set<string> = new Set<string>()
-  const tokens: string[] = STATIC_POOL_INFO[chainId ?? ChainId.MAINNET]
+  const tokens: string[] = STATIC_POOL_INFO[chainID ?? chainID.MAINNET]
     .flatMap((el) => el.tokens.map((tok) => tok.address))
     .filter((el) => {
       if (tokenSeen.has(el)) return false

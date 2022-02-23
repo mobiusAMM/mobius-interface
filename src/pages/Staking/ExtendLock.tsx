@@ -7,18 +7,11 @@ import { Calendar } from 'react-date-range'
 import { Text } from 'rebass'
 import { useLockEnd } from 'state/staking/hooks'
 import { useIsDarkMode } from 'state/user/hooks'
-import styled from 'styled-components'
 
 import { ButtonError } from '../../components/Button'
-import { AutoColumn } from '../../components/Column'
-import { useActiveContractKit } from '../../hooks'
+import { useWeb3Context } from '../../hooks'
 import { useVotingEscrowContract } from '../../hooks/useContract'
 import { TYPE } from '../../theme'
-
-const ContentWrapper = styled(AutoColumn)`
-  width: 100%;
-  padding: 1rem;
-`
 
 const MILLISECONDS_PER_SECOND = 1000
 const SECONDS_PER_WEEK = 604800
@@ -29,7 +22,7 @@ interface WithdrawModalProps {
 }
 
 export default function ExtendLock({ setHash, setAttempting }: WithdrawModalProps) {
-  const { account } = useActiveContractKit()
+  const { connected } = useWeb3Context()
 
   // monitor call to help UI loading state
   const endOfLock = useLockEnd()
@@ -62,7 +55,7 @@ export default function ExtendLock({ setHash, setAttempting }: WithdrawModalProp
   }
 
   let error: string | undefined
-  if (!account) {
+  if (!connected) {
     error = 'Connect Wallet'
   }
 

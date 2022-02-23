@@ -1,4 +1,3 @@
-import { useContractKit, useGetConnectedSigner, useProvider } from '@celo-tools/use-contractkit'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
 import { JSBI, SwapParameters } from '@ubeswap/sdk'
@@ -7,13 +6,12 @@ import { useMemo } from 'react'
 import isZero from 'utils/isZero'
 
 import { BIPS_BASE, INITIAL_ALLOWED_SLIPPAGE } from '../constants'
-import { useStableSwapContract } from '../hooks/useContract'
 import { MobiusTrade } from '../state/swap/hooks'
 import { useTransactionAdder } from '../state/transactions/hooks'
-import { getStableSwapContract, isAddress, shortenAddress } from '../utils'
-import { useActiveContractKit } from './index'
+import { getStableSwapContract } from '../utils'
 import useENS from './useENS'
 import useTransactionDeadline from './useTransactionDeadline'
+import { useWeb3Context } from './web3'
 
 export enum SwapCallbackState {
   INVALID,
@@ -49,18 +47,16 @@ function useSwapCallArguments(
   allowedSlippage: number = INITIAL_ALLOWED_SLIPPAGE, // in bips
   recipientAddressOrName: string | null // the ENS name or address of the recipient of the trade, or null if swap should be returned to sender
 ): SwapCall[] {
-  const { address: account, network } = useContractKit()
-  const library = useProvider()
-  const chainId = network.chainId
+  const { provider, connected, address: account } = useWeb3Context()
 
   const { address: recipientAddress } = useENS(recipientAddressOrName)
   const recipient = recipientAddressOrName === null ? account : recipientAddress
   const deadline = useTransactionDeadline()
 
   return useMemo(() => {
-    if (!trade || !recipient || !library || !account || !chainId || !deadline) return []
+    if (!trade || !recipient || !provider || !connected || !deadline) return []
 
-    const contract = getStableSwapContract(trade.pool.address, library, account)
+    const contract = getStableSwapContract(trade.pool.address, provider, connected)
     const { indexFrom = 0, indexTo = 0 } = trade || {}
     const outputRaw = trade.output.raw
     const minDy = JSBI.subtract(outputRaw, JSBI.divide(outputRaw, JSBI.divide(BIPS_BASE, JSBI.BigInt(allowedSlippage))))
@@ -78,7 +74,7 @@ function useSwapCallArguments(
     const swapMethods = [swapCallParameters]
 
     return swapMethods.map((parameters) => ({ parameters, contract }))
-  }, [account, allowedSlippage, chainId, deadline, library, recipient, trade])
+  }, [allowedSlippage, connected, deadline, provider, recipient, trade])
 }
 
 // returns a function that will execute a swap, if the parameters are all valid
@@ -88,18 +84,15 @@ export function useSwapCallback(
   allowedSlippage: number = INITIAL_ALLOWED_SLIPPAGE, // in bips
   recipientAddressOrName: string | null // the ENS name or address of the recipient of the trade, or null if swap should be returned to sender
 ): { state: SwapCallbackState; callback: null | (() => Promise<string>); error: string | null } {
-  const { account, chainId, library } = useActiveContractKit()
+  const { address, connected, provider } = useWeb3Context()
 
   const swapCalls = useSwapCallArguments(trade, allowedSlippage, recipientAddressOrName)
 
   const addTransaction = useTransactionAdder()
-  const contract = useStableSwapContract(trade?.pool.address)
-  const { address: recipientAddress } = useENS(recipientAddressOrName)
-  const recipient = recipientAddressOrName === null ? account : recipientAddress
-  const getConnectedSigner = useGetConnectedSigner()
+  const recipient = address
 
   return useMemo(() => {
-    if (!trade || !library || !account || !chainId) {
+    if (!trade || !provider || !connected) {
       return { state: SwapCallbackState.INVALID, callback: null, error: 'Missing dependencies' }
     }
     if (!recipient) {
@@ -174,7 +167,7 @@ export function useSwapCallback(
           gasEstimate,
         } = successfulEstimation
 
-        const contract = disconnectedContract.connect(await getConnectedSigner())
+        const contract = disconnectedContract.connect(provider.getSigner())
         return contract[methodName](...args, {
           gasLimit: gasEstimate,
         })
@@ -185,14 +178,7 @@ export function useSwapCallback(
             const outputAmount = trade.output.toSignificant(6)
 
             const base = `Swap ${inputAmount} ${inputSymbol} for ${outputAmount} ${outputSymbol}`
-            const withRecipient =
-              recipient === account
-                ? base
-                : `${base} to ${
-                    recipientAddressOrName && isAddress(recipientAddressOrName)
-                      ? shortenAddress(recipientAddressOrName)
-                      : recipientAddressOrName
-                  }`
+            const withRecipient = base
 
             addTransaction(response, {
               summary: withRecipient,
@@ -213,15 +199,5 @@ export function useSwapCallback(
       },
       error: null,
     }
-  }, [
-    trade,
-    library,
-    account,
-    chainId,
-    recipient,
-    recipientAddressOrName,
-    swapCalls,
-    getConnectedSigner,
-    addTransaction,
-  ])
+  }, [trade, provider, connected, recipient, recipientAddressOrName, swapCalls, addTransaction])
 }

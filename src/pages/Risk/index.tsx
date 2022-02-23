@@ -1,16 +1,10 @@
 import React from 'react'
-import Countdown from 'react-countdown'
 import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { colors, TYPE } from '../../theme'
 
 const { primary1: mobiGreen, bg4 } = colors(false)
-
-const StyledCountdown = styled(Countdown)`
-  padding: 2rem;
-  font-size: 3rem;
-`
 
 const Container = styled.div`
   padding-top: 4rem;
@@ -23,25 +17,6 @@ const Container = styled.div`
     margin-top: 0;
 `}
   overflow: none;
-`
-
-const Footer = styled.div`
-  display: flex;
-  justify-content: space-around;
-`
-
-const ExternalLink = styled.a`
-  margin: 0.5rem;
-  height: 3rem;
-  width: 3rem;
-  border-radius: 2rem;
-  background: white;
-  cursor: pointer;
-`
-
-const LogoContainer = styled.div`
-  width: min(25rem, 95%);
-  margin-top: 2rem;
 `
 
 export const StyledMenuButton = styled(NavLink)`
@@ -80,7 +55,7 @@ export const StyledMenuButton = styled(NavLink)`
 
 const Divider = styled.div`
   width: 100%;
-  background: ${({ theme, show }) => show && theme.primary3};
+  background: ${({ theme }) => theme.primary3};
   height: 1px;
   margin: auto;
   margin-top: 1rem;
@@ -121,11 +96,6 @@ export const ComingSoon = styled.a`
   }
 `
 
-// const NETWORK_LABELS: { [chainId in ChainId]?: string } = {
-//   [ChainId.ALFAJORES]: 'Alfajores',
-//   [ChainId.BAKLAVA]: 'Baklava',
-// }
-
 export default function RiskPage() {
   return (
     <Container>
@@ -137,7 +107,7 @@ export default function RiskPage() {
         and understanding the risks involved with being a Liquidity Provider (LP) and/or using the AMM to trade pegged
         value crypto assets.
       </TYPE.subHeader>
-      <Divider show />
+      <Divider />
       <TYPE.largeHeader fontWeight={1000} fontSize={[24, 30]}>
         Audits
       </TYPE.largeHeader>

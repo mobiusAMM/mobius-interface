@@ -1,8 +1,7 @@
-import { useContractKit } from '@celo-tools/use-contractkit'
-import { ChainId } from '@ubeswap/sdk'
 import React, { useCallback, useContext } from 'react'
 import styled, { ThemeContext } from 'styled-components'
 
+import { CHAIN } from '../../constants'
 import { getExplorerLink } from '../../constants/NetworkInfo'
 import useENS from '../../hooks/useENS'
 import { ExternalLink, TYPE } from '../../theme'
@@ -66,17 +65,17 @@ const Input = styled.input<{ error?: boolean }>`
 
 export default function AddressInputPanel({
   id,
+  label,
   value,
   onChange,
 }: {
   id?: string
+  label?: string
   // the typed string value
   value: string
   // triggers whenever the typed value changes
   onChange: (value: string) => void
 }) {
-  const { network } = useContractKit()
-  const chainId = network.chainId as unknown as ChainId
   const theme = useContext(ThemeContext)
 
   const { address, loading, name } = useENS(value)
@@ -99,10 +98,10 @@ export default function AddressInputPanel({
           <AutoColumn gap="md">
             <RowBetween>
               <TYPE.black color={theme.text2} fontWeight={500} fontSize={14}>
-                Recipient
+                {label ?? 'To'}
               </TYPE.black>
-              {address && chainId && (
-                <ExternalLink href={getExplorerLink(chainId, name ?? address, 'address')} style={{ fontSize: '14px' }}>
+              {address && (
+                <ExternalLink href={getExplorerLink(CHAIN, name ?? address, 'address')} style={{ fontSize: '14px' }}>
                   (View on Celo Explorer)
                 </ExternalLink>
               )}
@@ -114,7 +113,7 @@ export default function AddressInputPanel({
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck="false"
-              placeholder="Wallet Address or ENS name"
+              placeholder="Address"
               error={error}
               pattern="^(0x[a-fA-F0-9]{40})$"
               onChange={handleInput}

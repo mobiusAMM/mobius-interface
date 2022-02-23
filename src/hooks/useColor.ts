@@ -1,7 +1,4 @@
-import * as UbeswapDefaultList from '@ubeswap/default-token-list'
-import * as UbeswapExperimentalList from '@ubeswap/default-token-list/ubeswap-experimental.token-list.json'
 import { ChainId, Token } from '@ubeswap/sdk'
-import { MultiChainIds } from 'constants/Optics'
 import { Coins, STATIC_POOL_INFO } from 'constants/StablePools'
 import Vibrant from 'node-vibrant'
 import { shade } from 'polished'
@@ -11,32 +8,15 @@ import { useTheme } from 'styled-components'
 import uriToHttp from 'utils/uriToHttp'
 import { hex } from 'wcag-contrast'
 
-const ethColor = '#5ca6ce'
-const celoColor = '#FBCC5C'
-const polygonColor = '#8247e5'
-
-export const networkColors: { [id in MultiChainIds]: string } = {
-  [MultiChainIds.ETHEREUM]: ethColor,
-  [MultiChainIds.CELO]: celoColor,
-  [MultiChainIds.POLYGON]: polygonColor,
-  [MultiChainIds.BAKLAVA]: celoColor,
-  [MultiChainIds.KOVAN]: ethColor,
-  [MultiChainIds.RINKEBY]: ethColor,
-  [MultiChainIds.ALFAJORES]: celoColor,
-}
-
 const images: Record<string, string> = {}
 
 const stablePoolTokens = Object.values(STATIC_POOL_INFO)
   .flatMap((pools) => pools)
   .flatMap(({ tokens }) => tokens)
 
-UbeswapDefaultList.tokens
-  .concat(UbeswapExperimentalList.tokens)
-  .concat(stablePoolTokens)
-  .forEach((token) => {
-    images[token.address] = token.logoURI
-  })
+stablePoolTokens.forEach((token) => {
+  images[token.address] = token.logoURI ?? ''
+})
 
 async function getColorFromToken(token: Token): Promise<string | null> {
   if (token.chainId === ChainId.ALFAJORES && token.address === '0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735') {

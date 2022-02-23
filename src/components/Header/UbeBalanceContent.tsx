@@ -1,4 +1,3 @@
-import { ChainId } from '@ubeswap/sdk'
 import Loader from 'components/Loader'
 import QuestionHelper from 'components/QuestionHelper'
 import { useMobi } from 'hooks/Tokens'
@@ -8,8 +7,8 @@ import styled from 'styled-components'
 import { useCUSDPrice } from 'utils/useCUSDPrice'
 
 import tokenLogo from '../../assets/images/MOBI-200.png'
-import { UBE } from '../../constants'
-import { useActiveContractKit } from '../../hooks'
+import { CHAIN, MOBI } from '../../constants'
+import { useWeb3Context } from '../../hooks'
 import { useAggregateUbeBalance } from '../../state/wallet/hooks'
 import { ExternalLink, TYPE, UbeTokenAnimated } from '../../theme'
 import { AutoColumn } from '../Column'
@@ -41,14 +40,10 @@ const StyledClose = styled(X)`
  * Content for balance stats modal
  */
 export default function UbeBalanceContent({ setShowUbeBalanceModal }: { setShowUbeBalanceModal: any }) {
-  const { account, chainId } = useActiveContractKit()
-  const ube = chainId ? UBE[chainId] : undefined
+  const { connected } = useWeb3Context()
+  const ube = MOBI[CHAIN]
 
   const total = useAggregateUbeBalance()
-  // const ubeBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, ube)
-  // const ubeToClaim: TokenAmount | undefined = useTotalUbeEarned()
-
-  // const totalSupply: TokenAmount | undefined = useTotalSupply(ube)
   const mobi = useMobi()
   const mobiprice = useCUSDPrice(mobi)
   const ret = useCirculatingSupply()
@@ -64,7 +59,7 @@ export default function UbeBalanceContent({ setShowUbeBalanceModal }: { setShowU
           </RowBetween>
         </CardSection>
         <Break />
-        {account && (
+        {connected && (
           <>
             <CardSection gap="sm">
               <AutoColumn gap="md" justify="center">
@@ -73,25 +68,7 @@ export default function UbeBalanceContent({ setShowUbeBalanceModal }: { setShowU
                   {total?.toFixed(2, { groupSeparator: ',' })}
                 </TYPE.white>
               </AutoColumn>
-              {/* <AutoColumn gap="md">
-                <RowBetween>
-                  <TYPE.white color="white">Balance:</TYPE.white>
-                  <TYPE.white color="white">{ubeBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
-                </RowBetween>
-                {/* <RowBetween>
-                  <TYPE.white color="white">Unclaimed:</TYPE.white>
-                  <TYPE.white color="white">
-                    {ubeToClaim?.toFixed(4, { groupSeparator: ',' })}{' '}
-                    {ubeToClaim && ubeToClaim.greaterThan('0') && (
-                      <StyledInternalLink onClick={() => setShowUbeBalanceModal(false)} to="/farm">
-                        (claim)
-                      </StyledInternalLink>
-                    )}
-                  </TYPE.white>
-                </RowBetween> */}
-              {/* </AutoColumn> */}
             </CardSection>
-            {/* <Break /> */}
           </>
         )}
         <CardSection gap="sm">
@@ -103,7 +80,7 @@ export default function UbeBalanceContent({ setShowUbeBalanceModal }: { setShowU
             <RowBetween>
               <RowFixed>
                 <TYPE.white color="white">MOBI in circulation</TYPE.white>
-                <QuestionHelper text={'Total minted supply - treasury - unvested - staked'} />
+                <QuestionHelper text={'Total minted supply - treasury - unreleased'} />
               </RowFixed>
               <TYPE.white color="white">{ret?.supply?.toFixed(0, { groupSeparator: ',' }) ?? <Loader />}</TYPE.white>
             </RowBetween>
@@ -115,21 +92,21 @@ export default function UbeBalanceContent({ setShowUbeBalanceModal }: { setShowU
               <TYPE.white color="white">Total Supply</TYPE.white>
               <TYPE.white color="white">1,000,000,000</TYPE.white>
             </RowBetween>
-            {ube && ube.chainId === ChainId.MAINNET ? (
+            {ube && (
               <ExternalLink href={`https://info.ubeswap.org/token/${ube.address}`}>
                 View MOBI Analytics on Ubeswap
               </ExternalLink>
-            ) : null}
-            {ube && ube.chainId === ChainId.MAINNET ? (
+            )}
+            {ube && (
               <ExternalLink href={`https://nomics.com/assets/mobi3-mobius-money`}>View MOBI on Nomics</ExternalLink>
-            ) : null}
-            {ube && ube.chainId === ChainId.MAINNET ? (
+            )}
+            {ube && (
               <ExternalLink
                 href={`https://app.ubeswap.org/#/swap?outputCurrency=0x73a210637f6f6b7005512677ba6b3c96bb4aa44b`}
               >
                 Trade MOBI on Ubeswap
               </ExternalLink>
-            ) : null}
+            )}
           </AutoColumn>
         </CardSection>
         <CardNoise />

@@ -5,7 +5,6 @@ import application from './application/reducer'
 import burn from './burn/reducer'
 import claim from './claim/reducer'
 import { updateVersion } from './global/actions'
-import lists from './lists/reducer'
 import logs from './logs/slice'
 import mento from './mento/reducer'
 import mentoPools from './mentoPools/reducer'
@@ -18,7 +17,7 @@ import swap from './swap/reducer'
 import transactions from './transactions/reducer'
 import user from './user/reducer'
 
-const PERSISTED_KEYS: string[] = ['user', 'transactions', 'lists']
+const PERSISTED_KEYS: string[] = ['user', 'transactions']
 
 const store = configureStore({
   reducer: {
@@ -29,7 +28,6 @@ const store = configureStore({
     mint,
     burn,
     multicall,
-    lists,
     stablePools,
     mentoPools,
     mento,

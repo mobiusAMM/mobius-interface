@@ -3,7 +3,7 @@ import { ButtonEmpty, ButtonPrimary } from 'components/Button'
 import { AutoColumn } from 'components/Column'
 import Loader from 'components/Loader'
 import { RowBetween, RowFixed } from 'components/Row'
-import { useActiveContractKit } from 'hooks'
+import { useWeb3Context } from 'hooks'
 import { useFeeDistributor, useStakingContract } from 'hooks/useContract'
 import React, { useState } from 'react'
 import { useFeeInformation, useSNXRewardInfo } from 'state/staking/hooks'
@@ -119,7 +119,7 @@ export default function VeMobiRewards() {
   const { rewardToken, rewardRate, avgApr, userRewardRate, leftToClaim, snxAddress } = useSNXRewardInfo()
   const { totalFeesThisWeek, totalFeesNextWeek } = useFeeInformation()
   const tokenColor = '#ab9325' //useColor(rewardToken)
-  const { account } = useActiveContractKit()
+  const { connected, address: account } = useWeb3Context()
   const stakingContract = useStakingContract(snxAddress)
   const addTransaction = useTransactionAdder()
   const [attempting, setAttempting] = useState(false)
@@ -225,12 +225,11 @@ export default function VeMobiRewards() {
               </TYPE.darkGray>
             </RowFixed>
 
-            <TYPE.black
-              textAlign="right"
-              fontSize={[13, 16]}
-              fontWeight={800}
-              color={tokenColor}
-            >{`${userRewardRate.toSignificant(4, { groupSeparator: ',' })} ${rewardToken.symbol} / WEEK`}</TYPE.black>
+            <TYPE.black textAlign="right" fontSize={[13, 16]} fontWeight={800} color={tokenColor}>
+              {userRewardRate
+                ? `${userRewardRate?.toSignificant(4, { groupSeparator: ',' })} ${rewardToken.symbol} / WEEK`
+                : '--'}
+            </TYPE.black>
           </SecondSection>
           <Divider />
           <>
@@ -244,7 +243,7 @@ export default function VeMobiRewards() {
                 <TYPE.largeHeader>{`${leftToClaim.toSignificant(4, { groupSeparator: ',' })} ${
                   rewardToken.symbol
                 }`}</TYPE.largeHeader>
-              ) : account ? (
+              ) : connected ? (
                 <Loader />
               ) : (
                 <TYPE.red>Connect Wallet</TYPE.red>
