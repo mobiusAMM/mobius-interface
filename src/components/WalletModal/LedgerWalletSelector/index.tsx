@@ -17,42 +17,7 @@ type LedgerConnectorModalProps = {
   onClose: () => any
 }
 
-const ModalDiv = styled.div<{ offset: number; show?: boolean; opacity: number }>`
-  padding: 1rem;
-  border-radius: 1rem;
-  transition: opacity 0.1s ease-in-out;
-  text-align: center;
-  position: fixed;
-  width: min(50vw, 500px);
-  height: min(50vw, 500px);
-  top: 40vh;
-  left: 50%;
-  z-index: 2;
-  will-change: opacity;
-  background-color: ${({ opacity }) => {
-    let alpha = 0.4
-    if (typeof opacity === 'number') {
-      alpha = opacity
-    }
-    return `rgba(0, 0, 0, ${alpha})`
-  }};
-  opacity: ${({ show }) => (show ? 1 : 0)};
-  visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
-  pointer-events: ${({ show }) => (show ? 'auto' : 'none')};
-  justify-content: center;
-  align-items: center;
-  & * {
-    box-sizing: border-box !important;
-  }
-`
-
-export default function LedgerConnectorModal({ handleSelectIndex, onClose }: LedgerConnectorModalProps) {
-  const [showModal, setShowModal] = useState(true)
-  window.setShowLedgerModal = async (b: boolean) => {
-    console.log(b)
-    setShowModal(b)
-  }
-
+export default function LedgerConnectorModal({ handleSelectIndex }: LedgerConnectorModalProps) {
   return <LedgerWalletSelector handleSelectIndex={handleSelectIndex} />
 }
 
@@ -61,7 +26,6 @@ export const LedgerWalletSelector: React.FC<Props> = ({ handleSelectIndex }: Pro
   const [kit, setKit] = useState<LedgerKit | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState<number>(0)
-
   const connectToLedger = useCallback(async () => {
     setError(null)
     const idxs = Array(ADDRESSES_PER_PAGE)
@@ -81,7 +45,6 @@ export const LedgerWalletSelector: React.FC<Props> = ({ handleSelectIndex }: Pro
       await connectToLedger()
     })()
   }, [connectToLedger])
-
   return (
     <LedgerCard>
       <Heading>Connect to Ledger</Heading>

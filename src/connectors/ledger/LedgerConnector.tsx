@@ -56,7 +56,6 @@ export class LedgerConnector extends AbstractConnector {
   }
 
   public async activate(connectedKit?: { kit: LedgerKit; index: number }): Promise<ConnectorUpdate> {
-    console.log('Activating')
     if (connectedKit) {
       this.kit = connectedKit.kit
       this.index = connectedKit.index
@@ -111,7 +110,6 @@ export class LedgerConnector extends AbstractConnector {
     // document.body.appendChild(el)
     // injectedDiv?.appendChild(el)
     injectedDiv?.replaceChildren(el)
-
     ReactDOM.render(
       <LedgerConnectorModal
         handleSelectIndex={(i: number) => this.eventController.trigger(INDEX_SELECTED_EVENT, i)}
