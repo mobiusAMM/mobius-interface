@@ -11,7 +11,7 @@ import LedgerConnectorModal from 'components/WalletModal/LedgerWalletSelector'
 import React from 'react'
 import * as ReactDOM from 'react-dom'
 import { EventController } from 'utils/EventController'
-import { MODAL_CARD_CLASSNAME, WEB3_CONNECT_MODAL_ID } from 'web3modal'
+import { MODAL_CARD_CLASSNAME } from 'web3modal'
 
 import { NETWORK_CHAIN_ID } from '..'
 
@@ -51,16 +51,16 @@ export class LedgerConnector extends AbstractConnector {
   private eventController: EventController = new EventController()
   private show = false
 
-  constructor(connectedKit?: { kit: LedgerKit; index: number }) {
+  constructor() {
     super({ supportedChainIds: [NETWORK_CHAIN_ID] })
+  }
+
+  public async activate(connectedKit?: { kit: LedgerKit; index: number }): Promise<ConnectorUpdate> {
+    console.log('Activating')
     if (connectedKit) {
       this.kit = connectedKit.kit
       this.index = connectedKit.index
     }
-  }
-
-  public async activate(): Promise<ConnectorUpdate> {
-    console.log('Activating')
     if (this.kit && this.index !== null) {
       return {
         provider: this.kit.kit.web3.currentProvider,
@@ -105,11 +105,7 @@ export class LedgerConnector extends AbstractConnector {
   }
 
   public loadModal() {
-    console.log('Hi')
-    const APP_WRAPPER_ID = 'app-wrapper'
-    console.log(WEB3_CONNECT_MODAL_ID)
     const [injectedDiv] = document.getElementsByClassName(MODAL_CARD_CLASSNAME)
-    console.log(injectedDiv)
     const el = document.createElement('div')
     el.id = LEDGER_MODAL_ID
     // document.body.appendChild(el)

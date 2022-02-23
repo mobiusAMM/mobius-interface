@@ -120,20 +120,12 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
             description: 'Connect to your Celo Ledger Wallet',
           },
           package: LedgerConnector,
-          options: {
-            index: 0,
-          },
-          connector: async (p, options) => {
-            console.log('1')
-            const ledgerKit = await LedgerKit.init(CHAIN, [options.index])
-            console.log('2')
-            const re: LedgerConnector = new p({ ledgerKit, chainID: CHAIN })
-            console.log('before load')
+          connector: async (p) => {
+            const re: LedgerConnector = new p()
             re.loadModal()
-            console.log('before enable')
-            await re.enable()
-            console.log('exited enable')
-            return (await re.activate()).provider
+            const index = await re.enable()
+            const ledgerKit = await LedgerKit.init(CHAIN, [index])
+            return (await re.activate({ kit: ledgerKit, index })).provider
           },
         },
       },
