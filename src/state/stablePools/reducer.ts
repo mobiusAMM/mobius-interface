@@ -93,6 +93,7 @@ export type StableSwapPool = StableSwapConstants & StableSwapVariable
 export interface PoolState {
   readonly pools: {
     [address: string]: {
+      rehydrate?: boolean
       pool: StableSwapPool | StableSwapConstants
       math: StableSwapMath | undefined
       pair?: PairStableSwap | undefined
@@ -115,6 +116,7 @@ const initialState: PoolState = {
       [cur.address.toLowerCase()]: {
         pool: {
           ...cur,
+          rehydrate: true,
           balances: Array(cur.tokenAddresses.length).fill(ZERO),
           userStaked: ZERO,
           totalStakedAmount: ZERO,

@@ -15,6 +15,7 @@ import { ButtonSecondary } from '../Button'
 import Identicon from '../Identicon'
 import Loader from '../Loader'
 import { RowBetween } from '../Row'
+import WalletModal from '../WalletModal'
 
 const Web3StatusGeneric = styled(ButtonSecondary)`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -182,7 +183,7 @@ export default function Web3Status() {
   return (
     <>
       <Web3StatusInner />
-      {/* <WalletModal ENSName={undefined} pendingTransactions={pending} confirmedTransactions={confirmed} /> */}
+      <WalletModal ENSName={undefined} pendingTransactions={pending} confirmedTransactions={confirmed} />
     </>
   )
 }
