@@ -145,6 +145,7 @@
     "lodash": "^4.17.21",
     "randombytes": "^2.1.0",
     "react-circular-progressbar": "^2.0.4",
+    "react-countdown": "^2.3.2",
     "react-date-range": "^1.4.0",
     "react-hamburger-menu": "^1.2.1",
     "react-responsive": "^9.0.0-beta.4",
