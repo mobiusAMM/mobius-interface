@@ -16,6 +16,8 @@ export const PROPOSAL_LENGTH_IN_BLOCKS = 40_320
 export const PROPOSAL_LENGTH_IN_SECS = AVERAGE_BLOCK_TIME_IN_SECS * PROPOSAL_LENGTH_IN_BLOCKS
 
 export const weiScale = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18))
+export const FEE_DISTRIBUTOR = '0xeF4788e8C79c5B2dc1d70484C86161102879b0cc'
+export const POOL_PROXY = '0x1bc2DbB8c4d04AaCF4A7fefcDB060766964B5237'
 
 // used for display in the default list when adding liquidity
 export const SUGGESTED_BASES: ChainTokenList = {}
@@ -50,3 +52,4 @@ export const ZERO_PERCENT = new Percent('0')
 export const ONE_HUNDRED_PERCENT = new Percent('1')
 
 export const NOM_REGISTRY_ADDRESS = '0x3DE51c3960400A0F752d3492652Ae4A0b2A36FB3'
+export const SECONDS_IN_WEEK = 7 * 24 * 60 * 60
