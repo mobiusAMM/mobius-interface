@@ -1,6 +1,7 @@
 import { parseUnits } from '@ethersproject/units'
 import { JSBI, Percent, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
 import { IExchangeInfo } from 'constants/pools'
+import { calculateEstimatedSwapOutputAmount, calculateSwapPrice } from 'lib/calculator'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useCurrentPool, usePools } from 'state/mobiusPools/hooks'
@@ -101,16 +102,12 @@ function calcInputOutput(
   if (!input && !output) {
     return [undefined, undefined, undefined]
   }
-  const tokens = poolInfo.reserves.map(({ token }) => token)
   if (!output) {
     return [parsedAmount, undefined, undefined]
   }
   if (!input) {
     return [undefined, parsedAmount, undefined]
   }
-
-  const indexFrom = tokens.map(({ address }) => address).indexOf(input.address)
-  const indexTo = tokens.map(({ address }) => address).indexOf(output.address)
 
   const details: [TokenAmount | undefined, TokenAmount | undefined, TokenAmount | undefined] = [
     undefined,
@@ -121,9 +118,9 @@ function calcInputOutput(
   invariant(parsedAmount)
 
   details[0] = parsedAmount
-  const [expectedOut, fee] = math.calculateSwap(indexFrom, indexTo, parsedAmount.raw, math.calc_xp())
-  details[1] = new TokenAmount(output, expectedOut)
-  details[2] = new TokenAmount(input, fee)
+  const { fee, outputAmount } = calculateEstimatedSwapOutputAmount(poolInfo, parsedAmount)
+  details[1] = outputAmount
+  details[2] = fee
 
   return details
 }
@@ -179,6 +176,8 @@ export function useMobiusTradeInfo(): {
     inputError = inputError ?? 'Pool Info Loading'
   }
 
+  console.log(pool)
+
   if (pool && JSBI.equal(pool.lpTotalSupply.raw, JSBI.BigInt('0'))) {
     inputError = inputError ?? 'Insufficient Liquidity'
   }
@@ -213,12 +212,12 @@ export function useMobiusTradeInfo(): {
 
   const tradeData = calcInputOutput(inputCurrency, outputCurrency, parsedAmount, pool)
 
-  const basisTrade = calcInputOutput(inputCurrency, outputCurrency, tryParseAmount('1', inputCurrency), pool)
+  const basisPrice = calculateSwapPrice(pool)
   const input = tradeData[0]
   const output = tradeData[1]
   const fee = tradeData[2]
 
-  if (!input || !output || !fee || !basisTrade[0] || !basisTrade[1]) {
+  if (!input || !output || !fee || !basisPrice) {
     return {
       currencies,
       currencyBalances,
@@ -233,7 +232,6 @@ export function useMobiusTradeInfo(): {
   }
 
   const executionPrice = new Price(inputCurrency, outputCurrency, input?.raw, output?.raw)
-  const basisPrice = new Price(inputCurrency, outputCurrency, basisTrade[0]?.raw, basisTrade[1]?.raw)
   const priceImpactFraction = basisPrice.subtract(executionPrice).divide(basisPrice)
   const priceImpact = new Percent(priceImpactFraction.numerator, priceImpactFraction.denominator)
 

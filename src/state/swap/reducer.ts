@@ -44,9 +44,6 @@ export default createReducer<SwapState>(initialState, (builder) =>
         if (!!state[Field.INPUT].currencyId && !!state[Field.OUTPUT].currencyId) {
           return {
             ...state,
-            [otherField]: {
-              currencyId: undefined,
-            },
             [field]: {
               currencyId: currencyId,
             },
