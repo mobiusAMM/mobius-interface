@@ -5,7 +5,7 @@ import { toUtf8String, Utf8ErrorFuncs } from '@ethersproject/strings'
 import { formatUnits } from '@ethersproject/units'
 // eslint-disable-next-line no-restricted-imports
 import { TokenAmount } from '@ubeswap/sdk'
-import { abi as GOV_ABI } from '@uniswap/governance/build/GovernorAlpha.json'
+import GOV_ABI from '@uniswap/governance/build/GovernorAlpha.json'
 import { useWeb3Context } from 'hooks'
 import { useGovernanceContract, useVotingEscrowContract } from 'hooks/useContract'
 import { useCallback, useMemo } from 'react'
@@ -57,7 +57,7 @@ export enum ProposalState {
   EXECUTED,
 }
 
-const GovernanceInterface = new Interface(GOV_ABI)
+const GovernanceInterface = new Interface(GOV_ABI.abi)
 
 // get count of all proposals made in the governor contract
 function useProposalCount(contract: Contract | null): number | undefined {
