@@ -1,8 +1,7 @@
 import { createReducer, current } from '@reduxjs/toolkit'
-import { Fraction, Percent, Token } from '@ubeswap/sdk'
+import { Fraction, JSBI, Percent, Token } from '@ubeswap/sdk'
 import { NETWORK_CHAIN_ID } from 'connectors'
 import { Chain, Coins, STATIC_POOL_INFO } from 'constants/StablePools'
-import JSBI from 'jsbi'
 import { PairStableSwap } from 'utils/StablePairMath'
 import { StableSwapMath } from 'utils/stableSwapMath'
 

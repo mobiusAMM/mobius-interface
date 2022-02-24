@@ -185,7 +185,7 @@
     "web3-utils": "^1.5.2",
     "web3modal": "^1.9.5"
   },
-  "packageManager": "yarn@3.1.1",
+  "packageManager": "yarn@3.2.0",
   "lint-staged": {
     "*.{js,ts,tsx}": "eslint --cache --fix",
     "*.{html,md,graphql,json,yaml,yml}": "prettier --write"
