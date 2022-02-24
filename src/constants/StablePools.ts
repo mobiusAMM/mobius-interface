@@ -8,19 +8,6 @@ import ethLogo from '../assets/images/ethereum-chain-logo.png'
 import polygonLogo from '../assets/images/polygon-chain-logo.png'
 import terraLogo from '../assets/images/terra-logo.png'
 
-const mobiToken = (chainId: number, address: string) =>
-  new WrappedTokenInfo(
-    {
-      chainId,
-      address,
-      decimals: 18,
-      symbol: 'MOBI',
-      name: 'Mobius DAO Token',
-      logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_MOBI.png',
-    },
-    []
-  )
-
 export enum Coins {
   Bitcoin,
   Ether,
@@ -98,12 +85,6 @@ export const MOBIUS_MINTER_ADDRESS: { [K in ChainId]: string } = {
   [ChainId.MAINNET]: '0x5F0200CA03196D5b817E2044a0Bb0D837e0A7823',
   [ChainId.ALFAJORES]: '0x5c212FA1cf8b1143f2142C26161e65404034c01f',
   [ChainId.BAKLAVA]: '',
-}
-
-export const MOBI_TOKEN: { [K in ChainId]: Token | undefined } = {
-  [ChainId.MAINNET]: mobiToken(ChainId.MAINNET, '0x73a210637f6F6B7005512677Ba6B3C96bb4AA44B'),
-  [ChainId.ALFAJORES]: mobiToken(ChainId.ALFAJORES, '0x6dDcbC22c1ED5D0662635ffb020c82DF4e1Ba234'),
-  [ChainId.BAKLAVA]: undefined,
 }
 
 export const GAUGE_CONTROLLER: { [K in ChainId]: string } = {
