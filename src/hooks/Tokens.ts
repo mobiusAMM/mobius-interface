@@ -1,12 +1,28 @@
 import { Token } from '@ubeswap/sdk'
 import { MENTO_POOL_INFO } from 'constants/mento'
-import { StablePools } from 'constants/pools'
+import { IExchange, StablePools } from 'constants/pools'
 import { stableToToken } from 'state/mentoPools/hooks'
 import { dedupeTokens } from 'utils/tokens'
 
 import { CHAIN } from '../constants'
 import { CELO, ExternalRewards, MOBI, VEMOBI } from '../constants/tokens'
 import { isAddress } from '../utils'
+
+function inPool(token: Token, pool: IExchange): boolean {
+  return pool.tokens.map((t) => t.address === token.address && t.chainId === token.chainId).includes(true)
+}
+
+export function useTokensTradeable(mento: boolean, tokenIn: Token | null | undefined): Token[] {
+  if (!tokenIn) return []
+  const pools = mento
+    ? tokenIn === CELO[CHAIN]
+      ? MENTO_POOL_INFO[CHAIN].map((m) => stableToToken(m.stable))
+      : [CELO[CHAIN]]
+    : StablePools[CHAIN].filter((display) => inPool(tokenIn, display.pool))
+        .flatMap((display) => display.pool.tokens)
+        .filter((token) => token !== tokenIn)
+  return dedupeTokens(pools)
+}
 
 export function useSwappableTokens(mento: boolean): Token[] {
   return dedupeTokens(mento ? getMentoTokens() : StablePools[CHAIN].flatMap((display) => display.pool.tokens))
