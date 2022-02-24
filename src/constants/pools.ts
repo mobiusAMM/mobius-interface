@@ -1,7 +1,7 @@
 import { ChainId, Percent, Token, TokenAmount } from '@ubeswap/sdk'
 import JSBI from 'jsbi'
 
-import { CUSD } from './tokens'
+import { CUSD, UST } from './tokens'
 
 export type Fees = {
   trade: Percent
@@ -119,8 +119,6 @@ export interface DisplayPool {
   warningType?: WarningType
 }
 
-const UST = new Token(ChainId.MAINNET, '0xEd193C4E69F591E42398eF54DEa65aa1bb02835c', 18, 'UST', 'UST')
-
 const recommendedFeesRaw = {
   adminFeeNumerator: '50',
   adminFeeDenominator: '100',
@@ -156,7 +154,7 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
           'MobLP',
           'Mobius cUSD/aUST LP'
         ),
-        tokens: [CUSD[ChainId.MAINNET], UST],
+        tokens: [CUSD[ChainId.MAINNET], UST[ChainId.MAINNET]],
       },
       gauge: {
         address: '0x107F94409746E8c8E6eFF139A100D17D9ca7FdfE',
