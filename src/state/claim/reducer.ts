@@ -1,5 +1,5 @@
 import { createReducer } from '@reduxjs/toolkit'
-import JSBI from 'jsbi'
+import { JSBI } from '@ubeswap/sdk'
 
 import { update } from './actions'
 

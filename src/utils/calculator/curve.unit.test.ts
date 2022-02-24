@@ -1,5 +1,5 @@
 import type { BigintIsh } from '@saberhq/token-utils'
-import JSBI from 'jsbi'
+import { JSBI } from '@ubeswap/sdk'
 
 import { computeD, computeY } from './curve'
 

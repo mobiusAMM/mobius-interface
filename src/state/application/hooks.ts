@@ -1,6 +1,5 @@
-import { Fraction } from '@ubeswap/sdk'
+import { Fraction, JSBI } from '@ubeswap/sdk'
 import { useWeb3Context } from 'hooks'
-import JSBI from 'jsbi'
 import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 

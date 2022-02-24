@@ -1,4 +1,5 @@
 import { ONE, ZERO } from '@saberhq/token-utils'
+import { JSBI } from '@ubeswap/sdk'
 import JSBI from 'jsbi'
 
 const N_COINS = JSBI.BigInt(2) // n

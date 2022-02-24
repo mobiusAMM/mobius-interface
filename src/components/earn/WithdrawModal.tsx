@@ -1,4 +1,4 @@
-import JSBI from 'jsbi'
+import { JSBI } from '@ubeswap/sdk'
 import { darken } from 'polished'
 import React, { useState } from 'react'
 import styled from 'styled-components'

@@ -1,9 +1,9 @@
 import { BigNumber } from '@ethersproject/bignumber'
 // eslint-disable-next-line no-restricted-imports
 import { TokenAmount } from '@ubeswap/sdk'
+import { JSBI } from '@ubeswap/sdk'
 import { CardNoise } from 'components/claim/styled'
 import useCurrentBlockTimestamp from 'hooks/useCurrentBlockTimestamp'
-import JSBI from 'jsbi'
 import { DateTime } from 'luxon/src/luxon'
 import React, { useState } from 'react'
 import { ArrowLeft } from 'react-feather'

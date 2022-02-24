@@ -1,8 +1,8 @@
 import type { BigintIsh } from '@saberhq/token-utils'
 import { Percent, Token as SToken, TokenAmount } from '@saberhq/token-utils'
 import { PublicKey } from '@solana/web3.js'
+import { JSBI } from '@ubeswap/sdk'
 import BN from 'bn.js'
-import JSBI from 'jsbi'
 import mapValues from 'lodash.mapvalues'
 
 import { SWAP_PROGRAM_ID } from '../constants'
