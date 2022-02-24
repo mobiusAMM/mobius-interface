@@ -1,6 +1,6 @@
 import { gql, useQuery } from '@apollo/client'
 import { Interface } from '@ethersproject/abi'
-import { TokenAmount } from '@ubeswap/sdk'
+import { JSBI, TokenAmount } from '@ubeswap/sdk'
 import { RECOMMENDED_AMP, RECOMMENDED_FEES, StablePools } from 'constants/pools'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
@@ -45,8 +45,6 @@ export function UpdatePools() {
   `
   const { data, loading, error } = useQuery(query)
 
-  console.log('data', lpTotalSupply[0]?.result?.[0].toString())
-
   useEffect(() => {
     if (loading) return
     const inSubgraph: Set<string> =
@@ -55,6 +53,7 @@ export function UpdatePools() {
       dispatch(
         updatePools({
           pools: stablePools.map((displayPool, i) => {
+            console.log(i, new TokenAmount(displayPool.pool.lpToken, JSBI.BigInt(lpTotalSupply[i]?.result?.[0]) ?? '0'))
             return {
               ...displayPool.pool,
               fees: RECOMMENDED_FEES,
@@ -62,7 +61,7 @@ export function UpdatePools() {
               ampFactor: RECOMMENDED_AMP,
               lpTotalSupply: new TokenAmount(
                 displayPool.pool.lpToken,
-                BigIntToJSBI(lpTotalSupply[i]?.result?.[0] as BigInt) ?? '0'
+                JSBI.BigInt(lpTotalSupply[i]?.result?.[0]) ?? '0'
               ),
               reserves: balances?.[i]?.result?.[0]
                 ? balances?.[i]?.result?.[0].map(

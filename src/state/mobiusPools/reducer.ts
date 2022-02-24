@@ -26,6 +26,9 @@ const initialState: Pools = {
 
 export default createReducer<Pools>(initialState, (builder) =>
   builder.addCase(updatePools, (state, { payload: { pools } }) => {
-    pools
+    return {
+      ...state,
+      pools: pools,
+    }
   })
 )

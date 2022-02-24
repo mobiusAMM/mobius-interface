@@ -136,7 +136,6 @@ export default function CalcBoost({ stakingInfo }: PositionsProps) {
   const stablePools = useStablePoolInfo()
   const { address, connected } = useWeb3Context()
   const { positions = [] } = stakingInfo
-  const loading = positions.length === 0
   const greaterThanZero = positions.filter(({ baseBalance }) => baseBalance.greaterThan('0'))
   const [openModal, setOpenModal] = useState(false)
   const mobi = useMobi()
