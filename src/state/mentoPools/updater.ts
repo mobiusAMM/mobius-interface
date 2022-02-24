@@ -1,5 +1,4 @@
-import { Connection } from '@celo/connect'
-import { CeloContract, ContractKit, StableToken } from '@celo/contractkit'
+import { CeloContract, newKitFromWeb3, StableToken } from '@celo/contractkit'
 import { JSBI } from '@ubeswap/sdk'
 import { Exchange } from 'generated'
 import { useEffect } from 'react'
@@ -17,7 +16,7 @@ import { MentoConstants } from './reducer'
 
 export function UpdateMento(): null {
   const web3 = new Web3('https://forno.celo.org')
-  const kit = new ContractKit(new Connection(web3))
+  const kit = newKitFromWeb3(web3)
   const { provider } = useWeb3Context()
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()

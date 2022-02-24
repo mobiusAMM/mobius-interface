@@ -29,27 +29,24 @@ module.exports = {
         throw new Error("Can't find HtmlWebpackPlugin");
       }
 
-      config.resolve.fallback = {
-        string_decoder: require.resolve("string_decoder/"),
-        stream: require.resolve("stream-browserify"),
-        path: false,
-        fs: false,
-        util: false,
-      };
-
-      config.plugins.unshift(
-        new webpack.ProvidePlugin({
-          Buffer: ["buffer", "Buffer"],
-          process: "process/browser",
-        })
-      );
-
-      config.module.rules.push({
-        test: /\.m?js/,
-        resolve: {
-          fullySpecified: false,
-        },
-      });
+      const fallback = config.resolve.fallback || {};
+      Object.assign(fallback, {
+          "crypto": require.resolve("crypto-browserify"),
+          "stream": require.resolve("stream-browserify"),
+          "assert": require.resolve("assert"),
+          "http": require.resolve("stream-http"),
+          "https": require.resolve("https-browserify"),
+          "os": require.resolve("os-browserify"),
+          "url": require.resolve("url"),
+          "path": require.resolve("path-browserify")
+      })
+      config.resolve.fallback = fallback;
+      config.plugins = (config.plugins || []).concat([
+          new webpack.ProvidePlugin({
+              process: 'process/browser',
+              Buffer: ['buffer', 'Buffer']
+          })
+      ])
 
       // config.plugins.push(
       //   new FaviconsWebpackPlugin({
@@ -92,8 +89,7 @@ module.exports = {
       //       },
       //     })
       //   );
-      
-
+    
       return config;
     },
   },

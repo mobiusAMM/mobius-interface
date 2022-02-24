@@ -1,13 +1,11 @@
-import { CeloContract } from '@celo/contractkit'
-import { Mainnet } from '@celo-tools/use-contractkit'
+// import { Mainnet } from '@celo-tools/use-contractkit'
 import { JsonRpcProvider, StaticJsonRpcProvider, Web3Provider } from '@ethersproject/providers'
 import WalletConnectProvider from '@walletconnect/web3-provider'
-import { CeloExtensionWalletConnector } from 'connectors/CeloExtensionWalletConnector'
+// import { CeloExtensionWalletConnector } from 'connectors/CeloExtensionWalletConnector'
 import { LedgerConnector, LedgerKit } from 'connectors/ledger/LedgerConnector'
 import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Web3Modal from 'web3modal'
 
-import Celo from '../../assets/svg/celo-logo.svg'
 import Ledger from '../../assets/svg/ledger.svg'
 import { CHAIN } from '../../constants'
 
@@ -136,19 +134,19 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
           },
         },
         //TODO: fix if on wrong chain
-        [CEW_ID]: {
-          display: {
-            logo: Celo,
-            name: 'Celo Extension Wallet',
-            description: 'Connect to your Celo Extension Wallet',
-          },
-          package: CeloExtensionWalletConnector,
-          connector: async (p) => {
-            const re: CeloExtensionWalletConnector = new p(Mainnet, CeloContract.GoldToken)
-            await re.initialise()
-            return re.kit.web3.currentProvider
-          },
-        },
+        // [CEW_ID]: {
+        //   display: {
+        //     logo: Celo,
+        //     name: 'Celo Extension Wallet',
+        //     description: 'Connect to your Celo Extension Wallet',
+        //   },
+        //   package: CeloExtensionWalletConnector,
+        //   connector: async (p) => {
+        //     const re: CeloExtensionWalletConnector = new p(Mainnet, CeloContract.GoldToken)
+        //     await re.initialise()
+        //     return re.kit.web3.currentProvider
+        //   },
+        // },
       },
     })
   )
