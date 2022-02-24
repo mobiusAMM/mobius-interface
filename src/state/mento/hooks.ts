@@ -2,14 +2,14 @@ import { parseUnits } from '@ethersproject/units'
 import { JSBI, Percent, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
 import { IMentoExchangeInfo } from 'constants/mento'
 import { CELO } from 'constants/tokens'
-import { useCallback } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import invariant from 'tiny-invariant'
 import {
   calculateEstimatedSwapInputAmount,
   calculateEstimatedSwapOutputAmount,
   calculateSwapPrice,
-} from 'utils/mentoCalculator'
+} from 'lib/mentoCalculator'
+import { useCallback } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import invariant from 'tiny-invariant'
 
 import { BIPS_BASE, CHAIN } from '../../constants'
 import { useWeb3Context } from '../../hooks'

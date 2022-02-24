@@ -1,5 +1,7 @@
-import { ONE, ZERO } from '@saberhq/token-utils'
 import JSBI from 'jsbi'
+
+const ZERO = JSBI.BigInt(0)
+const ONE = JSBI.BigInt(1)
 
 const N_COINS = JSBI.BigInt(2) // n
 

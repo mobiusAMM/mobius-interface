@@ -1,8 +1,7 @@
 import { Price, TokenAmount } from '@ubeswap/sdk'
-import BN from 'bn.js'
 
 import type { IExchangeInfo } from '../../constants/pools'
-import { calculateEstimatedSwapOutputAmount } from './'
+import { calculateEstimatedSwapOutputAmount } from '.'
 
 /**
  * Gets the price of the second token in the swap, i.e. "Token 1", with respect to "Token 0".
@@ -19,13 +18,11 @@ export const calculateSwapPrice = (exchangeInfo: IExchangeInfo): Price => {
   // or at most, $1
   const inputAmountNum = Math.max(
     10_000,
-    Math.min(10 ** reserve0.token.decimals, Math.floor(parseInt(reserve0.toU64().div(new BN(100)).toString())))
+    Math.min(10 ** reserve0.token.decimals, Math.floor(parseInt(reserve0.divide('100').toString())))
   )
 
-  const inputAmount = new TokenAmount(reserve0.token, inputAmountNum)
+  const inputAmount = new TokenAmount(reserve0.token, inputAmountNum.toString())
   const outputAmount = calculateEstimatedSwapOutputAmount(exchangeInfo, inputAmount)
 
-  const frac = outputAmount.outputAmountBeforeFees.asFraction.divide(inputAmount.asFraction)
-
-  return new Price(reserve0.token, reserve1.token, frac.denominator, frac.numerator)
+  return new Price(reserve0.token, reserve1.token, outputAmount.outputAmountBeforeFees.raw, inputAmount.raw)
 }
