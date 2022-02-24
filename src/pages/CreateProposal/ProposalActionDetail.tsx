@@ -81,7 +81,6 @@ export const ProposalActionDetail = ({
             onUserInput={(amount: string) => onAmountInput(amount)}
             onCurrencySelect={(currency: Token) => onCurrencySelect(currency)}
             showMaxButton={false}
-            showCommonBases={false}
             hideBalance={true}
             disableCurrencySelect={true}
             id="currency-input"

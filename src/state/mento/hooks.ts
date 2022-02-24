@@ -17,7 +17,7 @@ import { useCurrency } from '../../hooks/Tokens'
 import { isAddress } from '../../utils'
 import { AppDispatch, AppState } from '../index'
 import { tokenToStable, useCurrentPool, usePools } from '../mentoPools/hooks'
-import { useCurrencyBalances } from '../wallet/hooks'
+import { useTokenBalances } from '../wallet/hooks'
 import { Field, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 
 export function useSwapState(): AppState['mento'] {
@@ -161,7 +161,7 @@ export function useMentoTradeInfo(): {
   const pool = useCurrentPool(stable)
 
   const to: string | null = connected ? address : null
-  const relevantTokenBalances = useCurrencyBalances(connected ? address : undefined, [
+  const relevantTokenBalances = useTokenBalances(connected ? address : undefined, [
     inputCurrency ?? undefined,
     outputCurrency ?? undefined,
   ])

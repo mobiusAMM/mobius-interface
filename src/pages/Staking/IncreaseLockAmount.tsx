@@ -11,7 +11,7 @@ import React, { useState } from 'react'
 import { Text } from 'rebass'
 import { StablePoolInfo } from 'state/stablePools/hooks'
 import { useIsDarkMode } from 'state/user/hooks'
-import { useCurrencyBalance } from 'state/wallet/hooks'
+import { useTokenBalance } from 'state/wallet/hooks'
 import styled from 'styled-components'
 
 import { ButtonConfirmed, ButtonError } from '../../components/Button'
@@ -37,7 +37,7 @@ export default function IncreaseLockAmount({ setHash, setAttempting }: IncreaseL
 
   // monitor call to help UI loading state
   const mobi = useMobi()
-  const balance = useCurrencyBalance(connected ? address : undefined, mobi)
+  const balance = useTokenBalance(connected ? address : undefined, mobi)
   const [approving, setApproving] = useState(false)
   const [input, setInput] = useState<string>('')
   const selectedAmount = tryParseAmount(input, mobi) || new TokenAmount(mobi, '0')

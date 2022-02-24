@@ -8,7 +8,7 @@ import { darken } from 'polished'
 import React, { useCallback, useState } from 'react'
 import { tryParseAmount } from 'state/mento/hooks'
 import { MobiStakingInfo, useMobiStakingInfo } from 'state/staking/hooks'
-import { useCurrencyBalance } from 'state/wallet/hooks'
+import { useTokenBalance } from 'state/wallet/hooks'
 import styled from 'styled-components'
 import { theme, TYPE } from 'theme'
 import { calcEstimatedBoost, calcVotesForMaxBoost } from 'utils/calcExpectedVeMobi'
@@ -145,7 +145,7 @@ export default function CalcBoost({ stakingInfo }: PositionsProps) {
   const [veInput, setVEInput] = useState<string>('')
   const [pool, setPool] = useState<StablePoolInfo | undefined>(stablePools[0] ?? undefined)
   const lpBalance = pool ? pool.amountDeposited : new TokenAmount(mobi, JSBI.BigInt(0))
-  const veBalance = useCurrencyBalance(connected ? address : undefined, vemobi)
+  const veBalance = useTokenBalance(connected ? address : undefined, vemobi)
   const isDarkMode = useIsDarkMode()
   const color = useColor()
   const staking = useMobiStakingInfo()
