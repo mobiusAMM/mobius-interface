@@ -4,8 +4,8 @@ import { stableToToken } from 'state/mentoPools/hooks'
 import { dedupeTokens } from 'utils/tokens'
 
 import { CHAIN } from '../constants'
-import { MOBI_TOKEN, STATIC_POOL_INFO } from '../constants/StablePools'
-import { CELO, ExternalRewards, VEMOBI } from '../constants/tokens'
+import { STATIC_POOL_INFO } from '../constants/StablePools'
+import { CELO, ExternalRewards, MOBI, VEMOBI } from '../constants/tokens'
 import { isAddress } from '../utils'
 
 export function useSwappableTokens(mento: boolean): Token[] {
@@ -18,19 +18,7 @@ export function getMentoTokens(): Token[] {
   return MENTO_POOL_INFO[CHAIN].map((m) => stableToToken(m.stable)).concat(CELO[CHAIN])
 }
 
-export function useDefaultTokens(): { [address: string]: Token } {
-  return {}
-}
-
-export function useAllTokens(): { [address: string]: Token } {
-  return {}
-}
-
-export function useAllInactiveTokens(): { [address: string]: Token } {
-  return {}
-}
-
-function getAllTokens(): Token[] | null {
+export function getAllTokens(): Token[] | null {
   const StableTokensWithDup = STATIC_POOL_INFO[CHAIN].flatMap((pools) => pools.tokens)
   const MentoTokensWithDup = getMentoTokens()
   return dedupeTokens(MentoTokensWithDup.concat(StableTokensWithDup).concat(ExternalRewards[CHAIN]))
@@ -52,10 +40,10 @@ export function useCurrency(currencyId: string | undefined): Token | null {
   return token
 }
 
-export function useMobi(): Token | undefined {
-  return MOBI_TOKEN[CHAIN]
+export function useMobi(): Token {
+  return MOBI[CHAIN]
 }
 
-export function useVeMobi(): Token | undefined {
+export function useVeMobi(): Token {
   return VEMOBI[CHAIN]
 }

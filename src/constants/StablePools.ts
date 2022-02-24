@@ -1,4 +1,5 @@
 import { ChainId, JSBI, Token } from '@ubeswap/sdk'
+import BigNumber from 'bignumber.js'
 import { VestType } from 'state/claim/reducer'
 import { WrappedTokenInfo } from 'state/lists/hooks'
 
@@ -116,6 +117,10 @@ export const GAUGE_PROXY: { [K in ChainId]: string } = {
   [ChainId.ALFAJORES]: '',
   [ChainId.BAKLAVA]: '',
 }
+const weeklyEmissionToSeconds = (n: number) => {
+  const yearlyEmission = new BigNumber(`${n}e+18`).dividedBy(7 * 24 * 60 * 60)
+  return yearlyEmission.toFixed(0)
+}
 
 export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
   [ChainId.MAINNET]: [
@@ -167,7 +172,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       displayDecimals: 0,
       gaugeAddress: '0x107F94409746E8c8E6eFF139A100D17D9ca7FdfE',
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
-      additionalRewardRate: ['12000000000000000'], // ['14776041660000000'], //['18468900000000000'], // ['7302827380000000']
+      additionalRewardRate: [weeklyEmissionToSeconds(2268)], // ['14776041660000000'], //['18468900000000000'], // ['7302827380000000']
       displayChain: Chain.Terra,
       coin: Coins.USD,
     },
@@ -219,7 +224,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       displayDecimals: 0,
       gaugeAddress: '0xc96AeeaFF32129da934149F6134Aa7bf291a754E',
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
-      additionalRewardRate: ['23000000000000000'], // ['29552083330000000'], // ['36940104160000000'], // ['7302827380000000']
+      additionalRewardRate: [weeklyEmissionToSeconds(11088)], // ['29552083330000000'], // ['36940104160000000'], // ['7302827380000000']
       displayChain: Chain.Ethereum,
       coin: Coins.USD,
     },
@@ -271,7 +276,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       displayDecimals: 0,
       gaugeAddress: '0xE1f9D952EecC07cfEFa69df9fBB0cEF260957119',
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
-      additionalRewardRate: ['13300000000000000'], // ['14776041660000000'], //['18468900000000000'], // ['7302827380000000']
+      additionalRewardRate: [weeklyEmissionToSeconds(3780)], // ['14776041660000000'], //['18468900000000000'], // ['7302827380000000']
       displayChain: Chain.Ethereum,
       coin: Coins.USD,
     },
@@ -427,7 +432,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       displayDecimals: 0,
       gaugeAddress: '0x0A125D473cd3b1968e728DDF7d424c928C09222A',
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
-      additionalRewardRate: ['3050000000000000'], // ['7388020830000000'], //['11080000000000000'], // ['2190848200000000'],
+      additionalRewardRate: [weeklyEmissionToSeconds(2520)], // ['7388020830000000'], //['11080000000000000'], // ['2190848200000000'],
       displayChain: Chain.Polygon,
       coin: Coins.USD,
     },
@@ -582,8 +587,8 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: false,
       displayDecimals: 0,
       gaugeAddress: '0xE7195E651Cc47853f0054d85c8ADFc79D532929f',
-      additionalRewards: ['0x00400FcbF0816bebB94654259de7273f4A05c762', '0x17700282592D6917F6A73D0bF8AcCf4D578c131e'],
-      additionalRewardRate: ['6283068780000000', '16534391530000000'],
+      additionalRewards: ['0x00400FcbF0816bebB94654259de7273f4A05c762'],
+      additionalRewardRate: ['6283068780000000'],
       displayChain: Chain.Celo,
       coin: Coins.USD,
     },
@@ -635,10 +640,8 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: true,
       displayDecimals: 0,
       gaugeAddress: '0xD0d57a6689188F854F996BEAE0Cb1949FDB5FF86',
-      additionalRewards: ['0x00400FcbF0816bebB94654259de7273f4A05c762', '0x17700282592D6917F6A73D0bF8AcCf4D578c131e'],
-      additionalRewardRate: ['6283068780000000', '8267195760000000'],
-      // additionalRewards: [''],
-      // additionalRewardRate: ['730282730000000'],
+      additionalRewards: ['0x00400FcbF0816bebB94654259de7273f4A05c762'],
+      additionalRewardRate: ['6283068780000000'],
       displayChain: Chain.Celo,
       coin: Coins.Celo,
     },
@@ -690,8 +693,8 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       pegComesAfter: false,
       displayDecimals: 0,
       gaugeAddress: '0xCAEd243de23264Bdd8297c6eECcF320846eee18A',
-      additionalRewards: ['0x00400FcbF0816bebB94654259de7273f4A05c762', '0x17700282592D6917F6A73D0bF8AcCf4D578c131e'],
-      additionalRewardRate: ['6283068780000000', '8267195760000000'],
+      additionalRewards: ['0x00400FcbF0816bebB94654259de7273f4A05c762'],
+      additionalRewardRate: ['6283068780000000'],
       // additionalRewards: [''],
       // additionalRewardRate: ['730282730000000'],
       displayChain: Chain.Celo,
@@ -799,7 +802,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       displayDecimals: 0,
       gaugeAddress: '0x27D9Bfa5F864862BeDC23cFab7e00b6b94488CC6',
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
-      additionalRewardRate: ['10000000000000000'],
+      additionalRewardRate: [weeklyEmissionToSeconds(3780)],
       displayChain: Chain.Solana,
       coin: Coins.USD,
     },

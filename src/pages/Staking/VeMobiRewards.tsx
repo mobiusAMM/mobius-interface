@@ -5,9 +5,10 @@ import Loader from 'components/Loader'
 import { RowBetween, RowFixed } from 'components/Row'
 import { ExternalStakingRewards } from 'constants/staking'
 import { useWeb3Context } from 'hooks'
-import { useStakingContract } from 'hooks/useContract'
+import { useFeeDistributor, useStakingContract } from 'hooks/useContract'
 import { useExternalStakingRewards, useUserExternalStakingRewards } from 'hooks/useExternalStakingRewards'
 import React, { useState } from 'react'
+import { useFeeInformation } from 'state/staking/hooks'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import styled from 'styled-components'
 import { TYPE } from 'theme'
@@ -115,13 +116,16 @@ const Divider = styled.div`
 export default function VeMobiRewards() {
   const { rewardRate, avgApr } = useExternalStakingRewards()
   const { userRewardRate, claimableRewards } = useUserExternalStakingRewards()
+  const { totalFeesThisWeek, totalFeesNextWeek } = useFeeInformation()
   const snxAddress = ExternalStakingRewards[CHAIN]
   const tokenColor = '#ab9325'
-  const { connected } = useWeb3Context()
+  const { connected, address } = useWeb3Context()
   const stakingContract = useStakingContract(snxAddress)
   const addTransaction = useTransactionAdder()
   const [attempting, setAttempting] = useState(false)
+  const [attemptingFees, setAttemptingFees] = useState(false)
   const [hash, setHash] = useState<string>()
+  const feeDistributorContract = useFeeDistributor()
 
   async function onClaimReward() {
     if (stakingContract) {
@@ -137,6 +141,22 @@ export default function VeMobiRewards() {
         })
         .catch((error: any) => {
           setAttempting(false)
+          console.log(error)
+        })
+    }
+  }
+
+  async function claimFees() {
+    if (feeDistributorContract && address) {
+      setAttemptingFees(true)
+      await feeDistributorContract['claim(address)'](address)
+        .then((response: TransactionResponse) => {
+          addTransaction(response, {
+            summary: `Claimed allocated Mobi fees`,
+          })
+          response.wait().then(() => setAttemptingFees(false))
+        })
+        .catch((error: any) => {
           console.log(error)
         })
     }
@@ -241,6 +261,54 @@ export default function VeMobiRewards() {
               </ButtonPrimary>
             </SecondSection>
           </>
+        </PositionWrapper>
+      </CardContainer>
+      <CardContainer>
+        <PositionWrapper>
+          <TopSection>
+            <RowFixed style={{ gap: '6px' }}>
+              <TYPE.black fontWeight={600} fontSize={[16, 24]}>
+                {`Mobi Rewards`}
+              </TYPE.black>
+            </RowFixed>
+          </TopSection>
+          <SecondSection>
+            <RowFixed style={{ marginTop: 10 }}>
+              <TYPE.darkGray fontWeight={450} fontSize={[15, 20]}>
+                {`Total Mobi Distributed this Week: `}
+              </TYPE.darkGray>
+            </RowFixed>
+
+            <TYPE.black textAlign="right" fontSize={[13, 16]} fontWeight={800} color={tokenColor}>
+              {totalFeesThisWeek
+                ? `${totalFeesThisWeek?.toSignificant(4, { groupSeparator: ',' })} ${totalFeesThisWeek.token.symbol}`
+                : '-'}
+            </TYPE.black>
+          </SecondSection>
+          <SecondSection>
+            <RowFixed style={{ marginTop: 10 }}>
+              <TYPE.darkGray fontWeight={450} fontSize={[15, 20]}>
+                {`Mobi to be Distributed Next Week: `}
+              </TYPE.darkGray>
+            </RowFixed>
+
+            <TYPE.black textAlign="right" fontSize={[13, 16]} fontWeight={800} color={tokenColor}>
+              {totalFeesNextWeek
+                ? `${totalFeesNextWeek?.toSignificant(4, { groupSeparator: ',' })} ${totalFeesNextWeek.token.symbol}`
+                : '-'}
+            </TYPE.black>
+          </SecondSection>
+
+          <Divider />
+          <SecondSection style={{ marginTop: '1rem' }}>
+            <ButtonPrimary
+              onClick={claimFees}
+              disabled={attempting && !hash}
+              style={{ fontWeight: 700, fontSize: 18, marginBottom: '1rem' }}
+            >
+              {attemptingFees ? `Claiming MOBI...` : 'Claim my Share'}
+            </ButtonPrimary>
+          </SecondSection>
         </PositionWrapper>
       </CardContainer>
     </Wrapper>

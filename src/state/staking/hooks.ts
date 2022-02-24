@@ -52,6 +52,12 @@ export type MobiStakingInfo = {
 //   return JSBI.greaterThan(boosted, liquidity) ? boosted : liquidity
 // }
 
+export type FeeInfo = {
+  toClaim: TokenAmount
+  totalFeesThisWeek: TokenAmount
+  totalFeesNextWeek: TokenAmount
+}
+
 export function useMobiStakingInfo(): MobiStakingInfo {
   const stakingInfo = useSelector<AppState, StakingState>((state) => state.staking)
   const pools = useSelector<AppState, StableSwapPool[]>((state) => {
@@ -145,4 +151,19 @@ export function useUserStakingState(): IUserStakingState {
 
 export function useStakingStateCombined(): IStakingState & IUserStakingState {
   return useSelector<AppState, IStakingState & IUserStakingState>((state) => state.staking)
+}
+
+export function useFeeInformation(): FeeInfo {
+  const { claimable, total, nextWeek } = useSelector((state: AppState) => ({
+    claimable: state.staking.claimableFees,
+    total: state.staking.feesThisWeek,
+    nextWeek: state.staking.feesNextWeek,
+  }))
+  const mobi = useMobi()
+
+  return {
+    toClaim: new TokenAmount(mobi, claimable ?? '0'),
+    totalFeesThisWeek: new TokenAmount(mobi, total ?? '0'),
+    totalFeesNextWeek: new TokenAmount(mobi, nextWeek ?? '0'),
+  }
 }

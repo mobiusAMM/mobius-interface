@@ -16,6 +16,7 @@ interface Window {
   }
   web3?: unknown
   MSStream: any
+  setShowLedgerModal: (b: boolean) => Promise<void>
 }
 
 declare module 'content-hash' {
@@ -27,3 +28,5 @@ declare module 'multihashes' {
   declare function decode(buff: Uint8Array): { code: number; name: string; length: number; digest: Uint8Array }
   declare function toB58String(hash: Uint8Array): string
 }
+
+declare module '@ensdomains/ensjs'

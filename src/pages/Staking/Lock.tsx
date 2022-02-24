@@ -12,7 +12,7 @@ import { Calendar } from 'react-date-range'
 import { Text } from 'rebass'
 import { useMobiStakingInfo } from 'state/staking/hooks'
 import { useIsDarkMode } from 'state/user/hooks'
-import { useCurrencyBalance } from 'state/wallet/hooks'
+import { useTokenBalance } from 'state/wallet/hooks'
 import styled from 'styled-components'
 import { calcBoost, calcExpectedVeMobi } from 'utils/calcExpectedVeMobi'
 
@@ -29,10 +29,9 @@ import { TYPE } from '../../theme'
 const MILLISECONDS_PER_SECOND = 1000
 const SECONDS_PER_WEEK = 604800
 
-const roundDate = (date: Date) =>
+export const roundDate = (date: number) =>
   new Date(
-    Math.floor(date.valueOf() / (MILLISECONDS_PER_SECOND * SECONDS_PER_WEEK)) *
-      (MILLISECONDS_PER_SECOND * SECONDS_PER_WEEK)
+    Math.floor(date / (MILLISECONDS_PER_SECOND * SECONDS_PER_WEEK)) * (MILLISECONDS_PER_SECOND * SECONDS_PER_WEEK)
   )
 interface LockProps {
   setAttempting: (attempting: boolean) => void
@@ -46,7 +45,7 @@ export default function Lock({ setHash, setAttempting }: LockProps) {
   const stakingInfo = useMobiStakingInfo()
   const positions = stakingInfo.positions?.filter((pos) => pos.baseBalance.greaterThan('0')) ?? []
   const mobi = useMobi()
-  const balance = useCurrencyBalance(connected ? address : undefined, mobi)
+  const balance = useTokenBalance(connected ? address : undefined, mobi)
   const [approving, setApproving] = useState(false)
   const [input, setInput] = useState<string>('')
   const [showBoosts, setShowBoosts] = useState(false)

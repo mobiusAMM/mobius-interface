@@ -6,7 +6,7 @@ import styled from 'styled-components'
 
 import { useWeb3Context } from '../../hooks'
 import { WrappedTokenInfo } from '../../state/lists/hooks'
-import { useCurrencyBalance } from '../../state/wallet/hooks'
+import { useTokenBalance } from '../../state/wallet/hooks'
 import { TYPE } from '../../theme'
 import Column from '../Column'
 import CurrencyLogo from '../CurrencyLogo'
@@ -102,7 +102,7 @@ function CurrencyRow({
 }) {
   const { address, connected } = useWeb3Context()
   const key = currencyKey(currency)
-  const balance = useCurrencyBalance(connected ? address : undefined, currency)
+  const balance = useTokenBalance(connected ? address : undefined, currency)
 
   // only show add or remove buttons if not on selected list
   return (

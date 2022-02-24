@@ -20,7 +20,6 @@ import { isAddress } from '../../utils'
 import Column from '../Column'
 import { TokenType } from '../CurrencyInputPanel'
 import Row, { RowBetween } from '../Row'
-import CommonBases from './CommonBases'
 import CurrencyList from './CurrencyList'
 import { filterTokens } from './filtering'
 import { useTokenComparator } from './sorting'
@@ -38,7 +37,6 @@ interface CurrencySearchProps {
   selectedCurrency?: Token | null
   onCurrencySelect: (currency: Token) => void
   otherSelectedCurrency?: Token | null
-  showCommonBases?: boolean
   mento?: boolean
   tokenType?: TokenType
 }
@@ -47,7 +45,6 @@ export function CurrencySearch({
   selectedCurrency,
   onCurrencySelect,
   otherSelectedCurrency,
-  showCommonBases,
   onDismiss,
   isOpen,
   tokenType,
@@ -193,9 +190,6 @@ export function CurrencySearch({
               onKeyDown={handleEnter}
             />
           </Row>
-        )}
-        {showCommonBases && (
-          <CommonBases chainId={CHAIN} onSelect={handleCurrencySelect} selectedCurrency={selectedCurrency} />
         )}
       </PaddedColumn>
       <Separator />

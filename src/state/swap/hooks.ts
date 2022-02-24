@@ -11,7 +11,7 @@ import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { isAddress } from '../../utils'
 import { AppDispatch, AppState } from '../index'
-import { useCurrencyBalances } from '../wallet/hooks'
+import { useTokenBalances } from '../wallet/hooks'
 import { Field, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 
 export function useSwapState(): AppState['swap'] {
@@ -99,7 +99,7 @@ function calcInputOutput(
   parsedAmount: TokenAmount | undefined,
   poolInfo: IExchangeInfo
 ): readonly [TokenAmount | undefined, TokenAmount | undefined, TokenAmount | undefined] {
-  if (!input && !output) {
+  if ((!input && !output) || !parsedAmount) {
     return [undefined, undefined, undefined]
   }
   if (!output) {
@@ -147,7 +147,7 @@ export function useMobiusTradeInfo(): {
   const pool = useCurrentPool(inputCurrency?.address ?? '', outputCurrency?.address ?? '')
 
   const to: string | null = connected ? address : null
-  const relevantTokenBalances = useCurrencyBalances(connected ? address : undefined, [
+  const relevantTokenBalances = useTokenBalances(connected ? address : undefined, [
     inputCurrency ?? undefined,
     outputCurrency ?? undefined,
   ])

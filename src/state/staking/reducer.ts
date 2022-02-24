@@ -13,12 +13,15 @@ export type IStakingState = {
   totalMobiLocked: JSBI
   totalVotingPower: JSBI
   externalRewardsRate: JSBI
+  feesThisWeek: JSBI
+  feesNextWeek: JSBI
 }
 
 export type IUserStakingState = {
   voteUserPower: JSBI
   votingPower: JSBI
   claimableExternalRewards: JSBI
+  claimableFees: JSBI
   lock: VoteLock | null
 }
 
@@ -27,12 +30,15 @@ const initialStakingState: IStakingState = {
   totalMobiLocked: JSBI.BigInt(1),
   totalVotingPower: JSBI.BigInt(0),
   externalRewardsRate: JSBI.BigInt(0),
+  feesThisWeek: JSBI.BigInt(0),
+  feesNextWeek: JSBI.BigInt(0),
 }
 
 const initialUserStakingState: IUserStakingState = {
   voteUserPower: JSBI.BigInt(0),
   votingPower: JSBI.BigInt(0),
   claimableExternalRewards: JSBI.BigInt(0),
+  claimableFees: JSBI.BigInt(0),
   lock: null,
 }
 
