@@ -1,4 +1,5 @@
 import { useWeb3Context } from 'hooks'
+import useENS from 'hooks/useENS'
 import { darken, lighten } from 'polished'
 import React, { useMemo } from 'react'
 import { Activity } from 'react-feather'
@@ -107,6 +108,8 @@ const StatusIcon: React.FC = () => {
 function Web3StatusInner() {
   const { t } = useTranslation()
   const { connect, address, connected, providerChainID, checkWrongNetwork } = useWeb3Context()
+  const { name } = useENS(address)
+
   const allTransactions = useAllTransactions()
 
   const sortedRecentTransactions = useMemo(() => {
@@ -143,7 +146,7 @@ function Web3StatusInner() {
             </RowBetween>
           ) : (
             <>
-              <Text>{shortenAddress(address)}</Text>
+              <Text>{name ? name : shortenAddress(address)}</Text>
             </>
           )}
           {!hasPendingTransactions && <StatusIcon />}

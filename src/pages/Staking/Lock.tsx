@@ -29,7 +29,7 @@ import { TYPE } from '../../theme'
 const MILLISECONDS_PER_SECOND = 1000
 const SECONDS_PER_WEEK = 604800
 
-const roundDate = (date: Date) =>
+export const roundDate = (date: Date) =>
   new Date(
     Math.floor(date.valueOf() / (MILLISECONDS_PER_SECOND * SECONDS_PER_WEEK)) *
       (MILLISECONDS_PER_SECOND * SECONDS_PER_WEEK)

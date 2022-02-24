@@ -1,13 +1,18 @@
+import { CeloContract } from '@celo/contractkit'
+import { Mainnet } from '@celo-tools/use-contractkit'
 import { JsonRpcProvider, StaticJsonRpcProvider, Web3Provider } from '@ethersproject/providers'
 import WalletConnectProvider from '@walletconnect/web3-provider'
+import { CeloExtensionWalletConnector } from 'connectors/CeloExtensionWalletConnector'
 import { LedgerConnector, LedgerKit } from 'connectors/ledger/LedgerConnector'
 import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Web3Modal from 'web3modal'
 
+import Celo from '../../assets/svg/celo-logo.svg'
 import Ledger from '../../assets/svg/ledger.svg'
 import { CHAIN } from '../../constants'
 
 const LEDGER_ID = 'custom-ledger'
+const CEW_ID = 'custom-cew'
 
 type onChainProvider = {
   connect: () => Promise<Web3Provider>
@@ -49,7 +54,6 @@ export const useAddress = () => {
 
 //TODO make dynamic for alfajores
 const switchRequest = () => {
-  console.log(window.ethereum)
   return window.ethereum?.request({
     method: 'wallet_switchEthereumChain',
     params: [{ chainId: '0xA4EC' }],
@@ -129,6 +133,20 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
             const index = await re.enable()
             const ledgerKit = await LedgerKit.init(CHAIN, [index])
             return (await re.activate({ kit: ledgerKit, index })).provider
+          },
+        },
+        //TODO: fix if on wrong chain
+        [CEW_ID]: {
+          display: {
+            logo: Celo,
+            name: 'Celo Extension Wallet',
+            description: 'Connect to your Celo Extension Wallet',
+          },
+          package: CeloExtensionWalletConnector,
+          connector: async (p) => {
+            const re: CeloExtensionWalletConnector = new p(Mainnet, CeloContract.GoldToken)
+            await re.initialise()
+            return re.kit.web3.currentProvider
           },
         },
       },
