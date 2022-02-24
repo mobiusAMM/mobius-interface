@@ -176,8 +176,6 @@ export function useMobiusTradeInfo(): {
     inputError = inputError ?? 'Pool Info Loading'
   }
 
-  console.log(pool)
-
   if (pool && JSBI.equal(pool.lpTotalSupply.raw, JSBI.BigInt('0'))) {
     inputError = inputError ?? 'Insufficient Liquidity'
   }

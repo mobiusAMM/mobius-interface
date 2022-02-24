@@ -24,6 +24,7 @@ export function UpdatePools() {
   const lpTokenAddress = stablePools.map((p) => p.pool.lpToken.address)
   const poolAddress = stablePools.map((p) => p.pool.address)
   const lpTotalSupply = useMultipleContractSingleData(lpTokenAddress, lpInterface, 'totalSupply')
+  console.log('lp', lpTotalSupply)
   const balances = useMultipleContractSingleData(poolAddress, SwapInterface, 'getBalances')
 
   const query = gql`
@@ -44,6 +45,8 @@ export function UpdatePools() {
   `
   const { data, loading, error } = useQuery(query)
 
+  console.log('data', lpTotalSupply[0]?.result?.[0].toString())
+
   useEffect(() => {
     if (loading) return
     const inSubgraph: Set<string> =
@@ -57,7 +60,10 @@ export function UpdatePools() {
               fees: RECOMMENDED_FEES,
               volume: null,
               ampFactor: RECOMMENDED_AMP,
-              lpTotalSupply: new TokenAmount(displayPool.pool.lpToken, lpTotalSupply[i]?.result?.[0] ?? '0'),
+              lpTotalSupply: new TokenAmount(
+                displayPool.pool.lpToken,
+                BigIntToJSBI(lpTotalSupply[i]?.result?.[0] as BigInt) ?? '0'
+              ),
               reserves: balances?.[i]?.result?.[0]
                 ? balances?.[i]?.result?.[0].map(
                     (amt: BigInt, j: number): TokenAmount =>
@@ -68,7 +74,9 @@ export function UpdatePools() {
           }),
         })
       )
+      console.log('updated')
     } catch (error) {
+      console.log('error')
       console.error(error)
     }
   }, [loading, data?.swaps, dispatch, stablePools, lpTotalSupply, blockNumber, balances])
