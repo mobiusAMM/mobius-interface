@@ -19,14 +19,14 @@ const makeTokens = (
 
 export const UST = makeTokens(
   {
-    [ChainId.MAINNET]: '0x73a210637f6F6B7005512677Ba6B3C96bb4AA44B',
-    [ChainId.ALFAJORES]: '0x17a139f275102bBaB5BcbF1c4b7143F08B635EA2',
-    [ChainId.BAKLAVA]: '0x00Be915B9dCf56a3CBE739D9B9c202ca692409EC',
+    [ChainId.MAINNET]: '0xEd193C4E69F591E42398eF54DEa65aa1bb02835c',
+    [ChainId.ALFAJORES]: '0xEd193C4E69F591E42398eF54DEa65aa1bb02835c',
+    [ChainId.BAKLAVA]: '0xEd193C4E69F591E42398eF54DEa65aa1bb02835c',
   },
   18,
-  'MOBI',
-  'Mobius DAO Token',
-  'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_MOBI.png'
+  'UST',
+  'TerraUSD',
+  'https://raw.githubusercontent.com/kyscott18/default-token-list/master/assets/asset_UST.png'
 )
 
 export const MOBI = makeTokens(
