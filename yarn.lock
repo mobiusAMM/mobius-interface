@@ -14,7 +14,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:^3.4.16":
+"@apollo/client@npm:^3.5.9":
   version: 3.5.9
   resolution: "@apollo/client@npm:3.5.9"
   dependencies:
@@ -1895,7 +1895,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@craco/craco@npm:^6.1.2":
+"@craco/craco@npm:^6.4.3":
   version: 6.4.3
   resolution: "@craco/craco@npm:6.4.3"
   dependencies:
@@ -2202,7 +2202,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ensdomains/ensjs@npm:^2.0.1":
+"@ensdomains/ensjs@npm:^2.1.0":
   version: 2.1.0
   resolution: "@ensdomains/ensjs@npm:2.1.0"
   dependencies:
@@ -2279,7 +2279,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/abi@npm:5.5.0, @ethersproject/abi@npm:^5.3.1, @ethersproject/abi@npm:^5.5.0":
+"@ethersproject/abi@npm:5.5.0, @ethersproject/abi@npm:^5.5.0":
   version: 5.5.0
   resolution: "@ethersproject/abi@npm:5.5.0"
   dependencies:
@@ -2296,7 +2296,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/abstract-provider@npm:5.5.1, @ethersproject/abstract-provider@npm:^5.3.0, @ethersproject/abstract-provider@npm:^5.5.0":
+"@ethersproject/abstract-provider@npm:5.5.1, @ethersproject/abstract-provider@npm:^5.5.0, @ethersproject/abstract-provider@npm:^5.5.1":
   version: 5.5.1
   resolution: "@ethersproject/abstract-provider@npm:5.5.1"
   dependencies:
@@ -2324,7 +2324,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/address@npm:5.5.0, @ethersproject/address@npm:^5.0.4, @ethersproject/address@npm:^5.3.0, @ethersproject/address@npm:^5.5.0":
+"@ethersproject/address@npm:5.5.0, @ethersproject/address@npm:^5.0.4, @ethersproject/address@npm:^5.5.0":
   version: 5.5.0
   resolution: "@ethersproject/address@npm:5.5.0"
   dependencies:
@@ -2356,7 +2356,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/bignumber@npm:5.5.0, @ethersproject/bignumber@npm:^5.0.7, @ethersproject/bignumber@npm:^5.3.0, @ethersproject/bignumber@npm:^5.5.0":
+"@ethersproject/bignumber@npm:5.5.0, @ethersproject/bignumber@npm:^5.0.7, @ethersproject/bignumber@npm:^5.5.0":
   version: 5.5.0
   resolution: "@ethersproject/bignumber@npm:5.5.0"
   dependencies:
@@ -2367,7 +2367,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/bytes@npm:5.5.0, @ethersproject/bytes@npm:^5.0.4, @ethersproject/bytes@npm:^5.3.0, @ethersproject/bytes@npm:^5.5.0":
+"@ethersproject/bytes@npm:5.5.0, @ethersproject/bytes@npm:^5.0.4, @ethersproject/bytes@npm:^5.5.0":
   version: 5.5.0
   resolution: "@ethersproject/bytes@npm:5.5.0"
   dependencies:
@@ -2376,7 +2376,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/constants@npm:5.5.0, @ethersproject/constants@npm:^5.0.4, @ethersproject/constants@npm:^5.3.0, @ethersproject/constants@npm:^5.5.0":
+"@ethersproject/constants@npm:5.5.0, @ethersproject/constants@npm:^5.0.4, @ethersproject/constants@npm:^5.5.0":
   version: 5.5.0
   resolution: "@ethersproject/constants@npm:5.5.0"
   dependencies:
@@ -2385,7 +2385,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/contracts@npm:5.5.0, @ethersproject/contracts@npm:^5.3.0":
+"@ethersproject/contracts@npm:5.5.0, @ethersproject/contracts@npm:^5.5.0":
   version: 5.5.0
   resolution: "@ethersproject/contracts@npm:5.5.0"
   dependencies:
@@ -2505,7 +2505,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/providers@npm:5.5.3, @ethersproject/providers@npm:^5.3.0, @ethersproject/providers@npm:^5.3.1":
+"@ethersproject/providers@npm:5.5.3, @ethersproject/providers@npm:^5.3.0, @ethersproject/providers@npm:^5.5.3":
   version: 5.5.3
   resolution: "@ethersproject/providers@npm:5.5.3"
   dependencies:
@@ -2591,7 +2591,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/strings@npm:5.5.0, @ethersproject/strings@npm:^5.0.4, @ethersproject/strings@npm:^5.3.0, @ethersproject/strings@npm:^5.5.0":
+"@ethersproject/strings@npm:5.5.0, @ethersproject/strings@npm:^5.0.4, @ethersproject/strings@npm:^5.5.0":
   version: 5.5.0
   resolution: "@ethersproject/strings@npm:5.5.0"
   dependencies:
@@ -2619,7 +2619,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/units@npm:5.5.0, @ethersproject/units@npm:^5.3.0":
+"@ethersproject/units@npm:5.5.0, @ethersproject/units@npm:^5.5.0":
   version: 5.5.0
   resolution: "@ethersproject/units@npm:5.5.0"
   dependencies:
@@ -3264,7 +3264,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@mobiusamm/interface@workspace:."
   dependencies:
-    "@apollo/client": ^3.4.16
+    "@apollo/client": ^3.5.9
     "@babel/preset-react": ^7.16.7
     "@celo-tools/use-contractkit": 2.1.4
     "@celo/base": ^1.5.2
@@ -3273,39 +3273,39 @@ __metadata:
     "@celo/utils": ^1.5.2
     "@celo/wallet-ledger": ^1.5.2
     "@celo/wallet-remote": ^1.5.2
-    "@craco/craco": ^6.1.2
+    "@craco/craco": ^6.4.3
     "@emotion/react": ^11.8.1
-    "@ensdomains/ensjs": ^2.0.1
-    "@ethersproject/abi": ^5.3.1
-    "@ethersproject/abstract-provider": ^5.3.0
-    "@ethersproject/address": ^5.3.0
-    "@ethersproject/bignumber": ^5.3.0
-    "@ethersproject/bytes": ^5.3.0
-    "@ethersproject/constants": ^5.3.0
-    "@ethersproject/contracts": ^5.3.0
+    "@ensdomains/ensjs": ^2.1.0
+    "@ethersproject/abi": ^5.5.0
+    "@ethersproject/abstract-provider": ^5.5.1
+    "@ethersproject/address": ^5.5.0
+    "@ethersproject/bignumber": ^5.5.0
+    "@ethersproject/bytes": ^5.5.0
+    "@ethersproject/constants": ^5.5.0
+    "@ethersproject/contracts": ^5.5.0
     "@ethersproject/networks": ^5.5.2
-    "@ethersproject/providers": ^5.3.1
+    "@ethersproject/providers": ^5.5.3
     "@ethersproject/solidity": ^5.5.0
-    "@ethersproject/strings": ^5.3.0
-    "@ethersproject/units": ^5.3.0
+    "@ethersproject/strings": ^5.5.0
+    "@ethersproject/units": ^5.5.0
     "@ledgerhq/errors": ^6.10.0
     "@ledgerhq/hw-transport-webusb": ^6.24.1
-    "@popperjs/core": ^2.9.2
+    "@popperjs/core": ^2.11.2
     "@reach/dialog": ^0.15.0
     "@reach/portal": ^0.15.0
     "@reduxjs/toolkit": ^1.5.1
-    "@sentry/react": ^6.9.0
-    "@sentry/tracing": ^6.9.0
-    "@sentry/webpack-plugin": ^1.16.0
-    "@typechain/ethers-v5": ^7.0.1
-    "@types/jest": ^26.0.23
+    "@sentry/react": ^6.17.9
+    "@sentry/tracing": ^6.17.9
+    "@sentry/webpack-plugin": ^1.18.7
+    "@typechain/ethers-v5": ^7.2.0
+    "@types/jest": ^26.0.24
     "@types/ledgerhq__hw-transport-webusb": ^4.70.1
-    "@types/lodash": ^4.14.170
+    "@types/lodash": ^4.14.178
     "@types/lodash.flatmap": ^4.5.6
-    "@types/luxon": ^2.0.7
+    "@types/luxon": ^2.0.9
     "@types/multicodec": ^2.1.0
-    "@types/node": ^14.14.37
-    "@types/prop-types": ^15
+    "@types/node": ^14.18.12
+    "@types/prop-types": ^15.7.4
     "@types/react": ^17.0.11
     "@types/react-date-range": ^1.1.8
     "@types/react-dom": ^17.0.8
@@ -3318,13 +3318,13 @@ __metadata:
     "@types/react-vis": ^1.11.7
     "@types/react-window": ^1.8.3
     "@types/rebass": ^4.0.8
-    "@types/styled-components": ^5.1.9
+    "@types/styled-components": ^5.1.23
     "@types/wcag-contrast": ^3.0.0
     "@typescript-eslint/eslint-plugin": ^4.28.0
     "@typescript-eslint/parser": ^4.28.0
-    "@ubeswap/sdk": ^2.1.0
+    "@ubeswap/sdk": ^2.1.2
     "@uniswap/governance": ^1.0.2
-    "@uniswap/token-lists": ^1.0.0-beta.24
+    "@uniswap/token-lists": ^1.0.0-beta.27
     "@walletconnect/encoding": ^1.0.0
     "@walletconnect/jsonrpc-types": ^1.0.0
     "@walletconnect/web3-provider": ^1.7.1
@@ -3346,7 +3346,7 @@ __metadata:
     eslint-plugin-react-hooks: ^4.2.0
     eslint-plugin-simple-import-sort: ^7.0.0
     eslint-plugin-unused-imports: ^1.1.1
-    ethers: ^5.3.1
+    ethers: ^5.5.4
     graphql: ^15.7.1
     husky: ">=6"
     i18next: ^20.3.1
@@ -3395,9 +3395,9 @@ __metadata:
     redux: ^4.1.0
     redux-localstorage-simple: ^2.4.0
     rlp: ^3.0.0
-    styled-components: ^5.3.0
-    tiny-invariant: ^1.1.0
-    typechain: ^5.1.1
+    styled-components: ^5.3.3
+    tiny-invariant: ^1.2.0
+    typechain: ^5.2.0
     typescript: ^4.3.4
     use-count-up: ^2.3.1
     wcag-contrast: ^3.0.0
@@ -3498,7 +3498,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@popperjs/core@npm:^2.9.2":
+"@popperjs/core@npm:^2.11.2":
   version: 2.11.2
   resolution: "@popperjs/core@npm:2.11.2"
   checksum: 5695bf020eda54636e16a62dc9b5fdd92beaf7b2d19f62fcef049d57c5cff92773562d80cbf760b217c3ec928da310eb24994ab6a00fd39dffa0af9b5dfc01a6
@@ -3671,7 +3671,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/react@npm:^6.9.0":
+"@sentry/react@npm:^6.17.9":
   version: 6.17.9
   resolution: "@sentry/react@npm:6.17.9"
   dependencies:
@@ -3687,7 +3687,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/tracing@npm:^6.9.0":
+"@sentry/tracing@npm:^6.17.9":
   version: 6.17.9
   resolution: "@sentry/tracing@npm:6.17.9"
   dependencies:
@@ -3717,7 +3717,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/webpack-plugin@npm:^1.16.0":
+"@sentry/webpack-plugin@npm:^1.18.7":
   version: 1.18.7
   resolution: "@sentry/webpack-plugin@npm:1.18.7"
   dependencies:
@@ -4175,7 +4175,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typechain/ethers-v5@npm:^7.0.1":
+"@typechain/ethers-v5@npm:^7.2.0":
   version: 7.2.0
   resolution: "@typechain/ethers-v5@npm:7.2.0"
   dependencies:
@@ -4392,7 +4392,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:^26.0.23":
+"@types/jest@npm:^26.0.24":
   version: 26.0.24
   resolution: "@types/jest@npm:26.0.24"
   dependencies:
@@ -4453,14 +4453,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:*, @types/lodash@npm:^4.14.170, @types/lodash@npm:^4.14.53":
+"@types/lodash@npm:*, @types/lodash@npm:^4.14.170, @types/lodash@npm:^4.14.178, @types/lodash@npm:^4.14.53":
   version: 4.14.178
   resolution: "@types/lodash@npm:4.14.178"
   checksum: a69a04a60bfc5257c3130a554b4efa0c383f0141b7b3db8ab7cf07ad2a46ea085fce66d0242da41da7e5647b133d5dfb2c15add9cbed8d7fef955e4a1e5b3128
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:^2.0.7":
+"@types/luxon@npm:^2.0.9":
   version: 2.0.9
   resolution: "@types/luxon@npm:2.0.9"
   checksum: 6c99741e1735aca5b784981ecec3a6ad9497b8e46cc3dd0ba625901bb5b34af4c7b1bf33e32b3e8468312ce2850b31f553f712283a8301a0ee1aacb633276738
@@ -4525,7 +4525,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^14.14.37":
+"@types/node@npm:^14.18.12":
   version: 14.18.12
   resolution: "@types/node@npm:14.18.12"
   checksum: 8a0273caa0584020adb8802784fc7d4f18f05e6c205335b7f3818a91d6b0c22736b9f51da3428d5bc54076ad47f1a4d6d57990a3ce8489a520ac66b2b3ff24bc
@@ -4562,7 +4562,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prop-types@npm:*, @types/prop-types@npm:^15":
+"@types/prop-types@npm:*, @types/prop-types@npm:^15.7.4":
   version: 15.7.4
   resolution: "@types/prop-types@npm:15.7.4"
   checksum: ef6e1899e59b876c273811b1bd845022fc66d5a3d11cb38a25b6c566b30514ae38fe20a40f67622f362a4f4f7f9224e22d8da101cff3d6e97e11d7b4c307cfc1
@@ -4753,7 +4753,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/styled-components@npm:*, @types/styled-components@npm:^5.1.9":
+"@types/styled-components@npm:*, @types/styled-components@npm:^5.1.23":
   version: 5.1.23
   resolution: "@types/styled-components@npm:5.1.23"
   dependencies:
@@ -5003,7 +5003,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ubeswap/sdk@npm:^2.1.0":
+"@ubeswap/sdk@npm:^2.1.2":
   version: 2.1.2
   resolution: "@ubeswap/sdk@npm:2.1.2"
   dependencies:
@@ -5031,7 +5031,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@uniswap/token-lists@npm:^1.0.0-beta.24":
+"@uniswap/token-lists@npm:^1.0.0-beta.27":
   version: 1.0.0-beta.27
   resolution: "@uniswap/token-lists@npm:1.0.0-beta.27"
   checksum: ab3d93dcd70b99a01402919a4b60ed3234a5dade398cd5ffff36be993cd28a682326b31d612a15ab5855610ca02ba51a7c32fddc7b06e8fee8b682adf63a34d5
@@ -10728,7 +10728,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:^5.0.13, ethers@npm:^5.3.1":
+"ethers@npm:^5.0.13, ethers@npm:^5.5.4":
   version: 5.5.4
   resolution: "ethers@npm:5.5.4"
   dependencies:
@@ -21615,7 +21615,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:^5.3.0, styled-components@npm:^5.3.3":
+"styled-components@npm:^5.3.3":
   version: 5.3.3
   resolution: "styled-components@npm:5.3.3"
   dependencies:
@@ -22080,7 +22080,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-invariant@npm:^1.0.2, tiny-invariant@npm:^1.1.0":
+"tiny-invariant@npm:^1.0.2, tiny-invariant@npm:^1.1.0, tiny-invariant@npm:^1.2.0":
   version: 1.2.0
   resolution: "tiny-invariant@npm:1.2.0"
   checksum: e09a718a7c4a499ba592cdac61f015d87427a0867ca07f50c11fd9b623f90cdba18937b515d4a5e4f43dac92370498d7bdaee0d0e7a377a61095e02c4a92eade
@@ -22498,7 +22498,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typechain@npm:^5.1.1":
+"typechain@npm:^5.2.0":
   version: 5.2.0
   resolution: "typechain@npm:5.2.0"
   dependencies:
