@@ -7,7 +7,7 @@ import { LedgerConnector, LedgerKit } from 'connectors/ledger/LedgerConnector'
 import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Web3Modal from 'web3modal'
 
-import Celo from '../../assets/images/celo_logo.png'
+import Celo from '../../assets/svg/celo-logo.svg'
 import Ledger from '../../assets/svg/ledger.svg'
 import { CHAIN } from '../../constants'
 
@@ -54,7 +54,6 @@ export const useAddress = () => {
 
 //TODO make dynamic for alfajores
 const switchRequest = () => {
-  console.log(window.ethereum)
   return window.ethereum?.request({
     method: 'wallet_switchEthereumChain',
     params: [{ chainId: '0xA4EC' }],
@@ -136,6 +135,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
             return (await re.activate({ kit: ledgerKit, index })).provider
           },
         },
+        //TODO: fix if on wrong chain
         [CEW_ID]: {
           display: {
             logo: Celo,
