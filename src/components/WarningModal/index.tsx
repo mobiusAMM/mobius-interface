@@ -40,7 +40,7 @@ export default function WarningModal({ isOpen, onDismiss }: ModalProps) {
         <TYPE.body>
           We have partnered with the Celo Foundation and DeFi for the People to bring CELO rewards to users who
           lock/stake veMOBI. As we fully decentralize, those who stake veMOBI will control all governable parameters of
-          the Mobius protocol. Reserve your spot governing the future of Mobius and earn triple digit yield (while
+          the Mobius protocol. Reserve your spot governing the future of Mobius and earn double digit yield (while
           supplies last).
         </TYPE.body>
         <ExternalLink href="https://mobius.money/#/stake">Start Staking</ExternalLink>

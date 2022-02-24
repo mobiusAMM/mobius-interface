@@ -4,13 +4,13 @@ import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { StableSwapPool } from 'state/stablePools/reducer'
 import invariant from 'tiny-invariant'
-import { StableSwapMath } from 'utils/stableSwapMath'
+import { PairStableSwap } from 'utils/StablePairMath'
 
 import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { isAddress } from '../../utils'
 import { AppDispatch, AppState } from '../index'
-import { useCurrentPool, useMathUtil, usePools } from '../stablePools/hooks'
+import { useCurrentPool, usePairUtil, usePools } from '../stablePools/hooks'
 import { useTokenBalances } from '../wallet/hooks'
 import { Field, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 
@@ -98,10 +98,10 @@ function calcInputOutput(
   output: Token | undefined,
   isExactIn: boolean,
   parsedAmount: TokenAmount | undefined,
-  math: StableSwapMath,
+  math: PairStableSwap,
   poolInfo: StableSwapPool
 ): readonly [TokenAmount | undefined, TokenAmount | undefined, TokenAmount | undefined] {
-  if (!input && !output) {
+  if ((!input && !output) || !parsedAmount) {
     return [undefined, undefined, undefined]
   }
   const { tokens } = poolInfo
@@ -122,17 +122,10 @@ function calcInputOutput(
   ]
 
   invariant(parsedAmount)
-  if (isExactIn) {
-    details[0] = parsedAmount
-    const [expectedOut, fee] = math.calculateSwap(indexFrom, indexTo, parsedAmount.raw, math.calc_xp())
-    details[1] = new TokenAmount(output, expectedOut)
-    details[2] = new TokenAmount(input, fee)
-  } else {
-    details[1] = parsedAmount
-    const requiredIn = math.get_dx(indexFrom, indexTo, parsedAmount.raw, math.calc_xp())
-    details[0] = new TokenAmount(input, requiredIn)
-    details[2] = new TokenAmount(input, JSBI.BigInt('0'))
-  }
+  details[0] = parsedAmount
+  const [expectedOut, fee] = math.outputAmount(indexFrom, indexTo, parsedAmount.raw)
+  details[1] = new TokenAmount(output, expectedOut)
+  details[2] = new TokenAmount(input, fee)
   return details
 }
 
@@ -157,7 +150,7 @@ export function useMobiusTradeInfo(): {
   const pools = usePools()
   const poolsLoading = pools.length === 0
   const [pool] = useCurrentPool(inputCurrency?.address ?? '', outputCurrency?.address ?? '')
-  const mathUtil = useMathUtil(pool ?? '')
+  const mathUtil = usePairUtil(pool)
 
   const to: string | null = connected ? address : null
   const relevantTokenBalances = useTokenBalances(connected ? address : undefined, [
