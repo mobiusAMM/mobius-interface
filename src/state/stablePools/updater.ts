@@ -35,9 +35,7 @@ export function UpdateVariablePoolInfo(): null {
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()
   const pools: StableSwapConstants[] = useSelector((state: AppState) =>
-    Object.values(state.stablePools.pools)
-      .filter(({ rehydrate }) => rehydrate)
-      .map(({ pool }) => pool)
+    Object.values(state.stablePools.pools).map(({ pool }) => pool)
   )
   const poolAddresses = pools.map(({ address }) => address)
   const lpTokenAddresses = pools.map(({ lpToken: { address } }) => address)
@@ -48,7 +46,6 @@ export function UpdateVariablePoolInfo(): null {
   const virtualPrices = useMultipleContractSingleData(poolAddresses, SwapInterface, 'getVirtualPrice')
   const balances = useMultipleContractSingleData(poolAddresses, SwapInterface, 'getBalances')
   const amplificationCoefficients = useMultipleContractSingleData(poolAddresses, SwapInterface, 'getAPrecise')
-  console.log(amplificationCoefficients)
   const query = gql`
     {
       swaps {
@@ -85,7 +82,6 @@ export function UpdateVariablePoolInfo(): null {
       }),
       {}
     )
-  console.log(lpInfo)
   const inSubgraph: Set<string> =
     data?.swaps.reduce((accum: Set<string>, cur: any) => new Set([...accum, cur.id]), new Set()) ?? new Set()
   const poolsNotInSubgraph = poolAddresses.map((a) => a.toLowerCase()).filter((addr) => !inSubgraph.has(addr))
@@ -117,21 +113,25 @@ export function UpdateVariablePoolInfo(): null {
             ? poolInfo.concat(
                 poolsNotInSubgraph.map((id) => ({
                   id,
-                  volume: undefined,
+                  volume: {
+                    total: undefined,
+                    day: undefined,
+                    week: undefined,
+                  },
                   balances: lpInfo[id]?.total ? lpInfo[id].balances : undefined,
-                  amp: JSBI.BigInt(50),
                   aPrecise: JSBI.BigInt(50 * 100),
                   virtualPrice: lpInfo[id]?.virtualPrice,
                   lpTotalSupply: lpInfo[id]?.total ?? JSBI.BigInt('1'),
                   lpOwned: lpInfo[id]?.user ?? JSBI.BigInt('0'),
                   loadingPool: !lpInfo[id]?.total,
+                  approxBalances: lpInfo[id]?.total ? lpInfo[id].balances : undefined,
                 }))
               )
             : poolInfo,
       })
     )
     return null
-  }, [data, loading, error, dispatch, blockNumber, lpInfo])
+  }, [data, loading, error, dispatch, blockNumber])
 }
 
 export function BatchUpdateGauges(): null {
