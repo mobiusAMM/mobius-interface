@@ -1,17 +1,15 @@
 import { Token } from '@ubeswap/sdk'
 import { MENTO_POOL_INFO } from 'constants/mento'
+import { StablePools } from 'constants/pools'
 import { stableToToken } from 'state/mentoPools/hooks'
 import { dedupeTokens } from 'utils/tokens'
 
 import { CHAIN } from '../constants'
-import { STATIC_POOL_INFO } from '../constants/StablePools'
 import { CELO, ExternalRewards, MOBI, VEMOBI } from '../constants/tokens'
 import { isAddress } from '../utils'
 
 export function useSwappableTokens(mento: boolean): Token[] {
-  return dedupeTokens(
-    mento ? getMentoTokens() : STATIC_POOL_INFO[CHAIN].filter((pool) => !pool.disabled).flatMap(({ tokens }) => tokens)
-  )
+  return dedupeTokens(mento ? getMentoTokens() : StablePools[CHAIN].flatMap((display) => display.pool.tokens))
 }
 
 export function getMentoTokens(): Token[] {
@@ -19,7 +17,7 @@ export function getMentoTokens(): Token[] {
 }
 
 export function getAllTokens(): Token[] | null {
-  const StableTokensWithDup = STATIC_POOL_INFO[CHAIN].flatMap((pools) => pools.tokens)
+  const StableTokensWithDup = StablePools[CHAIN].flatMap((display) => display.pool.tokens)
   const MentoTokensWithDup = getMentoTokens()
   return dedupeTokens(MentoTokensWithDup.concat(StableTokensWithDup).concat(ExternalRewards[CHAIN]))
 }
