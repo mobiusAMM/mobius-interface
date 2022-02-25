@@ -1,5 +1,6 @@
 import { JSBI } from '@ubeswap/sdk'
 import { ExternalStakingRewards } from 'constants/staking'
+import { VEMOBI } from 'constants/tokens'
 import { useWeb3Context } from 'hooks'
 import { roundDate } from 'pages/Staking/Lock'
 import { useEffect } from 'react'
@@ -35,8 +36,9 @@ export default function StakingUpdater() {
 
   const totalVotingPower = useSingleCallResult(votingEscrow, 'totalSupply()')
   const totalWeight = useSingleCallResult(controller, 'get_total_weight')
-  const totalMobiLocked = useSingleCallResult(mobiContract, 'balanceOf(address)', [votingEscrow?.address ?? undefined])
+  const totalMobiLocked = useSingleCallResult(mobiContract, 'balanceOf(address)', [VEMOBI[CHAIN].address])
   const snxRewardRate = useSingleCallResult(snxContract, 'rewardRate()')
+  const mobiRate = useSingleCallResult(mobiContract, 'rate')
 
   const feesToClaim = useSingleCallResult(feeDistributorContract, 'claim()')
   const totalFeesNextWeek = useSingleCallResult(feeDistributorContract, 'tokens_per_week', [
@@ -70,6 +72,7 @@ export default function StakingUpdater() {
           externalRewardsRate: JSBI.BigInt(snxRewardRate?.result?.[0] ?? '0'),
           feesThisWeek: JSBI.BigInt(totalFeesThisWeek?.result?.[0] ?? '0'),
           feesNextWeek: JSBI.BigInt(totalFeesNextWeek?.result?.[0] ?? '0'),
+          mobiRate: JSBI.BigInt(mobiRate?.result?.[0] ?? '0'),
         },
       })
     )
@@ -80,6 +83,7 @@ export default function StakingUpdater() {
     feesToClaim?.result,
     locked?.result?.amount,
     locked?.result?.end,
+    mobiRate?.result,
     snxRewardRate?.result,
     snxToClaim?.result,
     totalFeesNextWeek?.result,

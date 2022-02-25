@@ -15,6 +15,7 @@ export type IStakingState = {
   externalRewardsRate: JSBI
   feesThisWeek: JSBI
   feesNextWeek: JSBI
+  mobiRate: JSBI
 }
 
 export type IUserStakingState = {
@@ -32,6 +33,7 @@ const initialStakingState: IStakingState = {
   externalRewardsRate: JSBI.BigInt(0),
   feesThisWeek: JSBI.BigInt(0),
   feesNextWeek: JSBI.BigInt(0),
+  mobiRate: JSBI.BigInt(0),
 }
 
 const initialUserStakingState: IUserStakingState = {
