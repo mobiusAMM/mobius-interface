@@ -1,18 +1,11 @@
-import { CeloContract } from '@celo/contractkit'
-import { Mainnet } from '@celo-tools/use-contractkit'
 import { JsonRpcProvider, StaticJsonRpcProvider, Web3Provider } from '@ethersproject/providers'
-import WalletConnectProvider from '@walletconnect/web3-provider'
-import { CeloExtensionWalletConnector } from 'connectors/CeloExtensionWalletConnector'
-import { LedgerConnector, LedgerKit } from 'connectors/ledger/LedgerConnector'
 import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Web3Modal from 'web3modal'
 
-import Celo from '../../assets/svg/celo-logo.svg'
-import Ledger from '../../assets/svg/ledger.svg'
 import { CHAIN } from '../../constants'
 
-const LEDGER_ID = 'custom-ledger'
-const CEW_ID = 'custom-cew'
+// const LEDGER_ID = 'custom-ledger'
+// const CEW_ID = 'custom-cew'
 
 type onChainProvider = {
   connect: () => Promise<Web3Provider>
@@ -110,46 +103,45 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [web3Modal] = useState<Web3Modal>(
     new Web3Modal({
       cacheProvider: true,
-      providerOptions: {
-        walletconnect: {
-          package: WalletConnectProvider,
-          options: {
-            rpc: {
-              [42220]: uri,
-            },
-          },
-        },
-        [LEDGER_ID]: {
-          display: {
-            logo: Ledger,
-            name: 'Celo Ledger',
-            description: 'Connect to your Celo Ledger Wallet',
-          },
-          package: LedgerConnector,
-          connector: async (p) => {
-            web3Modal.clearCachedProvider()
-            const re: LedgerConnector = new p()
-            re.loadModal()
-            const index = await re.enable()
-            const ledgerKit = await LedgerKit.init(CHAIN, [index])
-            return (await re.activate({ kit: ledgerKit, index })).provider
-          },
-        },
-        //TODO: fix if on wrong chain
-        [CEW_ID]: {
-          display: {
-            logo: Celo,
-            name: 'Celo Extension Wallet',
-            description: 'Connect to your Celo Extension Wallet',
-          },
-          package: CeloExtensionWalletConnector,
-          connector: async (p) => {
-            const re: CeloExtensionWalletConnector = new p(Mainnet, CeloContract.GoldToken)
-            await re.initialise()
-            return re.kit.web3.currentProvider
-          },
-        },
-      },
+      // providerOptions: {
+      //   walletconnect: {
+      //     package: WalletConnectProvider,
+      //     options: {
+      //       rpc: {
+      //         [42220]: uri,
+      //       },
+      //     },
+      //   },
+      //   [LEDGER_ID]: {
+      //     display: {
+      //       logo: Ledger,
+      //       name: 'Celo Ledger',
+      //       description: 'Connect to your Celo Ledger Wallet',
+      //     },
+      //     package: LedgerConnector,
+      //     connector: async (p) => {
+      //       const re: LedgerConnector = new p()
+      //       re.loadModal()
+      //       const index = await re.enable()
+      //       const ledgerKit = await LedgerKit.init(CHAIN, [index])
+      //       return (await re.activate({ kit: ledgerKit, index })).provider
+      //     },
+      //   },
+      //   //TODO: fix if on wrong chain
+      //   [CEW_ID]: {
+      //     display: {
+      //       logo: Celo,
+      //       name: 'Celo Extension Wallet',
+      //       description: 'Connect to your Celo Extension Wallet',
+      //     },
+      //     package: CeloExtensionWalletConnector,
+      //     connector: async (p) => {
+      //       const re: CeloExtensionWalletConnector = new p(Mainnet, CeloContract.GoldToken)
+      //       await re.initialise()
+      //       return re.kit.web3.currentProvider
+      //     },
+      //   },
+      // },
     })
   )
 
@@ -186,9 +178,9 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
   }
 
   const connect = useCallback(async () => {
-    if (web3Modal.cachedProvider === LEDGER_ID) {
-      web3Modal.clearCachedProvider()
-    }
+    // if (web3Modal.cachedProvider === LEDGER_ID) {
+    //   web3Modal.clearCachedProvider()
+    // }
     const rawProvider = await web3Modal.connect()
 
     _initListeners(rawProvider)
