@@ -35,10 +35,6 @@ export interface IGauge {
   additionalRewardRate?: string[]
 }
 
-export interface IGaugeInfo {
-  isKilled?: boolean
-}
-
 export interface Volume {
   volume: {
     total: number

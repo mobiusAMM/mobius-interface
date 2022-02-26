@@ -4,6 +4,7 @@ import { load, save } from 'redux-localstorage-simple'
 import application from './application/reducer'
 import burn from './burn/reducer'
 import claim from './claim/reducer'
+import gauges from './gauges/reducer'
 import { updateVersion } from './global/actions'
 import logs from './logs/slice'
 import mento from './mento/reducer'
@@ -35,6 +36,7 @@ const store = configureStore({
     mento,
     claim,
     staking,
+    gauges,
     logs,
     openSum,
   },

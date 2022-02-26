@@ -53,7 +53,6 @@ export function UpdatePools() {
       dispatch(
         updatePools({
           pools: stablePools.map((displayPool, i) => {
-            console.log(i, new TokenAmount(displayPool.pool.lpToken, JSBI.BigInt(lpTotalSupply[i]?.result?.[0]) ?? '0'))
             return {
               ...displayPool.pool,
               fees: RECOMMENDED_FEES,
@@ -73,9 +72,7 @@ export function UpdatePools() {
           }),
         })
       )
-      console.log('updated')
     } catch (error) {
-      console.log('error')
       console.error(error)
     }
   }, [loading, data?.swaps, dispatch, stablePools, lpTotalSupply, blockNumber, balances])

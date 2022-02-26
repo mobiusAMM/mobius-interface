@@ -50,12 +50,13 @@ const initialState: IStakingState & IUserStakingState = {
 }
 
 export default createReducer<IStakingState & IUserStakingState>(initialState, (builder) => {
-  builder.addCase(updateStaking, (state, { payload: { stakingState } }) => ({
-    ...state,
-    ...stakingState,
-  }))
-  builder.addCase(updateStakingUser, (state, { payload: { userStakingState } }) => ({
-    ...state,
-    ...userStakingState,
-  }))
+  builder
+    .addCase(updateStaking, (state, { payload: { stakingState } }) => ({
+      ...state,
+      ...stakingState,
+    }))
+    .addCase(updateStakingUser, (state, { payload: { userStakingState } }) => ({
+      ...state,
+      ...userStakingState,
+    }))
 })

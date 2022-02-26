@@ -168,13 +168,13 @@ export function BatchUpdateGauges(): null {
     connected ? address : undefined,
   ])
   const totalEffectiveBalances = useMultipleContractSingleData(gaugeAddresses, gaugeInterface, 'working_supply')
-  const lastUserVotes = useSingleContractMultipleData(
+  const lastVote = useSingleContractMultipleData(
     gaugeController,
     'last_user_vote',
     gaugeAddresses.map((a) => [connected ? address : a, a])
   )
   // vote_user_slopes
-  const slopes = useSingleContractMultipleData(
+  const slope = useSingleContractMultipleData(
     gaugeController,
     'vote_user_slopes',
     gaugeAddresses.map((a) => [connected ? address : a, a])

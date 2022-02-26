@@ -18,8 +18,6 @@ import {
 } from '../../hooks/useContract'
 import { updateStaking, updateStakingUser } from './actions'
 
-// pools, general staking, general gauges, user staking, user gauges
-
 export default function StakingUpdater() {
   const dispatch = useDispatch<AppDispatch>()
   const mobiContract = useMobiContract()
