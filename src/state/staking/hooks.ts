@@ -1,4 +1,5 @@
 import { JSBI, Percent, Token, TokenAmount } from '@ubeswap/sdk'
+import { ExternalRewardsToken } from 'constants/staking'
 import { useMobi, useVeMobi } from 'hooks/Tokens'
 import { useSelector } from 'react-redux'
 import { AppState } from 'state'
@@ -6,7 +7,102 @@ import { getPoolInfo } from 'state/stablePools/hooks'
 import { StableSwapPool } from 'state/stablePools/reducer'
 import { getDepositValues } from 'utils/stableSwaps'
 
+import { CHAIN } from '../../constants'
 import { IStakingState, IUserStakingState } from './reducer'
+
+export function useStakingState(): IStakingState {
+  return useSelector<AppState, IStakingState>((state) => state.staking)
+}
+
+export function useUserStakingState(): IUserStakingState {
+  return useSelector<AppState, IUserStakingState>((state) => state.staking)
+}
+
+export function useStakingStateCombined(): IStakingState & IUserStakingState {
+  return useSelector<AppState, IStakingState & IUserStakingState>((state) => state.staking)
+}
+
+export type FeeInfo = {
+  toClaim: TokenAmount
+  totalFeesThisWeek: TokenAmount
+  totalFeesNextWeek: TokenAmount
+}
+
+export function useFeeInformation(): FeeInfo {
+  const { claimable, total, nextWeek } = useSelector((state: AppState) => ({
+    claimable: state.staking.claimableFees,
+    total: state.staking.feesThisWeek,
+    nextWeek: state.staking.feesNextWeek,
+  }))
+  const mobi = useMobi()
+
+  return {
+    toClaim: new TokenAmount(mobi, claimable ?? '0'),
+    totalFeesThisWeek: new TokenAmount(mobi, total ?? '0'),
+    totalFeesNextWeek: new TokenAmount(mobi, nextWeek ?? '0'),
+  }
+}
+
+export type StakingInfo = {
+  totalWeight: JSBI
+  totalMobiLocked: TokenAmount
+  totalVotingPower: TokenAmount
+  externalRewardRate: TokenAmount
+  feesThisWeek: JSBI
+  feesNextWeek: JSBI
+  mobiRate: TokenAmount
+}
+
+export function useStakingInfo(): StakingInfo {
+  const stakingState = useStakingState()
+
+  const mobi = useMobi()
+  const veMobi = useVeMobi()
+
+  return {
+    totalWeight: stakingState.totalWeight,
+    totalMobiLocked: new TokenAmount(mobi, stakingState.totalMobiLocked),
+    totalVotingPower: new TokenAmount(veMobi, stakingState.totalVotingPower),
+    externalRewardRate: new TokenAmount(ExternalRewardsToken[CHAIN], stakingState.externalRewardsRate),
+    feesThisWeek: stakingState.feesThisWeek,
+    feesNextWeek: stakingState.feesNextWeek,
+    mobiRate: new TokenAmount(mobi, stakingState.mobiRate),
+  }
+}
+
+export type VoteLockInfo = {
+  locked: TokenAmount
+  end: number // UNIX time stamp
+}
+
+export type UserStakingInfo = {
+  voteUserPower: number
+  votingPower: TokenAmount
+  claimableExternalRewards: TokenAmount
+  claimableFees: TokenAmount
+  lock: VoteLockInfo | null
+}
+
+export function useUserStakingInfo(): UserStakingInfo {
+  const userStakingState = useUserStakingState()
+
+  const mobi = useMobi()
+  const veMobi = useVeMobi()
+
+  return {
+    voteUserPower: parseInt(userStakingState.voteUserPower.toString()),
+    votingPower: new TokenAmount(veMobi, userStakingState.votingPower),
+    claimableExternalRewards: new TokenAmount(ExternalRewardsToken[CHAIN], userStakingState.claimableExternalRewards),
+    claimableFees: new TokenAmount(mobi, userStakingState.claimableFees),
+    lock:
+      userStakingState.lock === null
+        ? null
+        : {
+            locked: new TokenAmount(mobi, userStakingState.lock?.amount),
+            end: userStakingState.lock.end,
+          },
+  }
+}
 
 export type GaugeSummary = {
   pool: string
@@ -24,14 +120,6 @@ export type GaugeSummary = {
   lastVote: Date
   futureWeight: Percent
   powerAllocated: number
-}
-
-export type MobiStakingInfo = {
-  votingPower: TokenAmount
-  totalVotingPower: TokenAmount
-  mobiLocked?: TokenAmount
-  lockEnd?: Date
-  positions?: GaugeSummary[]
 }
 
 // export function calculateBoostedBalance(
@@ -52,54 +140,7 @@ export type MobiStakingInfo = {
 //   return JSBI.greaterThan(boosted, liquidity) ? boosted : liquidity
 // }
 
-export type FeeInfo = {
-  toClaim: TokenAmount
-  totalFeesThisWeek: TokenAmount
-  totalFeesNextWeek: TokenAmount
-}
-
-export function useMobiStakingInfo(): MobiStakingInfo {
-  const stakingInfo = useSelector<AppState, StakingState>((state) => state.staking)
-  const pools = useSelector<AppState, StableSwapPool[]>((state) => {
-    const allPools = state.stablePools.pools
-    return Object.values(allPools).map(({ pool }) => pool)
-  })
-  const veMobi = useVeMobi()
-  const mobi = useMobi()
-  const baseInfo: MobiStakingInfo = {
-    votingPower: new TokenAmount(veMobi, stakingInfo.votingPower),
-    totalVotingPower: new TokenAmount(veMobi, stakingInfo.totalVotingPower),
-    mobiLocked: new TokenAmount(mobi, stakingInfo.locked?.amount ?? '0'),
-    lockEnd: stakingInfo.locked ? new Date(stakingInfo.locked.end) : undefined,
-  }
-  if (pools && pools.length === 0) {
-    return baseInfo
-  }
-  const positions = pools.map((pool) => ({
-    pool: pool.name,
-    poolAddress: pool.address,
-    address: pool.gaugeAddress ?? '',
-    baseBalance: new TokenAmount(pool.lpToken, pool.userStaked ?? '0'),
-    totalStaked: new TokenAmount(pool.lpToken, pool.totalStakedAmount ?? '0'),
-    unclaimedMobi: new TokenAmount(mobi, pool.pendingMobi ?? '0'),
-    firstToken: pool.tokens[0],
-    currentWeight: pool.poolWeight,
-    futureWeight: new Percent(
-      pool.futureWeight,
-      JSBI.divide(stakingInfo.totalWeight, JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18)))
-    ),
-    workingBalance: new TokenAmount(pool.lpToken, pool.effectiveBalance),
-    totalWorkingBalance: new TokenAmount(pool.lpToken, pool.totalEffectiveBalance),
-    workingPercentage: new Percent(pool.effectiveBalance, pool.totalEffectiveBalance),
-    actualPercentage: new Percent(pool.userStaked ?? '0', pool.totalStakedAmount ?? '1'),
-    lastVote: new Date(pool.lastUserVote * 1000),
-    powerAllocated: pool.powerAllocated,
-  }))
-  return {
-    ...baseInfo,
-    positions,
-  }
-}
+// TODO: fix this hook
 
 export function usePriceOfDeposits() {
   const pools = useSelector<AppState, StableSwapPool[]>((state) => {
@@ -131,39 +172,7 @@ export function usePriceOfDeposits() {
       )
 }
 
-export function useLockEnd(): number {
-  const lockEnd = useSelector<AppState, number>((state) => state.staking?.lock?.end ?? 0)
-  return lockEnd
-}
-
 export function useVotePowerLeft(): number {
   const votePower = useSelector<AppState, JSBI>((state) => state.staking.voteUserPower)
   return (10000 - parseInt(votePower.toString())) / 100
-}
-
-export function useStakingState(): IStakingState {
-  return useSelector<AppState, IStakingState>((state) => state.staking)
-}
-
-export function useUserStakingState(): IUserStakingState {
-  return useSelector<AppState, IUserStakingState>((state) => state.staking)
-}
-
-export function useStakingStateCombined(): IStakingState & IUserStakingState {
-  return useSelector<AppState, IStakingState & IUserStakingState>((state) => state.staking)
-}
-
-export function useFeeInformation(): FeeInfo {
-  const { claimable, total, nextWeek } = useSelector((state: AppState) => ({
-    claimable: state.staking.claimableFees,
-    total: state.staking.feesThisWeek,
-    nextWeek: state.staking.feesNextWeek,
-  }))
-  const mobi = useMobi()
-
-  return {
-    toClaim: new TokenAmount(mobi, claimable ?? '0'),
-    totalFeesThisWeek: new TokenAmount(mobi, total ?? '0'),
-    totalFeesNextWeek: new TokenAmount(mobi, nextWeek ?? '0'),
-  }
 }

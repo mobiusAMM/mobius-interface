@@ -15,15 +15,6 @@ import StatsHeader from './StatsHeader'
 import VeMobiRewards from './VeMobiRewards'
 import Vote from './Vote'
 
-const TextContainer = styled.div`
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  margin-left: auto;
-  margin-right: auto;
-  justify-content: center;
-`
-
 const PositionsContainer = styled.div`
   width: 100%;
   display: flex;
@@ -45,15 +36,6 @@ const OuterContainer = styled.div`
   align-items: center;
   justify-content: center;
   flex-direction: column;
-`
-
-const Divider = styled.div`
-  height: 1px;
-  width: 100%;
-  background: ${({ theme }) => theme.text1};
-  margin-top: 1rem;
-  margin-bottom: 2rem;
-  opacity: 0.2;
 `
 
 const HeaderLinks = styled(Row)`

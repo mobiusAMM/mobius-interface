@@ -1,8 +1,9 @@
 import { TransactionResponse } from '@ethersproject/providers'
 import { JSBI } from '@ubeswap/sdk'
+import { useVotePowerLeft } from 'hooks/useStaking'
 import { MaxButton } from 'pages/Pool/styleds'
 import React, { useState } from 'react'
-import { GaugeSummary, useVotePowerLeft } from 'state/staking/hooks'
+import { GaugeSummary } from 'state/staking/hooks'
 import styled from 'styled-components'
 
 import { ButtonError } from '../../components/Button'

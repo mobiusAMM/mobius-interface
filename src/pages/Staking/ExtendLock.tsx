@@ -5,8 +5,7 @@ import { useDoTransaction } from 'hooks/useDoTransaction'
 import React, { useState } from 'react'
 import { Calendar } from 'react-date-range'
 import { Text } from 'rebass'
-import { useLockEnd } from 'state/staking/hooks'
-import { useIsDarkMode } from 'state/user/hooks'
+import { useUserStakingState } from 'state/staking/hooks'
 
 import { ButtonError } from '../../components/Button'
 import { useWeb3Context } from '../../hooks'
@@ -25,9 +24,8 @@ export default function ExtendLock({ setHash, setAttempting }: WithdrawModalProp
   const { connected } = useWeb3Context()
 
   // monitor call to help UI loading state
-  const endOfLock = useLockEnd()
-  const [date, setDate] = useState<Date>(new Date(endOfLock))
-  const isDarkMode = useIsDarkMode()
+  const { lock } = useUserStakingState()
+  const [date, setDate] = useState<Date>(new Date(lock?.end ?? 0))
   const roundedDate = date
     ? new Date(
         Math.floor(date?.valueOf() / (MILLISECONDS_PER_SECOND * SECONDS_PER_WEEK)) *
@@ -59,7 +57,7 @@ export default function ExtendLock({ setHash, setAttempting }: WithdrawModalProp
     error = 'Connect Wallet'
   }
 
-  if (!roundedDate || roundedDate.getTime() < endOfLock) {
+  if (!roundedDate || roundedDate.getTime() < (lock?.end ?? 0)) {
     error = error ?? 'Choose a date later than your current lock'
   }
 
@@ -73,7 +71,7 @@ export default function ExtendLock({ setHash, setAttempting }: WithdrawModalProp
       <Calendar date={roundedDate} onChange={setDate} />
 
       <ButtonError onClick={onLock} id="lock-button" disabled={!!error} error={!!error}>
-        <Text fontSize={20} fontWeight={500} color={!error && (isDarkMode ? 'black' : 'white')}>
+        <Text fontSize={20} fontWeight={500}>
           {error ? error : `Lock until ${roundedDate?.toLocaleDateString()}`}
         </Text>
       </ButtonError>

@@ -3,9 +3,10 @@ import Loader from 'components/Loader'
 import { RowFixed } from 'components/Row'
 import { ChainLogo } from 'constants/StablePools'
 import { usePoolColor } from 'hooks/useColor'
+import { useVotePowerLeft } from 'hooks/useStaking'
 import React, { useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { GaugeSummary, useVotePowerLeft } from 'state/staking/hooks'
+import { GaugeSummary } from 'state/staking/hooks'
 import styled from 'styled-components'
 import { TYPE } from 'theme'
 
@@ -153,7 +154,7 @@ function WeightCard({ position, disabled }: { position: GaugeSummary; disabled: 
         summary={position}
         isOpen={voteModalOpen}
         onDismiss={() => setVoteModalOpen(false)}
-        disabled={poolInfo.isDisabled}
+        disabled={poolInfo.isDisabled ?? false}
       />
 
       <PositionWrapper disabled={disabled} onClick={() => !disabled && setVoteModalOpen(true)}>
