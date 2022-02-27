@@ -37,7 +37,7 @@
     "ajv": "^6.12.3",
     "cids": "^1.1.6",
     "copy-to-clipboard": "^3.2.0",
-    "eslint": "^7.29.0",
+    "eslint": "^8.8.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-import-resolver-node": "^0.3.4",
     "eslint-plugin-import": "^2.23.4",
@@ -199,9 +199,14 @@
   "engines": {
     "node": ">=14.x"
   },
-  "packageManager": "yarn@3.2.0",
   "lint-staged": {
-    "*.{js,ts,tsx}": "eslint --cache --fix",
-    "*.{html,md,graphql,json,yaml,yml}": "prettier --write"
+    "*.{ts,tsx}": "eslint --fix --cache",
+    "*.{css,md,json,webmanifest,yml,yaml,js,jsx,html}": "prettier --write"
+  },
+  "packageManager": "yarn@3.1.1",
+  "dependenciesMeta": {
+    "@react-spring/core": {
+      "built": false
+    }
   }
 }
