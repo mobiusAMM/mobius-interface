@@ -17,18 +17,6 @@ const makeTokens = (
   })
 }
 
-export const UST = makeTokens(
-  {
-    [ChainId.MAINNET]: '0xEd193C4E69F591E42398eF54DEa65aa1bb02835c',
-    [ChainId.ALFAJORES]: '0xEd193C4E69F591E42398eF54DEa65aa1bb02835c',
-    [ChainId.BAKLAVA]: '0xEd193C4E69F591E42398eF54DEa65aa1bb02835c',
-  },
-  18,
-  'UST',
-  'TerraUSD',
-  'https://raw.githubusercontent.com/kyscott18/default-token-list/master/assets/asset_UST.png'
-)
-
 export const MOBI = makeTokens(
   {
     [ChainId.MAINNET]: '0x73a210637f6F6B7005512677Ba6B3C96bb4AA44B',
@@ -99,6 +87,42 @@ export const VEMOBI = makeTokens(
   'veMOBI',
   'Voting Escrow MOBI',
   'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_MOBI.png'
+)
+
+export const UST = makeTokens(
+  {
+    [ChainId.MAINNET]: '0xEd193C4E69F591E42398eF54DEa65aa1bb02835c',
+    [ChainId.ALFAJORES]: '0xEd193C4E69F591E42398eF54DEa65aa1bb02835c',
+    [ChainId.BAKLAVA]: '0xEd193C4E69F591E42398eF54DEa65aa1bb02835c',
+  },
+  18,
+  'UST',
+  'Terra USD',
+  'https://raw.githubusercontent.com/kyscott18/default-token-list/master/assets/asset_UST.png'
+)
+
+export const CETH = makeTokens(
+  {
+    [ChainId.MAINNET]: '0x2DEf4285787d58a2f811AF24755A8150622f4361',
+    [ChainId.ALFAJORES]: '0x2DEf4285787d58a2f811AF24755A8150622f4361',
+    [ChainId.BAKLAVA]: '0x2DEf4285787d58a2f811AF24755A8150622f4361',
+  },
+  18,
+  'cETH',
+  'Wrapped Ethereum',
+  'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cETH.svg'
+)
+
+export const WETH = makeTokens(
+  {
+    [ChainId.MAINNET]: '0x122013fd7dF1C6F636a5bb8f03108E876548b455',
+    [ChainId.ALFAJORES]: '0x122013fd7dF1C6F636a5bb8f03108E876548b455',
+    [ChainId.BAKLAVA]: '0x122013fd7dF1C6F636a5bb8f03108E876548b455',
+  },
+  18,
+  'wETH',
+  'Wrapped Ether (Optics Bridge)',
+  'https://etherscan.io/token/images/weth_28.png'
 )
 
 export const ExternalRewards: { [K in ChainId]: WrappedTokenInfo[] } = {

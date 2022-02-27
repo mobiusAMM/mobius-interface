@@ -1,6 +1,6 @@
+import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
 import { Fraction } from '@ubeswap/sdk'
 import { useWeb3Context } from 'hooks'
-import JSBI from 'jsbi'
 import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -63,6 +63,10 @@ export function useToggleVoteModal(): () => void {
   return useToggleModal(ApplicationModal.VOTE)
 }
 
+export function useUbeswapClient(): ApolloClient<NormalizedCacheObject> {
+  return useSelector<AppState, ApolloClient<NormalizedCacheObject>>((state) => state.application.ubeswapClient)
+}
+
 // returns a function that allows adding a popup
 export function useAddPopup(): (content: PopupContent, key?: string) => void {
   const dispatch = useDispatch()
@@ -92,25 +96,11 @@ export function useActivePopups(): AppState['application']['popupList'] {
   return useMemo(() => list.filter((item) => item.show), [list])
 }
 
-export function useEthBtcPrice(address: string): JSBI {
-  const prices = useSelector((state: AppState) => ({
-    ethPrice: state.application.ethPrice,
-    btcPrice: state.application.btcPrice,
-  }))
-  return address === '0x19260b9b573569dDB105780176547875fE9fedA3' ||
-    address === '0xBe50a3013A1c94768A1ABb78c3cB79AB28fc1aCE'
-    ? JSBI.BigInt(prices.btcPrice)
-    : address === '0xE0F2cc70E52f05eDb383313393d88Df2937DA55a' ||
-      address === '0xE919F65739c26a42616b7b8eedC6b5524d1e3aC4'
-    ? JSBI.BigInt(prices.ethPrice)
-    : JSBI.BigInt('1')
-}
-
 export function useTokenPrice(address: string | undefined): Fraction | undefined {
-  const priceString = useSelector((state: AppState) => {
-    return state.application.tokenPrices[address?.toLowerCase()]
-  })
-  return priceStringToFraction(priceString)
+  const prices = useTokenPrices()
+  if (!address) return undefined
+
+  return priceStringToFraction(prices[address])
 }
 
 export function priceStringToFraction(priceString: string | undefined): Fraction | undefined {

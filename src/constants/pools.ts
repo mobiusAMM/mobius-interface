@@ -2,7 +2,7 @@ import { ChainId, Percent, Token, TokenAmount } from '@ubeswap/sdk'
 import JSBI from 'jsbi'
 
 import { CHAIN } from './'
-import { CELO, CUSD, UST } from './tokens'
+import { CELO, CETH, CUSD, UST, WETH } from './tokens'
 
 export type Fees = {
   trade: Percent
@@ -60,6 +60,7 @@ export interface Peg {
   symbol: string
   position: 'before' | 'after'
   decimals: number
+  priceQuery: string | null
 }
 
 const Bitcoin: Peg = {
@@ -67,6 +68,7 @@ const Bitcoin: Peg = {
   symbol: '₿',
   position: 'after',
   decimals: 2,
+  priceQuery: 'bitcoin',
 }
 
 const Ether: Peg = {
@@ -74,6 +76,7 @@ const Ether: Peg = {
   symbol: 'Ξ',
   position: 'after',
   decimals: 2,
+  priceQuery: 'ethereum',
 }
 
 const Dollar: Peg = {
@@ -81,6 +84,7 @@ const Dollar: Peg = {
   symbol: '$',
   position: 'before',
   decimals: 0,
+  priceQuery: null,
 }
 
 const Celo: Peg = {
@@ -88,6 +92,7 @@ const Celo: Peg = {
   symbol: 'Celo',
   position: 'after',
   decimals: 0,
+  priceQuery: 'celo',
 }
 
 const Euro: Peg = {
@@ -95,6 +100,7 @@ const Euro: Peg = {
   symbol: '€',
   position: 'before',
   decimals: 0,
+  priceQuery: 'celo-euro',
 }
 
 export enum Chain {
@@ -155,6 +161,26 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
       gauge: {
         address: '0x107F94409746E8c8E6eFF139A100D17D9ca7FdfE',
         additionalRewards: [new TokenAmount(CELO[CHAIN], '12000000000000000')],
+      },
+    },
+    {
+      name: 'WETH (Optics V2)',
+      chain: Chain.Ethereum,
+      peg: Ether,
+      pool: {
+        address: '0x74ef28D635c6C5800DD3Cd62d4c4f8752DaACB09',
+        lpToken: new Token(
+          ChainId.MAINNET,
+          '0x4fF08e2a4E7114af4B575AeF9250144f95790982',
+          18,
+          'MobLP',
+          'Mobius cETH/wETH LP'
+        ),
+        tokens: [CETH[ChainId.MAINNET], WETH[ChainId.MAINNET]],
+      },
+      gauge: {
+        address: '0x487c30CB18AA9Ced435911E2B414e0e85D7E52bB',
+        additionalRewards: [],
       },
     },
   ],
