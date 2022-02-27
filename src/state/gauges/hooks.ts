@@ -1,18 +1,19 @@
 import { invariant } from '@apollo/client/utilities/globals'
 import { JSBI, TokenAmount } from '@ubeswap/sdk'
-import { IGauge } from 'constants/pools'
+import { IGauge, StablePools } from 'constants/pools'
 import { useMobi } from 'hooks/Tokens'
 import { useSelector } from 'react-redux'
 
+import { CHAIN } from '../../constants'
 import { AppState } from '..'
 import { IGaugeState, IUserGaugeState } from './reducer'
 
-export function useGauges(): readonly ((IGaugeState & IGauge) | null)[] {
-  return useSelector<AppState, ((IGaugeState & IGauge) | null)[]>((state) => state.gauges.gauges)
+export function useGauges(): readonly (IGaugeState | null)[] {
+  return useSelector<AppState, (IGaugeState | null)[]>((state) => state.gauges.gauges)
 }
 
-export function useUserGauges(): readonly ((IUserGaugeState & IGauge) | null)[] {
-  return useSelector<AppState, ((IUserGaugeState & IGauge) | null)[]>((state) => state.gauges.gauges)
+export function useUserGauges(): readonly (IUserGaugeState | null)[] {
+  return useSelector<AppState, (IUserGaugeState | null)[]>((state) => state.gauges.gauges)
 }
 
 export type GaugeInfo = {
@@ -67,7 +68,7 @@ export function useGaugeInfo(gauge: IGauge): GaugeInfo {
   const gauges = useGauges()
 
   const gaugeInfo = gauges
-    .filter((g) => g?.address === gauge.address)
+    .filter((g, i) => !StablePools[CHAIN][i].gauge && (StablePools[CHAIN][i].gauge?.address === gauge.address ?? false))
     .map((g) =>
       !g
         ? null
@@ -89,7 +90,9 @@ export function useUserGaugeInfo(gauge: IGauge): UserGaugeInfo {
   const mobi = useMobi()
 
   const gaugeInfo = gauges
-    .filter((g) => g?.address === gauge.address)
+    .filter(
+      (ug, i) => !StablePools[CHAIN][i].gauge && (StablePools[CHAIN][i].gauge?.address === gauge.address ?? false)
+    )
     .map((ug) =>
       !ug
         ? null

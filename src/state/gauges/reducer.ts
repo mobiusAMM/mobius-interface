@@ -6,7 +6,7 @@ import { CHAIN } from '../../constants'
 import { updateGauges, updateGaugesUser } from './actions'
 
 export interface Gauges {
-  readonly gauges: ((IUserGaugeState & IGaugeState & IGauge) | null)[]
+  readonly gauges: ((IUserGaugeState & IGaugeState) | null)[]
 }
 
 export interface IGaugeState {
@@ -45,11 +45,10 @@ const initialUserGaugeInfo: IUserGaugeState = {
   effectiveBalance: JSBI.BigInt(0),
 }
 
-function emptyExchangeInfo(gauge: IGauge | null): (IGaugeState & IUserGaugeState & IGauge) | null {
+function emptyExchangeInfo(gauge: IGauge | null): (IGaugeState & IUserGaugeState) | null {
   return gauge === null
     ? null
     : {
-        ...gauge,
         ...initialGaugeInfo,
         ...initialUserGaugeInfo,
       }

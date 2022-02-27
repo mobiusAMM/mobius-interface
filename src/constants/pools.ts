@@ -1,7 +1,8 @@
 import { ChainId, Percent, Token, TokenAmount } from '@ubeswap/sdk'
 import JSBI from 'jsbi'
 
-import { CUSD, UST } from './tokens'
+import { CHAIN } from './'
+import { CELO, CUSD, UST } from './tokens'
 
 export type Fees = {
   trade: Percent
@@ -31,8 +32,7 @@ export interface IExchangeInfo {
 
 export interface IGauge {
   address: string
-  additionalRewards?: string[]
-  additionalRewardRate?: string[]
+  additionalRewards: TokenAmount[]
 }
 
 export interface Volume {
@@ -154,8 +154,7 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
       },
       gauge: {
         address: '0x107F94409746E8c8E6eFF139A100D17D9ca7FdfE',
-        additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
-        additionalRewardRate: ['12000000000000000'],
+        additionalRewards: [new TokenAmount(CELO[CHAIN], '12000000000000000')],
       },
     },
   ],
