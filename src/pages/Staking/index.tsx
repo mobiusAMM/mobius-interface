@@ -1,8 +1,6 @@
 import { TokenAmount } from '@ubeswap/sdk'
-import { useMobi } from 'hooks/Tokens'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
-import { useMobiStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 
 import { Row } from '../../components/Row'
@@ -77,8 +75,6 @@ enum View {
 }
 
 export default function Staking() {
-  const stakingInfo = useMobiStakingInfo()
-  const mobi = useMobi()
   const unclaimedMobi = new TokenAmount(mobi, getAllUnclaimedMobi(stakingInfo.positions ?? []))
 
   const [view, setView] = React.useState<View>(View.Lock)

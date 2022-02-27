@@ -3,7 +3,7 @@ import Loader from 'components/Loader'
 import { useExternalStakingRewards } from 'hooks/useExternalStakingRewards'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
-import { MobiStakingInfo, usePriceOfDeposits } from 'state/staking/hooks'
+import { StakingInfo, UserStakingInfo } from 'state/staking/hooks'
 import { useIsDarkMode } from 'state/user/hooks'
 import styled from 'styled-components'
 import { TYPE } from 'theme'
@@ -63,22 +63,25 @@ const StatSpan = styled.span`
 `
 
 type PropType = {
-  stakingInfo: MobiStakingInfo
+  stakingInfo: StakingInfo
+  userStakingInfo: UserStakingInfo
 }
-function StatsHeader({ stakingInfo }: PropType) {
-  const priceOfDeposits = usePriceOfDeposits()
+function StatsHeader({ stakingInfo, userStakingInfo }: PropType) {
+  // TODO: fix price of deposits
+  // const priceOfDeposits = undefined
   const { avgApr } = useExternalStakingRewards()
   const isDarkMode = useIsDarkMode()
 
   const displayData = [
     {
       label: 'Your Voting Power',
-      value: stakingInfo?.votingPower?.toSignificant(4, { groupSeparator: ',' }),
+      value: userStakingInfo?.votingPower?.toSignificant(4, { groupSeparator: ',' }),
       img: isDarkMode ? lockDark : lockLight,
     },
     {
       label: 'Your total deposits',
-      value: priceOfDeposits ? '$' + priceOfDeposits?.toSignificant(4, { groupSeparator: ',' }) : undefined,
+      // value: priceOfDeposits ? '$' + priceOfDeposits?.toSignificant(4, { groupSeparator: ',' }) : undefined,
+      value: 'FIX',
       img: isDarkMode ? cashDark : cashLight,
     },
     {

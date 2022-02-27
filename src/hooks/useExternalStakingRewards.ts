@@ -1,6 +1,6 @@
 import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
 import { calcApy } from 'components/earn/StablePoolCard'
-import { CELO } from 'constants/tokens'
+import { ExternalRewardsToken } from 'constants/staking'
 import { useTokenPrice } from 'state/application/hooks'
 import { useStakingState, useStakingStateCombined } from 'state/staking/hooks'
 
@@ -23,7 +23,7 @@ export type ExternalUserRewardInfo = {
 export function useExternalStakingRewards(): ExternalRewardInfo {
   const stakingState = useStakingState()
   const mobi = useMobi()
-  const priceOfReward = useTokenPrice(CELO[CHAIN].address)
+  const priceOfReward = useTokenPrice(ExternalRewardsToken[CHAIN].address)
   const priceOfMobi = useTokenPrice(mobi?.address)
   const yearlyRate = JSBI.multiply(stakingState.externalRewardsRate, SECONDS_IN_YEAR)
 
@@ -34,7 +34,7 @@ export function useExternalStakingRewards(): ExternalRewardInfo {
       : new Percent('0')
 
   return {
-    rewardRate: new TokenAmount(CELO[CHAIN], stakingState.externalRewardsRate),
+    rewardRate: new TokenAmount(ExternalRewardsToken[CHAIN], stakingState.externalRewardsRate),
     avgApr,
   }
 }
@@ -47,7 +47,7 @@ export function useUserExternalStakingRewards(): ExternalUserRewardInfo {
   )
 
   return {
-    userRewardRate: new TokenAmount(CELO[CHAIN], userRateJSBI),
-    claimableRewards: new TokenAmount(CELO[CHAIN], stakingState.claimableExternalRewards),
+    userRewardRate: new TokenAmount(ExternalRewardsToken[CHAIN], userRateJSBI),
+    claimableRewards: new TokenAmount(ExternalRewardsToken[CHAIN], stakingState.claimableExternalRewards),
   }
 }
