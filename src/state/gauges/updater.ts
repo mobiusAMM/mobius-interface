@@ -68,11 +68,11 @@ export function GaugeUpdater() {
             return displayPool === null
               ? null
               : {
-                  balance: JSBI.BigInt(balance[i].result?.[0]),
-                  claimableMobi: JSBI.BigInt(claimableMobi[i].result?.[0]),
-                  lastVote: parseInt(lastVote[i]?.result?.[0].toString() ?? '0'),
-                  powerAllocated: parseInt(slopes[i]?.result?.[1] ?? '0'),
-                  effectiveBalance: JSBI.BigInt(effectiveBalances[i].result?.[0]),
+                  balance: JSBI.BigInt(balance[i].result?.[0] ?? '0'),
+                  claimableMobi: JSBI.BigInt(claimableMobi[i].result?.[0] ?? '0'),
+                  lastVote: parseInt(lastVote[i].result?.[0].toString() ?? '0'),
+                  powerAllocated: parseInt(slopes[i].result?.[1] ?? '0'),
+                  effectiveBalance: JSBI.BigInt(effectiveBalances[i].result?.[0] ?? '0'),
                 }
           }),
         })
