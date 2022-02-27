@@ -1,6 +1,5 @@
-import { ChainId } from '@ubeswap/sdk'
+import { ChainId, Token } from 'lib/token-utils'
 import mapValues from 'lodash/mapValues'
-import { WrappedTokenInfo } from 'state/lists/hooks'
 
 const makeTokens = (
   addresses: { [net in ChainId]: string },
@@ -8,12 +7,9 @@ const makeTokens = (
   symbol: string,
   name: string,
   logoURI: string
-): { [net in ChainId]: WrappedTokenInfo } => {
+): { [net in ChainId]: Token } => {
   return mapValues(addresses, (tokenAddress, network) => {
-    return new WrappedTokenInfo(
-      { chainId: parseInt(network), address: tokenAddress, decimals, symbol, name, logoURI },
-      []
-    )
+    return new Token({ chainId: parseInt(network), address: tokenAddress, decimals, symbol, name, logoURI })
   })
 }
 
@@ -125,41 +121,32 @@ export const WETH = makeTokens(
   'https://etherscan.io/token/images/weth_28.png'
 )
 
-export const ExternalRewards: { [K in ChainId]: WrappedTokenInfo[] } = {
+export const ExternalRewards: { [K in ChainId]: Token[] } = {
   [ChainId.MAINNET]: [
-    new WrappedTokenInfo(
-      {
-        address: '0x00400FcbF0816bebB94654259de7273f4A05c762',
-        name: 'Poof',
-        symbol: 'POOF',
-        chainId: ChainId.MAINNET,
-        decimals: 18,
-        logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_POOF.png',
-      },
-      []
-    ),
-    new WrappedTokenInfo(
-      {
-        address: '0x17700282592D6917F6A73D0bF8AcCf4D578c131e',
-        name: 'Moola',
-        symbol: 'MOO',
-        chainId: ChainId.MAINNET,
-        decimals: 18,
-        logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_MOO.png',
-      },
-      []
-    ),
-    new WrappedTokenInfo(
-      {
-        address: '0x471EcE3750Da237f93B8E339c536989b8978a438',
-        name: 'Celo',
-        symbol: 'CELO',
-        chainId: ChainId.MAINNET,
-        decimals: 18,
-        logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_CELO.png',
-      },
-      []
-    ),
+    new Token({
+      address: '0x00400FcbF0816bebB94654259de7273f4A05c762',
+      name: 'Poof',
+      symbol: 'POOF',
+      chainId: ChainId.MAINNET,
+      decimals: 18,
+      logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_POOF.png',
+    }),
+    new Token({
+      address: '0x17700282592D6917F6A73D0bF8AcCf4D578c131e',
+      name: 'Moola',
+      symbol: 'MOO',
+      chainId: ChainId.MAINNET,
+      decimals: 18,
+      logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_MOO.png',
+    }),
+    new Token({
+      address: '0x471EcE3750Da237f93B8E339c536989b8978a438',
+      name: 'Celo',
+      symbol: 'CELO',
+      chainId: ChainId.MAINNET,
+      decimals: 18,
+      logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_CELO.png',
+    }),
   ],
   [ChainId.ALFAJORES]: [],
   [ChainId.BAKLAVA]: [],

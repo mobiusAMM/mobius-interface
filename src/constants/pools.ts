@@ -1,5 +1,5 @@
-import { ChainId, Percent, Token, TokenAmount } from '@ubeswap/sdk'
 import JSBI from 'jsbi'
+import { ChainId, Percent, Token, TokenAmount } from 'lib/token-utils'
 
 import { CHAIN } from './'
 import { CELO, CETH, CUSD, UST, WETH } from './tokens'
@@ -149,13 +149,13 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
       peg: Dollar,
       pool: {
         address: '0x9F4AdBD0af281C69a582eB2E6fa2A594D4204CAe',
-        lpToken: new Token(
-          ChainId.MAINNET,
-          '0x9438e7281D7E3e99A9dD21e0EAd9c6a254e17ab2',
-          18,
-          'MobLP',
-          'Mobius cUSD/aUST LP'
-        ),
+        lpToken: new Token({
+          chainId: ChainId.MAINNET,
+          address: '0x9438e7281D7E3e99A9dD21e0EAd9c6a254e17ab2',
+          decimals: 18,
+          symbol: 'MobLP',
+          name: 'Mobius cUSD/aUST LP',
+        }),
         tokens: [CUSD[ChainId.MAINNET], UST[ChainId.MAINNET]],
       },
       gauge: {
@@ -169,13 +169,13 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
       peg: Ether,
       pool: {
         address: '0x74ef28D635c6C5800DD3Cd62d4c4f8752DaACB09',
-        lpToken: new Token(
-          ChainId.MAINNET,
-          '0x4fF08e2a4E7114af4B575AeF9250144f95790982',
-          18,
-          'MobLP',
-          'Mobius cETH/wETH LP'
-        ),
+        lpToken: new Token({
+          chainId: ChainId.MAINNET,
+          address: '0x4fF08e2a4E7114af4B575AeF9250144f95790982',
+          decimals: 18,
+          symbol: 'MobLP',
+          name: 'Mobius cUSD/aUST LP',
+        }),
         tokens: [CETH[ChainId.MAINNET], WETH[ChainId.MAINNET]],
       },
       gauge: {

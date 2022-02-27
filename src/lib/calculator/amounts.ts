@@ -1,12 +1,10 @@
-import { Fraction, Token, TokenAmount } from '@ubeswap/sdk'
+import type { Fees, IExchangeInfo } from 'constants/pools'
 import JSBI from 'jsbi'
+import type { Token } from 'lib/token-utils'
+import { Fraction, ONE, TokenAmount, ZERO } from 'lib/token-utils'
 import mapValues from 'lodash.mapvalues'
 
-import type { Fees, IExchangeInfo } from '../../constants/pools'
 import { computeD, computeY } from './curve'
-
-const ZERO = JSBI.BigInt(0)
-const ONE = JSBI.BigInt(1)
 
 /**
  * Calculates the current virtual price of the exchange.
@@ -15,7 +13,7 @@ const ONE = JSBI.BigInt(1)
  */
 export const calculateVirtualPrice = (exchange: IExchangeInfo): Fraction | null => {
   const amount = exchange.lpTotalSupply
-  if (amount === undefined || amount.equalTo('0')) {
+  if (amount === undefined || amount.equalTo(0)) {
     // pool has no tokens
     return null
   }
@@ -38,12 +36,12 @@ export const calculateEstimatedSwapOutputAmount = (
 ): {
   [K in 'outputAmountBeforeFees' | 'outputAmount' | 'fee' | 'lpFee' | 'adminFee']: TokenAmount
 } => {
-  const [fromReserves, toReserves] = fromAmount.token.equals(exchange.reserves[0].token)
+  const [fromReserves, toReserves] = fromAmount.token.equals(exchange.reserves[0].amount.token)
     ? [exchange.reserves[0], exchange.reserves[1]]
     : [exchange.reserves[1], exchange.reserves[0]]
 
-  if (fromAmount.equalTo('0')) {
-    const zero = new TokenAmount(toReserves.token, ZERO)
+  if (fromAmount.equalTo(0)) {
+    const zero = new TokenAmount(toReserves.amount.token, ZERO)
     return {
       outputAmountBeforeFees: zero,
       outputAmount: zero,
@@ -56,18 +54,28 @@ export const calculateEstimatedSwapOutputAmount = (
   const amp = exchange.ampFactor
 
   const amountBeforeFees = JSBI.subtract(
-    toReserves.raw,
-    computeY(amp, JSBI.add(fromReserves.raw, fromAmount.raw), computeD(amp, fromReserves.raw, toReserves.raw))
+    toReserves.amount.raw,
+    computeY(
+      amp,
+      JSBI.add(fromReserves.amount.raw, fromAmount.raw),
+      computeD(amp, fromReserves.amount.raw, toReserves.amount.raw)
+    )
   )
 
-  const outputAmountBeforeFees = new TokenAmount(toReserves.token, amountBeforeFees)
+  const outputAmountBeforeFees = new TokenAmount(toReserves.amount.token, amountBeforeFees)
 
-  const fee = new TokenAmount(toReserves.token, exchange.fees.trade.multiply(amountBeforeFees).toFixed(0))
+  const fee = new TokenAmount(
+    toReserves.amount.token,
+    exchange.fees.trade.asFraction.multiply(amountBeforeFees).toFixed(0)
+  )
 
-  const adminFee = new TokenAmount(toReserves.token, exchange.fees.admin.multiply(fee.raw).toFixed(0))
+  const adminFee = new TokenAmount(
+    toReserves.amount.token,
+    exchange.fees.adminTrade.asFraction.multiply(fee.raw).toFixed(0)
+  )
   const lpFee = fee.subtract(adminFee)
 
-  const outputAmount = new TokenAmount(toReserves.token, JSBI.subtract(amountBeforeFees, fee.raw))
+  const outputAmount = new TokenAmount(toReserves.amount.token, JSBI.subtract(amountBeforeFees, fee.raw))
 
   return {
     outputAmountBeforeFees,
@@ -86,7 +94,9 @@ export interface IWithdrawOneResult {
   swapFee: TokenAmount
   withdrawFee: TokenAmount
   lpSwapFee: TokenAmount
+  lpWithdrawFee: TokenAmount
   adminSwapFee: TokenAmount
+  adminWithdrawFee: TokenAmount
 }
 
 /**
@@ -102,7 +112,7 @@ export const calculateEstimatedWithdrawOneAmount = ({
   poolTokenAmount: TokenAmount
   withdrawToken: Token
 }): IWithdrawOneResult => {
-  if (poolTokenAmount.equalTo('0')) {
+  if (poolTokenAmount.equalTo(0)) {
     // final quantities
     const quantities = {
       withdrawAmount: ZERO,
@@ -110,7 +120,9 @@ export const calculateEstimatedWithdrawOneAmount = ({
       swapFee: ZERO,
       withdrawFee: ZERO,
       lpSwapFee: ZERO,
+      lpWithdrawFee: ZERO,
       adminSwapFee: ZERO,
+      adminWithdrawFee: ZERO,
     }
     return mapValues(quantities, (q) => new TokenAmount(withdrawToken, q))
   }
@@ -118,8 +130,8 @@ export const calculateEstimatedWithdrawOneAmount = ({
   const { ampFactor, fees } = exchange
 
   const [baseReserves, quoteReserves] = [
-    exchange.reserves.find((r) => r.token.equals(withdrawToken))?.raw ?? ZERO,
-    exchange.reserves.find((r) => !r.token.equals(withdrawToken))?.raw ?? ZERO,
+    exchange.reserves.find((r) => r.amount.token.equals(withdrawToken))?.amount.raw ?? ZERO,
+    exchange.reserves.find((r) => !r.amount.token.equals(withdrawToken))?.amount.raw ?? ZERO,
   ]
 
   const d_0 = computeD(ampFactor, baseReserves, quoteReserves)
@@ -132,25 +144,27 @@ export const calculateEstimatedWithdrawOneAmount = ({
   // expected_quote_amount = swap_quote_amount - swap_quote_amount * d_1 / d_0;
   const expected_quote_amount = JSBI.subtract(quoteReserves, JSBI.divide(JSBI.multiply(quoteReserves, d_1), d_0))
   // new_base_amount = swap_base_amount - expected_base_amount * fee / fee_denominator;
-  const new_base_amount = new Fraction(baseReserves.toString(), '1').subtract(
+  const new_base_amount = new Fraction(baseReserves.toString(), 1).subtract(
     normalizedTradeFee(fees, N_COINS, expected_base_amount)
   )
   // new_quote_amount = swap_quote_amount - expected_quote_amount * fee / fee_denominator;
-  const new_quote_amount = new Fraction(quoteReserves.toString(), '1').subtract(
+  const new_quote_amount = new Fraction(quoteReserves.toString(), 1).subtract(
     normalizedTradeFee(fees, N_COINS, expected_quote_amount)
   )
   const dy = new_base_amount.subtract(computeY(ampFactor, JSBI.BigInt(new_quote_amount.toFixed(0)), d_1).toString())
   const dy_0 = JSBI.subtract(baseReserves, new_y)
 
   // lp fees
-  const swapFee = new Fraction(dy_0.toString(), '1').subtract(dy)
-  const withdrawFee = dy.multiply(fees.withdraw)
+  const swapFee = new Fraction(dy_0.toString(), 1).subtract(dy)
+  const withdrawFee = dy.multiply(fees.withdraw.asFraction)
 
   // admin fees
-  const adminSwapFee = swapFee.multiply(fees.admin)
+  const adminSwapFee = swapFee.multiply(fees.adminTrade.asFraction)
+  const adminWithdrawFee = withdrawFee.multiply(fees.adminWithdraw.asFraction)
 
   // final LP fees
   const lpSwapFee = swapFee.subtract(adminSwapFee)
+  const lpWithdrawFee = withdrawFee.subtract(adminWithdrawFee)
 
   // final withdraw amount
   const withdrawAmount = dy.subtract(withdrawFee).subtract(swapFee)
@@ -162,7 +176,9 @@ export const calculateEstimatedWithdrawOneAmount = ({
     swapFee,
     withdrawFee,
     lpSwapFee,
+    lpWithdrawFee,
     adminSwapFee,
+    adminWithdrawFee,
   }
 
   return mapValues(quantities, (q) => new TokenAmount(withdrawToken, q.toFixed(0)))
@@ -173,7 +189,7 @@ export const calculateEstimatedWithdrawOneAmount = ({
  */
 export const normalizedTradeFee = ({ trade }: Fees, n_coins: JSBI, amount: JSBI): Fraction => {
   const adjustedTradeFee = new Fraction(n_coins, JSBI.multiply(JSBI.subtract(n_coins, ONE), JSBI.BigInt(4)))
-  return new Fraction(amount, '1').multiply(trade).multiply(adjustedTradeFee)
+  return new Fraction(amount, 1).multiply(trade).multiply(adjustedTradeFee)
 }
 
 export const calculateEstimatedWithdrawAmount = ({
@@ -191,8 +207,8 @@ export const calculateEstimatedWithdrawAmount = ({
   withdrawAmountsBeforeFees: readonly [TokenAmount, TokenAmount]
   fees: readonly [TokenAmount, TokenAmount]
 } => {
-  if (lpTotalSupply.equalTo('0')) {
-    const zero = reserves.map((r) => new TokenAmount(r.token, ZERO)) as [TokenAmount, TokenAmount]
+  if (lpTotalSupply.equalTo(0)) {
+    const zero = reserves.map((r) => new TokenAmount(r.amount.token, ZERO)) as [TokenAmount, TokenAmount]
     return {
       withdrawAmounts: zero,
       withdrawAmountsBeforeFees: zero,
@@ -202,9 +218,9 @@ export const calculateEstimatedWithdrawAmount = ({
 
   const share = poolTokenAmount.divide(lpTotalSupply)
 
-  const withdrawAmounts = reserves.map((amount) => {
+  const withdrawAmounts = reserves.map(({ amount }) => {
     const baseAmount = share.multiply(amount.raw)
-    const fee = baseAmount.multiply(fees.withdraw)
+    const fee = baseAmount.multiply(fees.withdraw.asFraction)
     return [
       new TokenAmount(amount.token, JSBI.BigInt(baseAmount.subtract(fee).toFixed(0))),
       {
@@ -250,20 +266,23 @@ export const calculateEstimatedMintAmount = (
 
   const amp = exchange.ampFactor
   const [reserveA, reserveB] = exchange.reserves
-  const d0 = computeD(amp, reserveA.raw, reserveB.raw)
+  const d0 = computeD(amp, reserveA.amount.raw, reserveB.amount.raw)
 
-  const d1 = computeD(amp, JSBI.add(reserveA.raw, depositAmountA), JSBI.add(reserveB.raw, depositAmountB))
+  const d1 = computeD(amp, JSBI.add(reserveA.amount.raw, depositAmountA), JSBI.add(reserveB.amount.raw, depositAmountB))
   if (JSBI.lessThan(d1, d0)) {
     throw new Error('New D cannot be less than previous D')
   }
 
-  const oldBalances = exchange.reserves.map((r) => r.raw) as [JSBI, JSBI]
-  const newBalances = [JSBI.add(reserveA.raw, depositAmountA), JSBI.add(reserveB.raw, depositAmountB)] as const
+  const oldBalances = exchange.reserves.map((r) => r.amount.raw) as [JSBI, JSBI]
+  const newBalances = [
+    JSBI.add(reserveA.amount.raw, depositAmountA),
+    JSBI.add(reserveB.amount.raw, depositAmountB),
+  ] as const
   const adjustedBalances = newBalances.map((newBalance, i) => {
     const oldBalance = oldBalances[i] as JSBI
     const idealBalance = new Fraction(d1, d0).multiply(oldBalance)
     const difference = idealBalance.subtract(newBalance)
-    const diffAbs = difference.greaterThan('0') ? difference : difference.multiply('-1')
+    const diffAbs = difference.greaterThan(0) ? difference : difference.multiply(-1)
     const fee = normalizedTradeFee(exchange.fees, N_COINS, JSBI.BigInt(diffAbs.toFixed(0)))
     return JSBI.subtract(newBalance, JSBI.BigInt(fee.toFixed(0)))
   }) as [JSBI, JSBI]

@@ -1,7 +1,5 @@
 import JSBI from 'jsbi'
-
-const ZERO = JSBI.BigInt(0)
-const ONE = JSBI.BigInt(1)
+import { ONE, ZERO } from 'lib/token-utils'
 
 const N_COINS = JSBI.BigInt(2) // n
 

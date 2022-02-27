@@ -1,5 +1,5 @@
 import { CeloContract, StableToken } from '@celo/contractkit'
-import { ChainId, Percent, TokenAmount } from '@ubeswap/sdk'
+import { ChainId, Percent, TokenAmount } from 'lib/token-utils'
 
 /**
  * Static definition of a Mento exchange.
