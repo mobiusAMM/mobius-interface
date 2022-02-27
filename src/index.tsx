@@ -11,7 +11,6 @@ import { GaugeUpdater } from 'state/gauges/updater'
 import { UpdateMento } from 'state/mentoPools/updater'
 import { UpdatePools } from 'state/mobiusPools/updater'
 import { UpdateOpenSum } from 'state/openSum/updater'
-import { BatchUpdateGauges, UpdateVariablePoolInfo } from 'state/stablePools/updater'
 import StakingUpdater from 'state/staking/updater'
 
 import { Web3ContextProvider } from './hooks'
@@ -58,9 +57,9 @@ function Updaters() {
       <ApplicationUpdater />
       <TransactionUpdater />
       <MulticallUpdater />
-      <BatchUpdateGauges />
+      {/* <BatchUpdateGauges /> */}
       <GaugeUpdater />
-      <UpdateVariablePoolInfo />
+      {/* <UpdateVariablePoolInfo /> */}
       <UpdatePools />
       <StakingUpdater />
       <UpdateMento />

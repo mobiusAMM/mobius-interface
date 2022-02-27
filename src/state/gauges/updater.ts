@@ -1,5 +1,5 @@
 import { Interface } from '@ethersproject/abi'
-import { JSBI, Percent } from '@ubeswap/sdk'
+import { JSBI } from '@ubeswap/sdk'
 import { IGauge, StablePools } from 'constants/pools'
 import { useWeb3Context } from 'hooks'
 import { useEffect } from 'react'
@@ -10,7 +10,7 @@ import { useMultipleContractSingleData, useSingleContractMultipleData } from 'st
 
 import { CHAIN } from '../../constants'
 import GAUGE_V3 from '../../constants/abis/LiquidityGaugeV3.json'
-import { useGaugeControllerContract, useMobiContract } from '../../hooks/useContract'
+import { useGaugeControllerContract } from '../../hooks/useContract'
 import { updateGauges, updateGaugesUser } from './actions'
 
 const gaugeInterface = new Interface(GAUGE_V3.abi)
@@ -22,7 +22,6 @@ export function GaugeUpdater() {
   const gauges: (IGauge | null)[] = StablePools[CHAIN].map((display) => display.gauge)
   const gaugeAddresses = gauges.map((g) => g?.address)
   const gaugeController = useGaugeControllerContract()
-  const mobiContract = useMobiContract()
 
   const totalSupply = useMultipleContractSingleData(gaugeAddresses, gaugeInterface, 'totalSupply')
   const workingSupply = useMultipleContractSingleData(gaugeAddresses, gaugeInterface, 'working_supply')
@@ -61,8 +60,6 @@ export function GaugeUpdater() {
     gaugeAddresses.map((a) => [connected ? address : a, a])
   )
 
-  console.log('returl', lastVote[0].result?.[0].toString())
-
   useEffect(() => {
     connected &&
       dispatch(
@@ -73,8 +70,9 @@ export function GaugeUpdater() {
               : {
                   balance: JSBI.BigInt(balance[i].result?.[0]),
                   claimableMobi: JSBI.BigInt(claimableMobi[i].result?.[0]),
-                  lastVote: parseInt((lastVote?.[i]?.result?.[0] ?? BigInt('0')).toString() ?? '0'),
-                  powerAllocated: parseInt((slopes?.[i]?.result?.[1] ?? BigInt('0')).toString() ?? '0'),
+                  lastVote: parseInt(lastVote[i]?.result?.[0].toString() ?? '0'),
+                  powerAllocated: parseInt(slopes[i]?.result?.[1] ?? '0'),
+                  effectiveBalance: JSBI.BigInt(effectiveBalances[i].result?.[0]),
                 }
           }),
         })
@@ -86,16 +84,33 @@ export function GaugeUpdater() {
             ? null
             : {
                 isKilled: isKilled[0].result?.[0] === false,
-                lastClaim: new Date(),
-                weight: new Percent('0'),
-                futureWeight: new Percent('0'),
-                totalSupply: JSBI.BigInt(0),
-                workingSupply: JSBI.BigInt(0),
+                lastClaim: parseInt(lastClaims?.[i]?.result?.[0].toString() ?? '0'),
+                weight: JSBI.BigInt(weights[i].result?.[0] ?? 0),
+                futureWeight: JSBI.BigInt(futureWeights[i].result?.[0] ?? 0),
+                totalSupply: JSBI.BigInt(totalSupply[i].result?.[0] ?? 0),
+                workingSupply: JSBI.BigInt(workingSupply[i].result?.[0] ?? 0),
+                totalEffectiveBalance: JSBI.BigInt(totalEffectiveBalances[i].result?.[0] ?? 0),
               }
         }),
       })
     )
-  }, [connected, dispatch, blockNumber, balance, claimableMobi, lastVote, slopes])
+  }, [
+    connected,
+    dispatch,
+    blockNumber,
+    balance,
+    claimableMobi,
+    lastVote,
+    slopes,
+    isKilled,
+    lastClaims,
+    totalSupply,
+    workingSupply,
+    weights,
+    futureWeights,
+    effectiveBalances,
+    totalEffectiveBalances,
+  ])
 
   return null
 }

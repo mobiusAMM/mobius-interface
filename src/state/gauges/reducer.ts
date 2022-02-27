@@ -1,5 +1,5 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { JSBI, Percent } from '@ubeswap/sdk'
+import { JSBI } from '@ubeswap/sdk'
 import { IGauge, StablePools } from 'constants/pools'
 
 import { CHAIN } from '../../constants'
@@ -11,11 +11,12 @@ export interface Gauges {
 
 export interface IGaugeInfo {
   isKilled: boolean
-  lastClaim: Date
-  weight: Percent
-  futureWeight: Percent
+  lastClaim: number
+  weight: JSBI
+  futureWeight: JSBI
   totalSupply: JSBI
   workingSupply: JSBI
+  totalEffectiveBalance: JSBI
 }
 
 export interface IUserGaugeInfo {
@@ -23,15 +24,17 @@ export interface IUserGaugeInfo {
   claimableMobi: JSBI
   lastVote: number
   powerAllocated: number
+  effectiveBalance: JSBI
 }
 
 const initialGaugeInfo: IGaugeInfo = {
   isKilled: false,
-  lastClaim: new Date(),
-  weight: new Percent('0'),
-  futureWeight: new Percent('0'),
+  lastClaim: 0,
+  weight: JSBI.BigInt('0'),
+  futureWeight: JSBI.BigInt('0'),
   totalSupply: JSBI.BigInt(0),
   workingSupply: JSBI.BigInt(0),
+  totalEffectiveBalance: JSBI.BigInt(0),
 }
 
 const initialUserGaugeInfo: IUserGaugeInfo = {
@@ -39,6 +42,7 @@ const initialUserGaugeInfo: IUserGaugeInfo = {
   claimableMobi: JSBI.BigInt(0),
   lastVote: 0,
   powerAllocated: 0,
+  effectiveBalance: JSBI.BigInt(0),
 }
 
 function emptyExchangeInfo(gauge: IGauge | null): (IGaugeInfo & IUserGaugeInfo & IGauge) | null {

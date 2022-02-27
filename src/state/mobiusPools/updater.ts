@@ -24,7 +24,6 @@ export function UpdatePools() {
   const lpTokenAddress = stablePools.map((p) => p.pool.lpToken.address)
   const poolAddress = stablePools.map((p) => p.pool.address)
   const lpTotalSupply = useMultipleContractSingleData(lpTokenAddress, lpInterface, 'totalSupply')
-  console.log('lp', lpTotalSupply)
   const balances = useMultipleContractSingleData(poolAddress, SwapInterface, 'getBalances')
 
   const query = gql`
