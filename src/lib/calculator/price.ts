@@ -1,8 +1,16 @@
-import BN from 'bn.js'
 import type { IExchangeInfo } from 'constants/pools'
-import { Price, TokenAmount } from 'lib/token-utils'
+import JSBI from 'jsbi'
+import { Price, TEN, TokenAmount } from 'lib/token-utils'
 
 import { calculateEstimatedSwapOutputAmount } from './'
+
+function min(a: JSBI, b: JSBI): JSBI {
+  return JSBI.greaterThanOrEqual(a, b) ? b : a
+}
+
+function max(a: JSBI, b: JSBI): JSBI {
+  return JSBI.greaterThanOrEqual(a, b) ? a : b
+}
 
 /**
  * Gets the price of the second token in the swap, i.e. "Token 1", with respect to "Token 0".
@@ -17,9 +25,9 @@ export const calculateSwapPrice = (exchangeInfo: IExchangeInfo): Price => {
   // We try to get at least 4 decimal points of precision here
   // Otherwise, we attempt to swap 1% of total supply of the pool
   // or at most, $1
-  const inputAmountNum = Math.max(
-    10_000,
-    Math.min(10 ** reserve0.token.decimals, Math.floor(parseInt(reserve0.toU64().div(new BN(100)).toString())))
+  const inputAmountNum = max(
+    JSBI.BigInt(10_000),
+    min(JSBI.exponentiate(TEN, JSBI.BigInt(reserve0.token.decimals)), reserve0.divide(100).quotient)
   )
 
   const inputAmount = new TokenAmount(reserve0.token, inputAmountNum)
