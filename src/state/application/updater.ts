@@ -58,7 +58,7 @@ export function PriceData(): null {
     if (!loading && !error && data) {
       console.log('update prices')
       fetchPegPrices(dispatch)
-      dispatch(addPrice({ token: mobi.address, price: data.token.derivedCUSD }))
+      dispatch(addPrice({ token: mobi.address.toLowerCase(), price: data.token.derivedCUSD }))
     }
   }, [data, loading, dispatch, error, mobi.address])
   return null

@@ -6,7 +6,6 @@ import { addressToToken } from 'hooks/Tokens'
 import { useLiquidityGaugeContract, useStableSwapContract } from 'hooks/useContract'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useEthBtcPrice } from 'state/application/hooks'
 import { useSingleContractMultipleData } from 'state/multicall/hooks'
 import { tryParseAmount } from 'state/swap/hooks'
 import invariant from 'tiny-invariant'
@@ -189,19 +188,19 @@ export function useMathUtil(pool: StableSwapPool | string): StableSwapMath | und
   return math
 }
 
-export function usePriceOfLp(address: string, amountOfLp: TokenAmount): TokenAmount | undefined {
-  const pool = useStablePoolInfoByName(address)
-  const price = useEthBtcPrice(pool?.poolAddress ?? '')
-  return pool && price && amountOfLp
-    ? new TokenAmount(
-        amountOfLp.token,
-        JSBI.divide(
-          JSBI.multiply(amountOfLp.raw, JSBI.multiply(pool?.virtualPrice, price)),
-          JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt('18'))
-        )
-      )
-    : undefined
-}
+// export function usePriceOfLp(address: string, amountOfLp: TokenAmount): TokenAmount | undefined {
+//   const pool = useStablePoolInfoByName(address)
+//   const price = useEthBtcPrice(pool?.poolAddress ?? '')
+//   return pool && price && amountOfLp
+//     ? new TokenAmount(
+//         amountOfLp.token,
+//         JSBI.divide(
+//           JSBI.multiply(amountOfLp.raw, JSBI.multiply(pool?.virtualPrice, price)),
+//           JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt('18'))
+//         )
+//       )
+//     : undefined
+// }
 
 export function useExternalRewards({ address }: { address: string }): TokenAmount[] {
   const pool = useSelector<AppState, StableSwapPool>((state) => state.stablePools.pools[address.toLowerCase()]?.pool)
