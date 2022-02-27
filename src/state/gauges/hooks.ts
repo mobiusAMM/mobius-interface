@@ -1,3 +1,4 @@
+import { invariant } from '@apollo/client/utilities/globals'
 import { JSBI, TokenAmount } from '@ubeswap/sdk'
 import { IGauge } from 'constants/pools'
 import { useMobi } from 'hooks/Tokens'
@@ -62,6 +63,42 @@ export function useAllUserGaugesInfo(): (UserGaugeInfo | null)[] {
   )
 }
 
-// get all user gauges
-// get one gauge by IGauge
-// get one user gauge by IGauge
+export function useGaugeInfo(gauge: IGauge): GaugeInfo {
+  const gauges = useGauges()
+
+  const gaugeInfo = gauges
+    .filter((g) => g?.address === gauge.address)
+    .map((g) =>
+      !g
+        ? null
+        : {
+            ...g,
+            lastClaim: new Date(g.lastClaim),
+            weight: g.lastClaim.valueOf(),
+            futureWeight: g.lastClaim.valueOf(),
+          }
+    )
+  invariant(gaugeInfo.length === 1, 'duplicate gauges')
+  invariant(!!gaugeInfo[0], 'gauge not found')
+  return gaugeInfo[0]
+}
+
+export function useUserGaugeInfo(gauge: IGauge): UserGaugeInfo {
+  const gauges = useUserGauges()
+
+  const mobi = useMobi()
+
+  const gaugeInfo = gauges
+    .filter((g) => g?.address === gauge.address)
+    .map((ug) =>
+      !ug
+        ? null
+        : {
+            ...ug,
+            claimableMobi: new TokenAmount(mobi, ug.claimableMobi),
+          }
+    )
+  invariant(gaugeInfo.length === 1, 'duplicate gauges')
+  invariant(!!gaugeInfo[0], 'gauge not found')
+  return gaugeInfo[0]
+}

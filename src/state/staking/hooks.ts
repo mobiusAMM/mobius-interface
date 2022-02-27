@@ -28,7 +28,7 @@ export type FeeInfo = {
   totalFeesNextWeek: TokenAmount
 }
 
-export function useFeeInformation(): FeeInfo {
+export function useFeeInfo(): FeeInfo {
   const { claimable, total, nextWeek } = useSelector((state: AppState) => ({
     claimable: state.staking.claimableFees,
     total: state.staking.feesThisWeek,
