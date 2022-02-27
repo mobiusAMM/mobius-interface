@@ -9,6 +9,7 @@ import styled from 'styled-components'
 import { Row } from '../../components/Row'
 import GaugeWeights from './GaugeWeights'
 import Stake from './Lock/Stake'
+import Positions from './Positions'
 import StatsHeader from './StatsHeader'
 import VeMobiRewards from './VeMobiRewards'
 import Vote from './Vote'
@@ -85,7 +86,6 @@ export const useAllClaimableMobi = (userGauges: (UserGaugeInfo | null)[]): Token
 export default function Staking() {
   const userGauges = useAllUserGaugesInfo()
   const gauges = useAllGaugesInfo()
-  const claimableMobi = useAllClaimableMobi(userGauges)
   const stakingInfo = useStakingInfo()
   const userStakingInfo = useUserStakingInfo()
 
@@ -114,7 +114,12 @@ export default function Staking() {
         <PositionsContainer>
           <Stake userStakingInfo={userStakingInfo} stakingInfo={stakingInfo} userGauges={userGauges} gauges={gauges} />
           {/* <CalcBoost stakingInfo={stakingInfo} /> */}
-          {/* <Positions stakingInfo={stakingInfo} unclaimedMobi={unclaimedMobi} /> */}
+          <Positions
+            stakingInfo={stakingInfo}
+            userStakingInfo={userStakingInfo}
+            gauges={gauges}
+            userGauges={userGauges}
+          />
         </PositionsContainer>
       ) : view === View.Vote ? (
         <PositionsContainer>
