@@ -4,7 +4,7 @@ import { AutoColumn } from 'components/Column'
 import { RowBetween } from 'components/Row'
 import React, { useState } from 'react'
 import Countdown from 'react-countdown'
-import { MobiStakingInfo } from 'state/staking/hooks'
+import { UserStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 import { theme, TYPE } from 'theme'
 
@@ -29,7 +29,7 @@ const Container = styled.div`
   margin-bottom: 1rem;
 `}
 `
-const Wrapper = styled(AutoColumn)<{ showBackground: boolean; background: any }>`
+const Wrapper = styled(AutoColumn)<{ showBackground: boolean }>`
   border-radius: 12px;
   width: 100%;
   overflow: hidden;
@@ -48,14 +48,16 @@ const Wrapper = styled(AutoColumn)<{ showBackground: boolean; background: any }>
 `
 
 type PropTypes = {
-  stakingInfo: MobiStakingInfo
+  userStakingInfo: UserStakingInfo
 }
-export default function Stake({ stakingInfo }: PropTypes) {
-  const { mobiLocked, lockEnd } = stakingInfo
+export default function Stake({ userStakingInfo }: PropTypes) {
+  const { lock } = userStakingInfo
   const [lockType, setLockType] = useState(-1)
+
   const veMobiContract = useVotingEscrowContract()
   const [attempting, setAttempting] = useState(false)
   const addTransaction = useTransactionAdder()
+
   async function onClaim() {
     if (veMobiContract) {
       setAttempting(true)
@@ -79,64 +81,60 @@ export default function Stake({ stakingInfo }: PropTypes) {
   return (
     <Container>
       <LockModal isOpen={lockType > -1} onDismiss={() => setLockType(-1)} lockType={lockType} />
-      <Wrapper>
+      <Wrapper showBackground={false}>
         <RowBetween marginBottom="1rem">
           <TYPE.largeHeader fontSize={[20, 32]}>Locked MOBI:</TYPE.largeHeader>
           <TYPE.green fontWeight={600} fontSize={[20, 24]}>
-            {mobiLocked ? mobiLocked.toFixed(2) : '0.00'}
+            {lock.locked.toSignificant(2)}
           </TYPE.green>
         </RowBetween>
-        {mobiLocked && mobiLocked.greaterThan('0') && Date.now() + SECONDS_IN_DAY >= (lockEnd?.valueOf() ?? 0) ? (
+        {lock.locked.greaterThan('0') && Date.now() + SECONDS_IN_DAY >= lock.end ? (
           <RowBetween>
             <TYPE.mediumHeader>You can claim in: </TYPE.mediumHeader>
-            <Countdown date={lockEnd} />
+            <Countdown date={lock.end} />
           </RowBetween>
-        ) : mobiLocked && mobiLocked.greaterThan('0') ? (
+        ) : lock.locked.greaterThan('0') ? (
           <RowBetween>
             <TYPE.mediumHeader>You can claim on: </TYPE.mediumHeader>
-            <TYPE.mediumHeader>{lockEnd?.toLocaleDateString() ?? '--'}</TYPE.mediumHeader>
+            <TYPE.mediumHeader>{new Date(lock.end).toLocaleDateString()}</TYPE.mediumHeader>
           </RowBetween>
         ) : null}
-        {true && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginTop: '1rem',
-              gap: '1rem',
-            }}
-          >
-            {Date.now() > (lockEnd?.valueOf() ?? 0) && mobiLocked && mobiLocked.greaterThan('0') ? (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginTop: '1rem',
+            gap: '1rem',
+          }}
+        >
+          {Date.now() > lock.end && lock.locked.greaterThan('0') ? (
+            <ButtonPrimary
+              onClick={onClaim}
+              style={{ fontWeight: 700, fontSize: 18, backgroundColor: theme(false).celoRed }}
+            >
+              {attempting ? 'CLAIMING...' : 'CLAIM'}
+            </ButtonPrimary>
+          ) : (
+            <>
               <ButtonPrimary
-                onClick={onClaim}
-                style={{ fontWeight: 700, fontSize: 18, backgroundColor: theme(false).celoRed }}
+                onClick={() =>
+                  lock.locked.greaterThan('0') ? setLockType(LockType.increase) : setLockType(LockType.initial)
+                }
+                style={{ fontWeight: 700, fontSize: 18, backgroundColor: theme(false).celoGreen }}
               >
-                {attempting ? 'CLAIMING...' : 'CLAIM'}
+                DEPOSIT
               </ButtonPrimary>
-            ) : (
-              <>
+              {lock.locked.greaterThan('0') && (
                 <ButtonPrimary
-                  onClick={() =>
-                    mobiLocked && mobiLocked.greaterThan('0')
-                      ? setLockType(LockType.increase)
-                      : setLockType(LockType.initial)
-                  }
-                  style={{ fontWeight: 700, fontSize: 18, backgroundColor: theme(false).celoGreen }}
+                  onClick={() => setLockType(LockType.extend)}
+                  style={{ fontWeight: 700, fontSize: 18, backgroundColor: theme(false).celoGold }}
                 >
-                  DEPOSIT
+                  EXTEND
                 </ButtonPrimary>
-                {mobiLocked && mobiLocked.greaterThan('0') && (
-                  <ButtonPrimary
-                    onClick={() => setLockType(LockType.extend)}
-                    style={{ fontWeight: 700, fontSize: 18, backgroundColor: theme(false).celoGold }}
-                  >
-                    EXTEND
-                  </ButtonPrimary>
-                )}
-              </>
-            )}
-          </div>
-        )}
+              )}
+            </>
+          )}
+        </div>
       </Wrapper>
     </Container>
   )

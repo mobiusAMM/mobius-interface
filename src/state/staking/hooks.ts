@@ -80,7 +80,7 @@ export type UserStakingInfo = {
   votingPower: TokenAmount
   claimableExternalRewards: TokenAmount
   claimableFees: TokenAmount
-  lock: VoteLockInfo | null
+  lock: VoteLockInfo
 }
 
 export function useUserStakingInfo(): UserStakingInfo {
@@ -94,13 +94,10 @@ export function useUserStakingInfo(): UserStakingInfo {
     votingPower: new TokenAmount(veMobi, userStakingState.votingPower),
     claimableExternalRewards: new TokenAmount(ExternalRewardsToken[CHAIN], userStakingState.claimableExternalRewards),
     claimableFees: new TokenAmount(mobi, userStakingState.claimableFees),
-    lock:
-      userStakingState.lock === null
-        ? null
-        : {
-            locked: new TokenAmount(mobi, userStakingState.lock?.amount),
-            end: userStakingState.lock.end,
-          },
+    lock: {
+      locked: new TokenAmount(mobi, userStakingState.lock?.amount),
+      end: userStakingState.lock.end,
+    },
   }
 }
 
@@ -170,9 +167,4 @@ export function usePriceOfDeposits() {
           return JSBI.add(accum, JSBI.multiply(valueOfStaked.raw, price))
         }, JSBI.BigInt('0'))
       )
-}
-
-export function useVotePowerLeft(): number {
-  const votePower = useSelector<AppState, JSBI>((state) => state.staking.voteUserPower)
-  return (10000 - parseInt(votePower.toString())) / 100
 }

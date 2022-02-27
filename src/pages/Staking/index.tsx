@@ -1,11 +1,10 @@
-import { TokenAmount } from '@ubeswap/sdk'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
+import { useStakingInfo, useUserStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 
 import { Row } from '../../components/Row'
 import CalcBoost from './CalcBoost'
-import { getAllUnclaimedMobi } from './ClaimAllMobiModal'
 import GaugeWeights from './GaugeWeights'
 import Positions from './Positions'
 import Stake from './Stake'
@@ -75,13 +74,15 @@ enum View {
 }
 
 export default function Staking() {
-  const unclaimedMobi = new TokenAmount(mobi, getAllUnclaimedMobi(stakingInfo.positions ?? []))
+  // const unclaimedMobi = new TokenAmount(mobi, getAllUnclaimedMobi(stakingInfo.positions ?? []))
+  const stakingInfo = useStakingInfo()
+  const userStakingInfo = useUserStakingInfo()
 
   const [view, setView] = React.useState<View>(View.Lock)
 
   return (
     <OuterContainer>
-      <StatsHeader stakingInfo={stakingInfo} />
+      <StatsHeader stakingInfo={stakingInfo} userStakingInfo={userStakingInfo} />
       <div style={{ alignItems: 'center', marginBottom: '1rem', marginTop: '1rem', display: 'flex', width: '100%' }}>
         <HeaderLinks>
           <Sel onClick={() => setView(View.Lock)} selected={view === View.Lock}>
@@ -100,7 +101,7 @@ export default function Staking() {
       </div>
       {view === View.Lock ? (
         <PositionsContainer>
-          <Stake stakingInfo={stakingInfo} />
+          <Stake userStakingInfo={userStakingInfo} />
           <CalcBoost stakingInfo={stakingInfo} unclaimedMobi={unclaimedMobi} />
           <Positions stakingInfo={stakingInfo} unclaimedMobi={unclaimedMobi} />
         </PositionsContainer>

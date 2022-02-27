@@ -23,7 +23,7 @@ export type IUserStakingState = {
   votingPower: JSBI
   claimableExternalRewards: JSBI
   claimableFees: JSBI
-  lock: VoteLock | null
+  lock: VoteLock
 }
 
 const initialStakingState: IStakingState = {
@@ -41,7 +41,7 @@ const initialUserStakingState: IUserStakingState = {
   votingPower: JSBI.BigInt(0),
   claimableExternalRewards: JSBI.BigInt(0),
   claimableFees: JSBI.BigInt(0),
-  lock: null,
+  lock: { amount: JSBI.BigInt(0), end: 0 },
 }
 
 const initialState: IStakingState & IUserStakingState = {
