@@ -4,15 +4,17 @@ import Loader from 'components/Loader'
 import { ExternalStakingRewards } from 'constants/staking'
 import { useStakingContract } from 'hooks/useContract'
 import React, { useState } from 'react'
+import { GaugeInfo, UserGaugeInfo } from 'state/gauges/hooks'
+import { StakingInfo } from 'state/staking/hooks'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import styled from 'styled-components'
 
-import { AutoColumn } from '../../components/Column'
-import Modal from '../../components/Modal'
-import { LoadingView, SubmittedView } from '../../components/ModalViews'
-import { RowBetween } from '../../components/Row'
-import { CHAIN } from '../../constants'
-import { CloseIcon, TYPE } from '../../theme'
+import { AutoColumn } from '../../../components/Column'
+import Modal from '../../../components/Modal'
+import { LoadingView, SubmittedView } from '../../../components/ModalViews'
+import { RowBetween } from '../../../components/Row'
+import { CHAIN } from '../../../constants'
+import { CloseIcon, TYPE } from '../../../theme'
 import ExtendLock from './ExtendLock'
 import IncreaseLockAmount from './IncreaseLockAmount'
 import Lock from './Lock'
@@ -31,6 +33,9 @@ interface LockModalProps {
   isOpen: boolean
   onDismiss: () => void
   lockType?: LockType
+  stakingInfo: StakingInfo
+  gauges: (GaugeInfo | null)[]
+  userGauges: (UserGaugeInfo | null)[]
 }
 
 const ModifiedWrapper = styled(ContentWrapper)`
@@ -41,7 +46,14 @@ const ModifiedWrapper = styled(ContentWrapper)`
   }
 `
 
-export default function LockModal({ isOpen, onDismiss, lockType = LockType.initial }: LockModalProps) {
+export default function LockModal({
+  isOpen,
+  onDismiss,
+  lockType = LockType.initial,
+  stakingInfo,
+  gauges,
+  userGauges,
+}: LockModalProps) {
   // monitor call to help UI loading state
   const stakingContract = useStakingContract(ExternalStakingRewards[CHAIN])
   const addTransaction = useTransactionAdder()
@@ -92,7 +104,13 @@ export default function LockModal({ isOpen, onDismiss, lockType = LockType.initi
               {hasSnapshot === 0 ? <TYPE.mediumHeader>Snapshot veMOBI Celo Rewards</TYPE.mediumHeader> : <Loader />}
             </ButtonConfirmed>
           ) : lockType === LockType.initial ? (
-            <Lock setAttempting={setAttempting} setHash={setHash} />
+            <Lock
+              setAttempting={setAttempting}
+              setHash={setHash}
+              stakingInfo={stakingInfo}
+              gauges={gauges}
+              userGauges={userGauges}
+            />
           ) : lockType === LockType.extend ? (
             <ExtendLock setAttempting={setAttempting} setHash={setHash} />
           ) : (

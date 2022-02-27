@@ -130,7 +130,6 @@ const StyledDropDown = styled(DropDown)<{ selected: boolean }>`
 
 type PositionsProps = {
   stakingInfo: MobiStakingInfo
-  unclaimedMobi: TokenAmount
 }
 export default function CalcBoost({ stakingInfo }: PositionsProps) {
   const stablePools = useStablePoolInfo()

@@ -65,7 +65,7 @@ export function GaugeUpdater() {
       dispatch(
         updateGaugesUser({
           userGaugeState: StablePools[CHAIN].map((displayPool, i) => {
-            return displayPool === null
+            return displayPool.gauge === null
               ? null
               : {
                   balance: JSBI.BigInt(balance[i].result?.[0] ?? '0'),
@@ -80,7 +80,7 @@ export function GaugeUpdater() {
     dispatch(
       updateGauges({
         gaugeState: StablePools[CHAIN].map((display, i) => {
-          return display === null
+          return display.gauge === null
             ? null
             : {
                 isKilled: isKilled[0].result?.[0] === false,

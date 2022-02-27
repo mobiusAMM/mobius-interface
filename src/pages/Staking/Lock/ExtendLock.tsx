@@ -7,10 +7,10 @@ import { Calendar } from 'react-date-range'
 import { Text } from 'rebass'
 import { useUserStakingState } from 'state/staking/hooks'
 
-import { ButtonError } from '../../components/Button'
-import { useWeb3Context } from '../../hooks'
-import { useVotingEscrowContract } from '../../hooks/useContract'
-import { TYPE } from '../../theme'
+import { ButtonError } from '../../../components/Button'
+import { useWeb3Context } from '../../../hooks'
+import { useVotingEscrowContract } from '../../../hooks/useContract'
+import { TYPE } from '../../../theme'
 
 const MILLISECONDS_PER_SECOND = 1000
 const SECONDS_PER_WEEK = 604800

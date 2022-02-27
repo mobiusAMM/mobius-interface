@@ -4,13 +4,14 @@ import { AutoColumn } from 'components/Column'
 import { RowBetween } from 'components/Row'
 import React, { useState } from 'react'
 import Countdown from 'react-countdown'
-import { UserStakingInfo } from 'state/staking/hooks'
+import { GaugeInfo, UserGaugeInfo } from 'state/gauges/hooks'
+import { StakingInfo, UserStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 import { theme, TYPE } from 'theme'
 
 import { useVotingEscrowContract } from '../../hooks/useContract'
 import { useTransactionAdder } from '../../state/transactions/hooks'
-import LockModal, { LockType } from './LockModal'
+import LockModal, { LockType } from './Lock/LockModal'
 
 const SECONDS_IN_DAY = 24 * 60 * 60
 
@@ -49,8 +50,11 @@ const Wrapper = styled(AutoColumn)<{ showBackground: boolean }>`
 
 type PropTypes = {
   userStakingInfo: UserStakingInfo
+  stakingInfo: StakingInfo
+  userGauges: (UserGaugeInfo | null)[]
+  gauges: (GaugeInfo | null)[]
 }
-export default function Stake({ userStakingInfo }: PropTypes) {
+export default function Stake({ userStakingInfo, stakingInfo, userGauges, gauges }: PropTypes) {
   const { lock } = userStakingInfo
   const [lockType, setLockType] = useState(-1)
 
@@ -80,7 +84,14 @@ export default function Stake({ userStakingInfo }: PropTypes) {
 
   return (
     <Container>
-      <LockModal isOpen={lockType > -1} onDismiss={() => setLockType(-1)} lockType={lockType} />
+      <LockModal
+        isOpen={lockType > -1}
+        onDismiss={() => setLockType(-1)}
+        lockType={lockType}
+        stakingInfo={stakingInfo}
+        userGauges={userGauges}
+        gauges={gauges}
+      />
       <Wrapper showBackground={false}>
         <RowBetween marginBottom="1rem">
           <TYPE.largeHeader fontSize={[20, 32]}>Locked MOBI:</TYPE.largeHeader>

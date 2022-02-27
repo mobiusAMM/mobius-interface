@@ -42,12 +42,12 @@ export function UpdatePools() {
       }
     }
   `
-  const { data, loading, error } = useQuery(query)
+  const { data, loading } = useQuery(query)
 
   useEffect(() => {
     if (loading) return
-    const inSubgraph: Set<string> =
-      data?.swaps.reduce((accum: Set<string>, cur: any) => new Set([...accum, cur.id]), new Set()) ?? new Set()
+    // const inSubgraph: Set<string> =
+    //   data?.swaps.reduce((accum: Set<string>, cur: any) => new Set([...accum, cur.id]), new Set()) ?? new Set()
     try {
       dispatch(
         updatePools({
@@ -59,7 +59,7 @@ export function UpdatePools() {
               ampFactor: RECOMMENDED_AMP,
               lpTotalSupply: new TokenAmount(
                 displayPool.pool.lpToken,
-                JSBI.BigInt(lpTotalSupply[i]?.result?.[0]) ?? '0'
+                JSBI.BigInt(lpTotalSupply[i]?.result?.[0] ?? '0')
               ),
               reserves: balances?.[i]?.result?.[0]
                 ? balances?.[i]?.result?.[0].map(

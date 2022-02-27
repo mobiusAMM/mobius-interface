@@ -1,20 +1,20 @@
 import { Fraction, JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import { GaugeSummary } from 'state/staking/hooks'
 
-export function calcBoost(summary: GaugeSummary, votingPower: JSBI, totalVotingPower: JSBI): Fraction {
-  const { baseBalance, totalStaked } = summary
-  const baseWeighted = JSBI.divide(JSBI.multiply(JSBI.BigInt(4), baseBalance.raw), JSBI.BigInt(10))
+// TODO double check that this math is correct
+export function calcBoost(userBalance: JSBI, totalSupply: JSBI, votingPower: JSBI, totalVotingPower: JSBI): Fraction {
+  const baseWeighted = JSBI.divide(JSBI.multiply(JSBI.BigInt(4), userBalance), JSBI.BigInt(10))
   let weighted = baseWeighted
   if (JSBI.greaterThan(totalVotingPower, JSBI.BigInt('0'))) {
     weighted = JSBI.add(
-      JSBI.divide(JSBI.multiply(JSBI.BigInt(4), baseBalance.raw), JSBI.BigInt(10)),
+      JSBI.divide(JSBI.multiply(JSBI.BigInt(4), userBalance), JSBI.BigInt(10)),
       JSBI.divide(
-        JSBI.multiply(JSBI.BigInt(6), JSBI.multiply(totalStaked.raw, votingPower)),
+        JSBI.multiply(JSBI.BigInt(6), JSBI.multiply(totalSupply, votingPower)),
         JSBI.multiply(totalVotingPower, JSBI.BigInt(10))
       )
     )
   }
-  const min = JSBI.lessThan(weighted, baseBalance.raw) ? weighted : baseBalance.raw
+  const min = JSBI.lessThan(weighted, userBalance) ? weighted : userBalance
   return new Fraction(min, baseWeighted)
 }
 

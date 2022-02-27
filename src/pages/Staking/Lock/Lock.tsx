@@ -5,46 +5,68 @@ import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import CurrencyLogo from 'components/CurrencyLogo'
 import Loader from 'components/Loader'
 import { AutoRow, RowBetween } from 'components/Row'
+import { StablePools } from 'constants/pools'
 import { useMobi } from 'hooks/Tokens'
 import { useDoTransaction } from 'hooks/useDoTransaction'
 import React, { useState } from 'react'
+import { Calendar } from 'react-date-range'
 import { Text } from 'rebass'
-import { StablePoolInfo } from 'state/stablePools/hooks'
-import { useIsDarkMode } from 'state/user/hooks'
+import { GaugeInfo, UserGaugeInfo } from 'state/gauges/hooks'
+import { StakingInfo } from 'state/staking/hooks'
 import { useTokenBalance } from 'state/wallet/hooks'
 import styled from 'styled-components'
+import invariant from 'tiny-invariant'
+import { calcBoost, calcExpectedVeMobi } from 'utils/calcExpectedVeMobi'
 
-import { ButtonConfirmed, ButtonError } from '../../components/Button'
-import Column from '../../components/Column'
-import DoubleCurrencyLogo from '../../components/DoubleLogo'
-import { Input as NumericalInput } from '../../components/NumericalInput'
-import ProgressSteps from '../../components/ProgressSteps'
-import { useWeb3Context } from '../../hooks'
-import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
-import { useVotingEscrowContract } from '../../hooks/useContract'
-import { tryParseAmount } from '../../state/swap/hooks'
-import { TYPE } from '../../theme'
+import { ButtonConfirmed, ButtonError } from '../../../components/Button'
+import Column from '../../../components/Column'
+import { Input as NumericalInput } from '../../../components/NumericalInput'
+import ProgressSteps from '../../../components/ProgressSteps'
+import { CHAIN } from '../../../constants'
+import { useWeb3Context } from '../../../hooks'
+import { ApprovalState, useApproveCallback } from '../../../hooks/useApproveCallback'
+import { useVotingEscrowContract } from '../../../hooks/useContract'
+import { tryParseAmount } from '../../../state/swap/hooks'
+import { TYPE } from '../../../theme'
 
 const MILLISECONDS_PER_SECOND = 1000
 const SECONDS_PER_WEEK = 604800
-interface IncreaseLockAmountProps {
+
+export const roundDate = (date: number) =>
+  new Date(
+    Math.floor(date / (MILLISECONDS_PER_SECOND * SECONDS_PER_WEEK)) * (MILLISECONDS_PER_SECOND * SECONDS_PER_WEEK)
+  )
+interface LockProps {
   setAttempting: (attempting: boolean) => void
   setHash: (hash: string | undefined) => void
+  userGauges: (UserGaugeInfo | null)[]
+  gauges: (GaugeInfo | null)[]
+  stakingInfo: StakingInfo
 }
 
-export default function IncreaseLockAmount({ setHash, setAttempting }: IncreaseLockAmountProps) {
-  const { address, connected } = useWeb3Context()
+export default function Lock({ setHash, setAttempting, userGauges, gauges, stakingInfo }: LockProps) {
+  const { connected, address } = useWeb3Context()
 
   // monitor call to help UI loading state
   const mobi = useMobi()
   const balance = useTokenBalance(connected ? address : undefined, mobi)
+
   const [approving, setApproving] = useState(false)
   const [input, setInput] = useState<string>('')
+  const [showBoosts, setShowBoosts] = useState(false)
+
   const selectedAmount = tryParseAmount(input, mobi) || new TokenAmount(mobi, '0')
-  const isDarkMode = useIsDarkMode()
+  const [date, setDate] = useState<Date>()
+  const roundedDate = date ? roundDate(date.getSeconds()) : undefined
   const doTransaction = useDoTransaction()
 
   const veMobiContract = useVotingEscrowContract()
+  const expectedVeMobi = calcExpectedVeMobi(
+    selectedAmount,
+    roundedDate ? roundedDate.getTime() - roundDate(Date.now()).getTime() : 0
+  )
+
+  invariant(veMobiContract, 'veMobi contract')
 
   const [approval, approveCallback] = useApproveCallback(selectedAmount, veMobiContract.address)
   const showApproveFlow =
@@ -52,11 +74,12 @@ export default function IncreaseLockAmount({ setHash, setAttempting }: IncreaseL
     approval === ApprovalState.PENDING ||
     (approving && approval === ApprovalState.APPROVED)
   async function onLock() {
-    if (veMobiContract && selectedAmount) {
+    if (veMobiContract && date && selectedAmount) {
       setAttempting(true)
-      const resp = await doTransaction(veMobiContract, 'increase_amount', {
-        args: [selectedAmount.raw.toString()],
-        summary: `Increase lock by ${selectedAmount.toExact()} MOBI`,
+      const dateAsUnix = date.valueOf() / MILLISECONDS_PER_SECOND
+      const resp = await doTransaction(veMobiContract, 'create_lock', {
+        args: [selectedAmount.raw.toString(), dateAsUnix.toFixed()],
+        summary: `Lock ${selectedAmount.toExact()} MOBI until ${date?.toLocaleDateString()}`,
       }).catch((error: any) => {
         setAttempting(false)
         throw error
@@ -79,14 +102,45 @@ export default function IncreaseLockAmount({ setHash, setAttempting }: IncreaseL
     error = error ?? 'Insufficient Funds'
   }
 
+  if (!roundedDate || roundedDate.getTime() < Date.now()) {
+    error = error ?? 'Choose a Date in the Future'
+  }
+
   return (
     <>
-      <TYPE.mediumHeader marginBottom={0}>Select Additional Mobi</TYPE.mediumHeader>
       <CurrencyRow val={input} token={mobi} balance={balance} setTokenAmount={setInput} />
+      <TYPE.mediumHeader marginBottom={0}>Set Lock Date</TYPE.mediumHeader>
       <TYPE.subHeader marginTop={-20} color="red">
-        You will be unable to withdraw this additional MOBI until your lock date is reached.
+        You will be unable to withdraw your locked MOBI until this date. This date will be rounded down to the nearest
+        Thursday 00:00:00 GTM 0
       </TYPE.subHeader>
-
+      <Calendar date={roundedDate} onChange={setDate} />
+      <RowBetween>
+        <TYPE.body>Expected veMobi</TYPE.body>
+        <TYPE.body>{expectedVeMobi.toFixed(2)}</TYPE.body>
+      </RowBetween>
+      {!showBoosts ? (
+        <AutoRow onClick={() => setShowBoosts(true)} style={{ cursor: 'pointer' }}>
+          <TYPE.body>Show Boosts</TYPE.body>
+        </AutoRow>
+      ) : (
+        userGauges.map((ug, i) => {
+          if (ug === null || JSBI.equal(ug.balance, JSBI.BigInt(0))) return null
+          const boost = calcBoost(
+            ug?.balance,
+            gauges[i]?.totalSupply ?? JSBI.BigInt(0),
+            expectedVeMobi.raw,
+            JSBI.add(expectedVeMobi.raw, stakingInfo.totalVotingPower.raw)
+          )
+          const poolName = StablePools[CHAIN][i].name
+          return (
+            <RowBetween key={`boost-info-${poolName}`}>
+              <TYPE.body>{poolName}</TYPE.body>
+              <TYPE.body>{boost.toFixed(2)}x</TYPE.body>
+            </RowBetween>
+          )
+        })
+      )}
       {showApproveFlow ? (
         <RowBetween>
           <ButtonConfirmed
@@ -117,14 +171,14 @@ export default function IncreaseLockAmount({ setHash, setAttempting }: IncreaseL
             error={!!error}
           >
             <Text fontSize={16} fontWeight={500}>
-              {error ? error : `Increase Lock`}
+              {error ? error : `Lock until ${roundedDate?.toLocaleDateString()}`}
             </Text>
           </ButtonError>
         </RowBetween>
       ) : (
         <ButtonError onClick={onLock} id="lock-button" disabled={!!error} error={!!error}>
-          <Text fontSize={20} fontWeight={500} color={!error && (isDarkMode ? 'black' : 'white')}>
-            {error ? error : `Increase Lock`}
+          <Text fontSize={20} fontWeight={500}>
+            {error ? error : `Lock until ${roundedDate?.toLocaleDateString()}`}
           </Text>
         </ButtonError>
       )}
@@ -141,14 +195,8 @@ type CurrencyRowProps = {
   val: string
   token: Token
   setTokenAmount: (tokenAmount: string) => void
-  readOnly: boolean | undefined
   balance?: TokenAmount
-  pool?: StablePoolInfo
 }
-
-const InputRowLeft = styled.div``
-
-const TokenInfo = styled.div``
 
 const InputRow = styled.div<{ selected: boolean }>`
   ${({ theme }) => theme.flexRowNoWrap};
@@ -168,22 +216,6 @@ const Aligner = styled.span`
   justify-content: space-between;
 `
 
-const InputPanel = styled.div<{ hideInput?: boolean }>`
-  ${({ theme }) => theme.flexColumnNoWrap}
-  position: relative;
-  border-radius: ${({ hideInput }) => (hideInput ? '8px' : '20px')};
-  background-color: ${({ theme }) => theme.bg2};
-  z-index: 1;
-  width: 100%;
-`
-
-const Container = styled.div<{ hideInput: boolean }>`
-  border-radius: ${({ hideInput }) => (hideInput ? '8px' : '20px')};
-  border: 1px solid ${({ theme }) => theme.bg2};
-  background-color: ${({ theme }) => theme.bg1};
-  padding: 0.5rem;
-`
-
 const StyledTokenName = styled.span<{ active?: boolean }>`
   ${({ active }) => (active ? '  margin: 0 0.25rem 0 0.75rem;' : '  margin: 0 0.25rem 0 0.25rem;')}
   font-size:  ${({ active }) => (active ? '20px' : '16px')};
@@ -193,20 +225,15 @@ const BalanceText = styled(TYPE.subHeader)`
   cursor: pointer;
 `
 
-export const CurrencyRow = ({ val, token, setTokenAmount, balance, readOnly, pool }: CurrencyRowProps) => {
+const CurrencyRow = ({ val, token, setTokenAmount, balance }: CurrencyRowProps) => {
   const currency = token
   const tokenBalance = balance
-  const TEN = JSBI.BigInt('10')
 
   const mainRow = (
-    <InputRow>
+    <InputRow selected={false}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <Aligner>
-          {pool ? (
-            <DoubleCurrencyLogo currency0={pool.tokens[0]} currency1={pool.tokens[1]} size={24} margin={true} />
-          ) : (
-            <CurrencyLogo currency={currency} size={'34px'} />
-          )}
+          <CurrencyLogo currency={currency} size={'34px'} />
           <StyledTokenName className="token-symbol-container" active={Boolean(currency && currency.symbol)}>
             {(currency && currency.symbol && currency.symbol.length > 20
               ? currency.symbol.slice(0, 4) +
@@ -219,7 +246,6 @@ export const CurrencyRow = ({ val, token, setTokenAmount, balance, readOnly, poo
       <InputDiv>
         <NumericalInput
           className="token-amount-input"
-          disabled={readOnly}
           value={val}
           onUserInput={(val) => {
             setTokenAmount(val)
@@ -230,7 +256,7 @@ export const CurrencyRow = ({ val, token, setTokenAmount, balance, readOnly, poo
   )
   const decimalPlacesForBalance = tokenBalance?.greaterThan('1') ? 2 : tokenBalance?.greaterThan('0') ? 10 : 2
 
-  const balanceRow = !readOnly && (
+  const balanceRow = (
     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
       <BalanceText onClick={() => setTokenAmount(tokenBalance?.toExact() || '0')}>
         Balance: {tokenBalance?.toFixed(decimalPlacesForBalance)}
@@ -244,12 +270,4 @@ export const CurrencyRow = ({ val, token, setTokenAmount, balance, readOnly, poo
       {mainRow}
     </div>
   )
-}
-
-const insertDecimal = (tokenAmount: TokenAmount) => {
-  const { token } = tokenAmount
-  const amount = tokenAmount.divide(
-    new TokenAmount(token, JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt(token.decimals)))
-  )
-  return amount.toFixed(2)
 }

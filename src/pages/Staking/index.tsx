@@ -1,16 +1,15 @@
+import { TokenAmount } from '@ubeswap/sdk'
+import { useMobi } from 'hooks/Tokens'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
+import { useAllGaugesInfo, useAllUserGaugesInfo, UserGaugeInfo } from 'state/gauges/hooks'
 import { useStakingInfo, useUserStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 
 import { Row } from '../../components/Row'
-import CalcBoost from './CalcBoost'
-import GaugeWeights from './GaugeWeights'
-import Positions from './Positions'
 import Stake from './Stake'
 import StatsHeader from './StatsHeader'
 import VeMobiRewards from './VeMobiRewards'
-import Vote from './Vote'
 
 const PositionsContainer = styled.div`
   width: 100%;
@@ -73,8 +72,18 @@ enum View {
   Rewards = 4,
 }
 
+export const useAllClaimableMobi = (userGauges: (UserGaugeInfo | null)[]): TokenAmount => {
+  const mobi = useMobi()
+  return userGauges.reduce(
+    (accum, userGauge) => (userGauge ? accum.add(userGauge.claimableMobi) : accum),
+    new TokenAmount(mobi, '0')
+  )
+}
+
 export default function Staking() {
-  // const unclaimedMobi = new TokenAmount(mobi, getAllUnclaimedMobi(stakingInfo.positions ?? []))
+  const userGauges = useAllUserGaugesInfo()
+  const gauges = useAllGaugesInfo()
+  const claimableMobi = useAllClaimableMobi(userGauges)
   const stakingInfo = useStakingInfo()
   const userStakingInfo = useUserStakingInfo()
 
@@ -101,18 +110,16 @@ export default function Staking() {
       </div>
       {view === View.Lock ? (
         <PositionsContainer>
-          <Stake userStakingInfo={userStakingInfo} />
-          <CalcBoost stakingInfo={stakingInfo} unclaimedMobi={unclaimedMobi} />
-          <Positions stakingInfo={stakingInfo} unclaimedMobi={unclaimedMobi} />
+          <Stake userStakingInfo={userStakingInfo} stakingInfo={stakingInfo} userGauges={userGauges} gauges={gauges} />
+          {/* <CalcBoost stakingInfo={stakingInfo} /> */}
+          {/* <Positions stakingInfo={stakingInfo} unclaimedMobi={unclaimedMobi} /> */}
         </PositionsContainer>
       ) : view === View.Vote ? (
         <PositionsContainer>
-          <Vote summaries={stakingInfo.positions ?? []} lockDate={stakingInfo.lockEnd ?? new Date()} />
+          {/* <Vote summaries={stakingInfo.positions ?? []} lockDate={stakingInfo.lockEnd ?? new Date()} /> */}
         </PositionsContainer>
       ) : view === View.Analyze ? (
-        <PositionsContainer>
-          <GaugeWeights summaries={stakingInfo.positions ?? []} />
-        </PositionsContainer>
+        <PositionsContainer>{/* <GaugeWeights summaries={stakingInfo.positions ?? []} /> */}</PositionsContainer>
       ) : (
         <PositionsContainer>
           <VeMobiRewards />
