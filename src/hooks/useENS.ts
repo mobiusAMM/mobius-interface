@@ -1,9 +1,9 @@
 import ENS from '@ensdomains/ensjs'
-import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
 
 import { NOM_REGISTRY_ADDRESS } from '../constants'
 import { isAddress } from '../utils'
+import { useWeb3Context } from './web3'
 
 /**
  * Given an address, does a lookup to resolve to a name
@@ -16,10 +16,10 @@ export default function useENS(address?: string | null): {
 } {
   const validated = isAddress(address)
   const [name, setName] = useState<string | null>(null)
+  const { provider } = useWeb3Context()
 
   useEffect(() => {
     ;(async () => {
-      const provider = new ethers.providers.JsonRpcProvider('https://forno.celo.org')
       const ens = new ENS({ provider, ensAddress: NOM_REGISTRY_ADDRESS })
       try {
         const { name } = await ens.getName(address)
@@ -28,7 +28,7 @@ export default function useENS(address?: string | null): {
         console.error('Could not fetch name data', e)
       }
     })()
-  }, [address])
+  }, [address, provider])
 
   return {
     loading: false,
