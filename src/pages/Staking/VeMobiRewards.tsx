@@ -8,7 +8,7 @@ import { useWeb3Context } from 'hooks'
 import { useFeeDistributor, useStakingContract } from 'hooks/useContract'
 import { useExternalStakingRewards, useUserExternalStakingRewards } from 'hooks/useExternalStakingRewards'
 import React, { useState } from 'react'
-import { useFeeInformation } from 'state/staking/hooks'
+import { useFeeInfo } from 'state/staking/hooks'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import styled from 'styled-components'
 import { TYPE } from 'theme'
@@ -116,7 +116,7 @@ const Divider = styled.div`
 export default function VeMobiRewards() {
   const { rewardRate, avgApr } = useExternalStakingRewards()
   const { userRewardRate, claimableRewards } = useUserExternalStakingRewards()
-  const { totalFeesThisWeek, totalFeesNextWeek } = useFeeInformation()
+  const { totalFeesThisWeek, totalFeesNextWeek } = useFeeInfo()
   const snxAddress = ExternalStakingRewards[CHAIN]
   const tokenColor = '#ab9325'
   const { connected, address } = useWeb3Context()

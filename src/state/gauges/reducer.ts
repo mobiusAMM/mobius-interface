@@ -6,10 +6,10 @@ import { CHAIN } from '../../constants'
 import { updateGauges, updateGaugesUser } from './actions'
 
 export interface Gauges {
-  readonly gauges: ((IUserGaugeInfo & IGaugeInfo & IGauge) | null)[]
+  readonly gauges: ((IUserGaugeState & IGaugeState & IGauge) | null)[]
 }
 
-export interface IGaugeInfo {
+export interface IGaugeState {
   isKilled: boolean
   lastClaim: number
   weight: JSBI
@@ -19,7 +19,7 @@ export interface IGaugeInfo {
   totalEffectiveBalance: JSBI
 }
 
-export interface IUserGaugeInfo {
+export interface IUserGaugeState {
   balance: JSBI
   claimableMobi: JSBI
   lastVote: number
@@ -27,7 +27,7 @@ export interface IUserGaugeInfo {
   effectiveBalance: JSBI
 }
 
-const initialGaugeInfo: IGaugeInfo = {
+const initialGaugeInfo: IGaugeState = {
   isKilled: false,
   lastClaim: 0,
   weight: JSBI.BigInt('0'),
@@ -37,7 +37,7 @@ const initialGaugeInfo: IGaugeInfo = {
   totalEffectiveBalance: JSBI.BigInt(0),
 }
 
-const initialUserGaugeInfo: IUserGaugeInfo = {
+const initialUserGaugeInfo: IUserGaugeState = {
   balance: JSBI.BigInt(0),
   claimableMobi: JSBI.BigInt(0),
   lastVote: 0,
@@ -45,7 +45,7 @@ const initialUserGaugeInfo: IUserGaugeInfo = {
   effectiveBalance: JSBI.BigInt(0),
 }
 
-function emptyExchangeInfo(gauge: IGauge | null): (IGaugeInfo & IUserGaugeInfo & IGauge) | null {
+function emptyExchangeInfo(gauge: IGauge | null): (IGaugeState & IUserGaugeState & IGauge) | null {
   return gauge === null
     ? null
     : {

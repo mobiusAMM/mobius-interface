@@ -1,6 +1,6 @@
 import { createAction } from '@reduxjs/toolkit'
 
-import { IGaugeInfo, IUserGaugeInfo } from './reducer'
+import { IGaugeState, IUserGaugeState } from './reducer'
 
-export const updateGauges = createAction<{ gaugeState: (IGaugeInfo | null)[] }>('gauges/update')
-export const updateGaugesUser = createAction<{ userGaugeState: (IUserGaugeInfo | null)[] }>('gauges/updateUser')
+export const updateGauges = createAction<{ gaugeState: (IGaugeState | null)[] }>('gauges/update')
+export const updateGaugesUser = createAction<{ userGaugeState: (IUserGaugeState | null)[] }>('gauges/updateUser')
