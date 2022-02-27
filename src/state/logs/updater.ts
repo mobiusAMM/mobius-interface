@@ -1,3 +1,4 @@
+import { GOVERNANCE_GENESIS } from 'constants/governance'
 import { useWeb3Context } from 'hooks'
 import { useEffect, useMemo } from 'react'
 
@@ -39,7 +40,7 @@ export default function Updater(): null {
       provider
         .getLogs({
           ...filter,
-          fromBlock: 0,
+          fromBlock: GOVERNANCE_GENESIS,
           toBlock: blockNumber,
         })
         .then((logs) => {
