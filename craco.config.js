@@ -1,12 +1,11 @@
+const fs = require('fs')
+const path = require('path')
+// const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const webpack = require('webpack')
 
-const fs = require("fs");
-const path = require("path");
-const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
-const webpack = require("webpack");
-
-const srcDirs = fs.readdirSync(path.resolve(__dirname, "./src"), {
+const srcDirs = fs.readdirSync(path.resolve(__dirname, './src'), {
   withFileTypes: true,
-});
+})
 
 const aliases = srcDirs
   .filter((dir) => dir.isDirectory())
@@ -16,24 +15,19 @@ const aliases = srcDirs
       [el.name]: path.resolve(__dirname, `./src/${el.name}`),
     }),
     {}
-  );
+  )
 
 module.exports = {
   babel: {
-    presets: [
-      [
-        "@babel/preset-react",
-        { runtime: "automatic", importSource: "@emotion/react" },
-      ],
-    ],
+    presets: [['@babel/preset-react', { runtime: 'automatic', importSource: '@emotion/react' }]],
     plugins: [
-      "@emotion/babel-plugin",
-      "babel-plugin-twin",
-      "babel-plugin-macros",
+      '@emotion/babel-plugin',
+      'babel-plugin-twin',
+      'babel-plugin-macros',
       [
-        "@simbathesailor/babel-plugin-use-what-changed",
+        '@simbathesailor/babel-plugin-use-what-changed',
         {
-          active: process.env.NODE_ENV === "development", // boolean
+          active: process.env.NODE_ENV === 'development', // boolean
         },
       ],
     ],
@@ -41,35 +35,32 @@ module.exports = {
   webpack: {
     alias: aliases,
     configure: (config) => {
-      const htmlWebpackPlugin = config.plugins.find(
-        (plugin) => plugin.constructor.name === "HtmlWebpackPlugin"
-      );
+      const htmlWebpackPlugin = config.plugins.find((plugin) => plugin.constructor.name === 'HtmlWebpackPlugin')
       if (!htmlWebpackPlugin) {
-        throw new Error("Can't find HtmlWebpackPlugin");
+        throw new Error("Can't find HtmlWebpackPlugin")
       }
 
       config.resolve.fallback = {
-        string_decoder: require.resolve("string_decoder/"),
-        stream: require.resolve("stream-browserify"),
+        string_decoder: require.resolve('string_decoder/'),
+        stream: require.resolve('stream-browserify'),
         path: false,
         fs: false,
         util: false,
-      };
+      }
 
       config.plugins.unshift(
         new webpack.ProvidePlugin({
-          Buffer: ["buffer", "Buffer"],
-          process: "process/browser",
+          Buffer: ['buffer', 'Buffer'],
+          process: 'process/browser',
         })
-      );
+      )
 
       config.module.rules.push({
         test: /\.m?js/,
         resolve: {
           fullySpecified: false,
         },
-      });
-
+      })
 
       // htmlWebpackPlugin.userOptions = deepMerge(htmlWebpackPlugin.userOptions, {
       //   title: appInfo.title ?? appInfo.name,
@@ -95,11 +86,11 @@ module.exports = {
       // });
 
       // pushing here ensures that the dotenv is loaded
-      if (process.env.ANALYZE) {
-        config.plugins.push(
-          new BundleAnalyzerPlugin({ analyzerMode: "server" })
-        );
-      }
+      // if (process.env.ANALYZE) {
+      //   config.plugins.push(
+      //     new BundleAnalyzerPlugin({ analyzerMode: "server" })
+      //   );
+      // }
 
       // config.plugins.push(
       //   new FaviconsWebpackPlugin({
@@ -116,11 +107,11 @@ module.exports = {
       //   })
       // );
 
-      return config;
+      return config
     },
   },
   eslint: {
     enable: false,
   },
   typescript: { enableTypeChecking: false },
-};
+}
