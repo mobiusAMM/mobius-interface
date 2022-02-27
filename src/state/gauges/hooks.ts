@@ -64,8 +64,10 @@ export function useAllUserGaugesInfo(): (UserGaugeInfo | null)[] {
   )
 }
 
-export function useGaugeInfo(gauge: IGauge): GaugeInfo {
+export function useGaugeInfo(gauge: IGauge | undefined): GaugeInfo | undefined {
   const gauges = useGauges()
+
+  if (!gauge) return undefined
 
   const gaugeInfo = gauges
     .filter((g, i) => !StablePools[CHAIN][i].gauge && (StablePools[CHAIN][i].gauge?.address === gauge.address ?? false))
@@ -84,10 +86,11 @@ export function useGaugeInfo(gauge: IGauge): GaugeInfo {
   return gaugeInfo[0]
 }
 
-export function useUserGaugeInfo(gauge: IGauge): UserGaugeInfo {
+export function useUserGaugeInfo(gauge: IGauge | undefined): UserGaugeInfo | undefined {
   const gauges = useUserGauges()
-
   const mobi = useMobi()
+
+  if (!gauge) return undefined
 
   const gaugeInfo = gauges
     .filter(

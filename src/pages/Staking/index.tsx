@@ -7,6 +7,7 @@ import { useStakingInfo, useUserStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 
 import { Row } from '../../components/Row'
+import CalcBoost from './CalcBoost'
 import GaugeWeights from './GaugeWeights'
 import Stake from './Lock/Stake'
 import Positions from './Positions'
@@ -113,7 +114,12 @@ export default function Staking() {
       {view === View.Lock ? (
         <PositionsContainer>
           <Stake userStakingInfo={userStakingInfo} stakingInfo={stakingInfo} userGauges={userGauges} gauges={gauges} />
-          {/* <CalcBoost stakingInfo={stakingInfo} /> */}
+          <CalcBoost
+            userStakingInfo={userStakingInfo}
+            stakingInfo={stakingInfo}
+            userGauges={userGauges}
+            gauges={gauges}
+          />
           <Positions
             stakingInfo={stakingInfo}
             userStakingInfo={userStakingInfo}

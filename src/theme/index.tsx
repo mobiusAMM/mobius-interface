@@ -99,7 +99,6 @@ export function colors(darkMode: boolean): Colors {
     polygon: '#BF97FF',
     ethereum: '#2E3338',
     solana: '#9DB6FF',
-    white: '#FFFFFF',
 
     // dont wanna forget these blue yet
     // blue4: darkMode ? '#153d6f70' : '#C4D9F8',

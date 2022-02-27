@@ -5,11 +5,11 @@ import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import CurrencyLogo from 'components/CurrencyLogo'
 import Loader from 'components/Loader'
 import { AutoRow, RowBetween } from 'components/Row'
+import { DisplayPool } from 'constants/pools'
 import { useMobi } from 'hooks/Tokens'
 import { useDoTransaction } from 'hooks/useDoTransaction'
 import React, { useState } from 'react'
 import { Text } from 'rebass'
-import { StablePoolInfo } from 'state/stablePools/hooks'
 import { useTokenBalance } from 'state/wallet/hooks'
 import styled from 'styled-components'
 import invariant from 'tiny-invariant'
@@ -137,10 +137,10 @@ export default function IncreaseLockAmount({ setHash, setAttempting }: IncreaseL
 
 type CurrencyRowProps = {
   val: string
+  balance: TokenAmount | undefined
   token: Token
   setTokenAmount: (tokenAmount: string) => void
-  balance?: TokenAmount
-  pool?: StablePoolInfo
+  pool?: DisplayPool
 }
 
 const InputRow = styled.div<{ selected: boolean }>`
@@ -171,24 +171,22 @@ const BalanceText = styled(TYPE.subHeader)`
 `
 
 export const CurrencyRow = ({ val, token, setTokenAmount, balance, pool }: CurrencyRowProps) => {
-  const currency = token
-  const tokenBalance = balance
-
   const mainRow = (
     <InputRow selected={false}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <Aligner>
           {pool ? (
-            <DoubleCurrencyLogo currency0={pool.tokens[0]} currency1={pool.tokens[1]} size={24} margin={true} />
+            <DoubleCurrencyLogo
+              currency0={pool.pool.tokens[0]}
+              currency1={pool.pool.tokens[1]}
+              size={24}
+              margin={true}
+            />
           ) : (
-            <CurrencyLogo currency={currency} size={'34px'} />
+            <CurrencyLogo currency={token} size={'34px'} />
           )}
-          <StyledTokenName className="token-symbol-container" active={Boolean(currency && currency.symbol)}>
-            {(currency && currency.symbol && currency.symbol.length > 20
-              ? currency.symbol.slice(0, 4) +
-                '...' +
-                currency.symbol.slice(currency.symbol.length - 5, currency.symbol.length)
-              : currency?.symbol) || ''}
+          <StyledTokenName className="token-symbol-container" active={!!token.symbol}>
+            {token.symbol ?? ''}
           </StyledTokenName>
         </Aligner>
       </div>
@@ -203,12 +201,12 @@ export const CurrencyRow = ({ val, token, setTokenAmount, balance, pool }: Curre
       </InputDiv>
     </InputRow>
   )
-  const decimalPlacesForBalance = tokenBalance?.greaterThan('1') ? 2 : tokenBalance?.greaterThan('0') ? 10 : 2
+  const decimalPlacesForBalance = balance?.greaterThan('1') ? 2 : balance?.greaterThan('0') ? 10 : 2
 
   const balanceRow = (
     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-      <BalanceText onClick={() => setTokenAmount(tokenBalance?.toExact() || '0')}>
-        Balance: {tokenBalance?.toFixed(decimalPlacesForBalance)}
+      <BalanceText onClick={() => setTokenAmount(balance?.toExact() || '0')}>
+        Balance: {balance?.toFixed(decimalPlacesForBalance)}
       </BalanceText>
     </div>
   )

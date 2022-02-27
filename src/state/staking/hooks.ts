@@ -3,9 +3,6 @@ import { ExternalRewardsToken } from 'constants/staking'
 import { useMobi, useVeMobi } from 'hooks/Tokens'
 import { useSelector } from 'react-redux'
 import { AppState } from 'state'
-import { getPoolInfo } from 'state/stablePools/hooks'
-import { StableSwapPool } from 'state/stablePools/reducer'
-import { getDepositValues } from 'utils/stableSwaps'
 
 import { CHAIN } from '../../constants'
 import { IStakingState, IUserStakingState } from './reducer'
@@ -139,32 +136,32 @@ export type GaugeSummary = {
 
 // TODO: fix this hook
 
-export function usePriceOfDeposits() {
-  const pools = useSelector<AppState, StableSwapPool[]>((state) => {
-    const allPools = state.stablePools.pools
-    return Object.values(allPools)
-      .map(({ pool }) => pool)
-      .filter((pool) => pool.userStaked && JSBI.greaterThan(pool.userStaked, JSBI.BigInt('0')))
-  })
-  const prices = useSelector((state: AppState) => ({
-    ethPrice: state.application.ethPrice,
-    btcPrice: state.application.btcPrice,
-  }))
-  const dummyToken = useMobi()
-  return !pools[0] || pools[0].loadingGauge
-    ? undefined
-    : new TokenAmount(
-        dummyToken,
-        pools.reduce((accum, pool) => {
-          const address = pool.address
-          const { valueOfStaked } = getDepositValues(getPoolInfo(pool))
-          const price =
-            address === '0x19260b9b573569dDB105780176547875fE9fedA3'
-              ? JSBI.BigInt(prices.btcPrice)
-              : address === '0xE0F2cc70E52f05eDb383313393d88Df2937DA55a'
-              ? JSBI.BigInt(prices.ethPrice)
-              : JSBI.BigInt('1')
-          return JSBI.add(accum, JSBI.multiply(valueOfStaked.raw, price))
-        }, JSBI.BigInt('0'))
-      )
-}
+// export function usePriceOfDeposits() {
+//   const pools = useSelector<AppState, StableSwapPool[]>((state) => {
+//     const allPools = state.stablePools.pools
+//     return Object.values(allPools)
+//       .map(({ pool }) => pool)
+//       .filter((pool) => pool.userStaked && JSBI.greaterThan(pool.userStaked, JSBI.BigInt('0')))
+//   })
+//   const prices = useSelector((state: AppState) => ({
+//     ethPrice: state.application.ethPrice,
+//     btcPrice: state.application.btcPrice,
+//   }))
+//   const dummyToken = useMobi()
+//   return !pools[0] || pools[0].loadingGauge
+//     ? undefined
+//     : new TokenAmount(
+//         dummyToken,
+//         pools.reduce((accum, pool) => {
+//           const address = pool.address
+//           const { valueOfStaked } = getDepositValues(getPoolInfo(pool))
+//           const price =
+//             address === '0x19260b9b573569dDB105780176547875fE9fedA3'
+//               ? JSBI.BigInt(prices.btcPrice)
+//               : address === '0xE0F2cc70E52f05eDb383313393d88Df2937DA55a'
+//               ? JSBI.BigInt(prices.ethPrice)
+//               : JSBI.BigInt('1')
+//           return JSBI.add(accum, JSBI.multiply(valueOfStaked.raw, price))
+//         }, JSBI.BigInt('0'))
+//       )
+// }

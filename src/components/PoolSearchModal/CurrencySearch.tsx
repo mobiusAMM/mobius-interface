@@ -1,5 +1,5 @@
 import { Token } from '@ubeswap/sdk'
-import { STATIC_POOL_INFO } from 'constants/StablePools'
+import { StablePools } from 'constants/pools'
 import { useOnClickOutside } from 'hooks/useOnClickOutside'
 import useTheme from 'hooks/useTheme'
 import useToggle from 'hooks/useToggle'
@@ -36,13 +36,13 @@ export function CurrencySearch({ selectedCurrency, onCurrencySelect, onDismiss }
   // refs for fixed size lists
   const fixedList = useRef<FixedSizeList>()
 
-  const tokensToSelect = STATIC_POOL_INFO[CHAIN].map(
-    ({ lpToken, name }) =>
+  const tokensToSelect = StablePools[CHAIN].map(
+    (s) =>
       new WrappedTokenInfo(
         {
-          ...lpToken,
-          symbol: name,
-          name,
+          ...s.pool.lpToken,
+          symbol: s.name,
+          name: s.name,
         },
         []
       )
