@@ -9,9 +9,9 @@ import { StakingInfo, UserStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 import { theme, TYPE } from 'theme'
 
-import { useVotingEscrowContract } from '../../hooks/useContract'
-import { useTransactionAdder } from '../../state/transactions/hooks'
-import LockModal, { LockType } from './Lock/LockModal'
+import { useVotingEscrowContract } from '../../../hooks/useContract'
+import { useTransactionAdder } from '../../../state/transactions/hooks'
+import LockModal, { LockType } from './LockModal'
 
 const SECONDS_IN_DAY = 24 * 60 * 60
 

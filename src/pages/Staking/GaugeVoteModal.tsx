@@ -1,9 +1,9 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { JSBI } from '@ubeswap/sdk'
+import { IGauge } from 'constants/pools'
 import { useVotePowerLeft } from 'hooks/useStaking'
 import { MaxButton } from 'pages/Pool/styleds'
 import React, { useState } from 'react'
-import { GaugeSummary } from 'state/staking/hooks'
+import { UserGaugeInfo } from 'state/gauges/hooks'
 import styled from 'styled-components'
 
 import { ButtonError } from '../../components/Button'
@@ -25,18 +25,16 @@ const ContentWrapper = styled(AutoColumn)`
 interface GaugeVoteModalProps {
   isOpen: boolean
   onDismiss: () => void
-  summary: GaugeSummary
-  disabled: boolean
+  userGauge: UserGaugeInfo
+  gauge: IGauge
+  poolName: string
 }
-
-export const getAllUnclaimedMobi = (summaries: GaugeSummary[]): JSBI =>
-  summaries.reduce((accum, { unclaimedMobi }) => JSBI.add(accum, unclaimedMobi.raw), JSBI.BigInt(0))
 
 function daysBetween(d1: Date, d2: Date): number {
   return Math.floor((d1.getTime() - d2.getTime()) / (1000 * 3600 * 24))
 }
 
-export default function GaugeVoteModal({ isOpen, onDismiss, summary, disabled }: GaugeVoteModalProps) {
+export default function GaugeVoteModal({ isOpen, onDismiss, userGauge, poolName, gauge }: GaugeVoteModalProps) {
   const { connected } = useWeb3Context()
 
   // monitor call to help UI loading state
@@ -44,9 +42,8 @@ export default function GaugeVoteModal({ isOpen, onDismiss, summary, disabled }:
   const [hash, setHash] = useState<string | undefined>()
   const [attempting, setAttempting] = useState(false)
   const [input, setInput] = useState(0)
-  const votesLeft = useVotePowerLeft() + summary.powerAllocated
+  const votesLeft = useVotePowerLeft() + userGauge.powerAllocated
   const today = new Date(Date.now())
-  const lastVote = summary.lastVote
 
   function wrappedOnDismiss() {
     setHash(undefined)
@@ -60,10 +57,10 @@ export default function GaugeVoteModal({ isOpen, onDismiss, summary, disabled }:
     if (controller) {
       setAttempting(true)
       await controller
-        .vote_for_gauge_weights(summary.address, input * 100, { gasLimit: 350000 })
+        .vote_for_gauge_weights(gauge.address, input * 100, { gasLimit: 350000 })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
-            summary: `Voted ${disabled ? 'to burn' : `for ${summary.pool} to receive`} ${input}% of MOBI inflation`,
+            summary: `Voted for ${poolName} to receive ${input}% of MOBI inflation`,
           })
           setHash(response.hash)
         })
@@ -79,8 +76,8 @@ export default function GaugeVoteModal({ isOpen, onDismiss, summary, disabled }:
     error = 'Connect Wallet'
   }
 
-  if (daysBetween(today, lastVote) < 10) {
-    error = error ?? `Wait ${10 - daysBetween(today, lastVote)} days to vote for this pool again`
+  if (daysBetween(today, new Date(userGauge.lastVote)) < 10) {
+    error = error ?? `Wait ${10 - daysBetween(today, new Date(userGauge.lastVote))} days to vote for this pool again`
   }
 
   return (
@@ -88,7 +85,7 @@ export default function GaugeVoteModal({ isOpen, onDismiss, summary, disabled }:
       {!attempting && !hash && (
         <ContentWrapper gap="lg">
           <RowBetween>
-            <TYPE.mediumHeader>Vote for {disabled ? 'BURN' : summary.pool}</TYPE.mediumHeader>
+            <TYPE.mediumHeader>Vote for {poolName}</TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOnDismiss} />
           </RowBetween>
           {votesLeft === 0 ? (
@@ -124,9 +121,7 @@ export default function GaugeVoteModal({ isOpen, onDismiss, summary, disabled }:
                 </RowBetween>
               </>
               <RowFixed>
-                <TYPE.body>{`Vote ${
-                  disabled ? 'to burn' : `for ${summary.pool} to receive`
-                } ${input}% of MOBI inflation`}</TYPE.body>
+                <TYPE.body>{`Vote  for ${poolName} to receive ${input}% of MOBI inflation`}</TYPE.body>
               </RowFixed>
               <ButtonError disabled={!!error} error={!!error} onClick={onClaimReward}>
                 {error ?? `Vote!`}
@@ -146,7 +141,7 @@ export default function GaugeVoteModal({ isOpen, onDismiss, summary, disabled }:
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>veMOBI allocated to {summary.pool}</TYPE.body>
+            <TYPE.body fontSize={20}>veMOBI allocated to {poolName}</TYPE.body>
           </AutoColumn>
         </SubmittedView>
       )}

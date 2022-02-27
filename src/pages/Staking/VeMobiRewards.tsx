@@ -236,9 +236,6 @@ export default function VeMobiRewards() {
           </SecondSection>
           <Divider />
           <>
-            {/* <StyledButton padding="8px" borderRadius="8px" width="fit-content" onClick={onClaimReward}>
-              Claim
-            </StyledButton> */}
             <SecondSection>
               <TYPE.largeHeader>Available to Claim: </TYPE.largeHeader>
               {claimableRewards ? (

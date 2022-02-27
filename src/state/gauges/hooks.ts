@@ -1,5 +1,5 @@
 import { invariant } from '@apollo/client/utilities/globals'
-import { JSBI, TokenAmount } from '@ubeswap/sdk'
+import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
 import { IGauge, StablePools } from 'constants/pools'
 import { useMobi } from 'hooks/Tokens'
 import { useSelector } from 'react-redux'
@@ -19,8 +19,8 @@ export function useUserGauges(): readonly (IUserGaugeState | null)[] {
 export type GaugeInfo = {
   isKilled: boolean
   lastClaim: Date
-  weight: number
-  futureWeight: number
+  weight: Percent
+  futureWeight: Percent
   totalSupply: JSBI
   workingSupply: JSBI
   totalEffectiveBalance: JSBI
@@ -43,8 +43,8 @@ export function useAllGaugesInfo(): (GaugeInfo | null)[] {
       : {
           ...g,
           lastClaim: new Date(g.lastClaim),
-          weight: g.lastClaim.valueOf(),
-          futureWeight: g.lastClaim.valueOf(),
+          weight: new Percent(g.weight),
+          futureWeight: new Percent(g.futureWeight),
         }
   )
 }
@@ -75,8 +75,8 @@ export function useGaugeInfo(gauge: IGauge): GaugeInfo {
         : {
             ...g,
             lastClaim: new Date(g.lastClaim),
-            weight: g.lastClaim.valueOf(),
-            futureWeight: g.lastClaim.valueOf(),
+            weight: new Percent(g.weight),
+            futureWeight: new Percent(g.futureWeight),
           }
     )
   invariant(gaugeInfo.length === 1, 'duplicate gauges')

@@ -7,9 +7,11 @@ import { useStakingInfo, useUserStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 
 import { Row } from '../../components/Row'
-import Stake from './Stake'
+import GaugeWeights from './GaugeWeights'
+import Stake from './Lock/Stake'
 import StatsHeader from './StatsHeader'
 import VeMobiRewards from './VeMobiRewards'
+import Vote from './Vote'
 
 const PositionsContainer = styled.div`
   width: 100%;
@@ -116,10 +118,12 @@ export default function Staking() {
         </PositionsContainer>
       ) : view === View.Vote ? (
         <PositionsContainer>
-          {/* <Vote summaries={stakingInfo.positions ?? []} lockDate={stakingInfo.lockEnd ?? new Date()} /> */}
+          <Vote gauges={gauges} userGauges={userGauges} userStaking={userStakingInfo} />
         </PositionsContainer>
       ) : view === View.Analyze ? (
-        <PositionsContainer>{/* <GaugeWeights summaries={stakingInfo.positions ?? []} /> */}</PositionsContainer>
+        <PositionsContainer>
+          <GaugeWeights gauges={gauges} />
+        </PositionsContainer>
       ) : (
         <PositionsContainer>
           <VeMobiRewards />

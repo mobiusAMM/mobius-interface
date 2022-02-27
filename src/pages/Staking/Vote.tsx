@@ -1,18 +1,20 @@
 import { AutoColumn } from 'components/Column'
-import Loader from 'components/Loader'
 import { RowFixed } from 'components/Row'
+import { DisplayPool, StablePools } from 'constants/pools'
 import { ChainLogo } from 'constants/StablePools'
 import { usePoolColor } from 'hooks/useColor'
 import { useVotePowerLeft } from 'hooks/useStaking'
 import React, { useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { GaugeSummary } from 'state/staking/hooks'
+import { GaugeInfo, UserGaugeInfo } from 'state/gauges/hooks'
+import { UserStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 import { TYPE } from 'theme'
+import invariant from 'tiny-invariant'
 
 import CurrencyPoolLogo from '../../components/CurrencyPoolLogo'
 import Logo from '../../components/Logo'
-import { useStablePoolInfo } from '../../state/stablePools/hooks'
+import { CHAIN } from '../../constants'
 import GaugeVoteModal from './GaugeVoteModal'
 
 const Wrapper = styled(AutoColumn)`
@@ -57,20 +59,17 @@ const TopSection = styled.div`
   `};
 `
 
-interface GaugeWeightsProps {
-  summaries: GaugeSummary[]
-  lockDate: Date
+interface VoteProps {
+  gauges: (GaugeInfo | null)[]
+  userGauges: (UserGaugeInfo | null)[]
+  userStaking: UserStakingInfo
 }
 
-export default function Vote({ summaries, lockDate }: GaugeWeightsProps) {
+export default function Vote({ gauges, userGauges, userStaking }: VoteProps) {
   const votePowerLeft = useVotePowerLeft()
-  const tooLateToVote = lockDate.valueOf() - Date.now() <= 7 * 24 * 60 * 60 * 1000
+  const tooLateToVote = userStaking.lock.end.valueOf() - Date.now() <= 7 * 24 * 60 * 60 * 1000
 
-  return summaries.length === 0 ? (
-    <Wrapper>
-      <Loader />
-    </Wrapper>
-  ) : (
+  return (
     <Wrapper>
       <TYPE.darkGray>Allocate your voting power to affect the MOBI distribution of each pool.</TYPE.darkGray>
       <TYPE.darkGray>{votePowerLeft}% Left to Allocate</TYPE.darkGray>
@@ -80,9 +79,20 @@ export default function Vote({ summaries, lockDate }: GaugeWeightsProps) {
         </TYPE.red>
       )}
       <CardContainer>
-        {summaries.map((summary) => (
-          <WeightCard position={summary} key={`weight-card-${summary.pool}`} disabled={tooLateToVote} />
-        ))}
+        {gauges.map((g, i) => {
+          if (g === null) return null
+          const userGauge = userGauges[i]
+          invariant(userGauge, 'user gauge')
+          return (
+            <WeightCard
+              gauge={g}
+              userGauge={userGauge}
+              displayPool={StablePools[CHAIN][i]}
+              key={`weight-card-${StablePools[CHAIN][i].name}`}
+              disabled={tooLateToVote}
+            />
+          )
+        })}
       </CardContainer>
     </Wrapper>
   )
@@ -141,43 +151,50 @@ const SecondSection = styled.div<{ mobile: boolean }>`
   `};
 `
 
-function WeightCard({ position, disabled }: { position: GaugeSummary; disabled: boolean }) {
+function WeightCard({
+  userGauge,
+  gauge,
+  displayPool,
+  disabled,
+}: {
+  userGauge: UserGaugeInfo
+  gauge: GaugeInfo
+  displayPool: DisplayPool
+  disabled: boolean
+}) {
   const [voteModalOpen, setVoteModalOpen] = useState(false)
-  const stablePools = useStablePoolInfo()
-  const poolInfo = stablePools.filter((x) => x.name === position.pool)[0]
 
-  const poolColor = usePoolColor(poolInfo)
+  const poolColor = usePoolColor(displayPool)
 
-  return (
+  return displayPool.gauge === null ? null : (
     <>
       <GaugeVoteModal
-        summary={position}
+        userGauge={userGauge}
+        poolName={displayPool.name}
+        gauge={displayPool.gauge}
         isOpen={voteModalOpen}
         onDismiss={() => setVoteModalOpen(false)}
-        disabled={poolInfo.isDisabled ?? false}
       />
 
       <PositionWrapper disabled={disabled} onClick={() => !disabled && setVoteModalOpen(true)}>
         <TopSection>
           <RowFixed style={{ gap: '6px' }}>
             <TYPE.black fontWeight={600} fontSize={[16, 24]}>
-              {poolInfo.isDisabled ? 'BURN' : position.pool}
+              {displayPool.name}
             </TYPE.black>
-            {!poolInfo.isDisabled && (
-              <StyledLogo size={'26px'} srcs={[ChainLogo[poolInfo.displayChain]]} alt={'logo'} />
-            )}
+            <StyledLogo size={'26px'} srcs={[ChainLogo[displayPool.chain]]} alt={'logo'} />
           </RowFixed>
           <RowFixed>
             <TYPE.subHeader color={poolColor} className="apr" fontWeight={800} fontSize={[16, 24]} textAlign="right">
-              {`Future: ${position.futureWeight.toFixed(2)}%`}
+              {`Future: ${gauge.futureWeight.toFixed(2)}%`}
             </TYPE.subHeader>
           </RowFixed>
         </TopSection>
         <SecondSection mobile={isMobile}>
           <RowFixed style={{ marginTop: 10 }}>
-            <CurrencyPoolLogo tokens={poolInfo.tokens.slice()} size={24} margin={true} />
+            <CurrencyPoolLogo tokens={displayPool.pool.tokens.slice()} size={24} margin={true} />
             <TYPE.darkGray fontWeight={450} fontSize={[15, 20]}>
-              {poolInfo.tokens.map((t) => t.symbol).join(' / ')}
+              {displayPool.pool.tokens.map((t) => t.symbol).join(' / ')}
             </TYPE.darkGray>
           </RowFixed>
           <div>
@@ -186,22 +203,15 @@ function WeightCard({ position, disabled }: { position: GaugeSummary; disabled: 
               fontSize={[13, 16]}
               fontWeight={800}
               color={poolColor}
-            >{`Current: ${position.currentWeight.toFixed(2)}%`}</TYPE.black>
+            >{`Current: ${gauge.weight.toFixed(2)}%`}</TYPE.black>
             <TYPE.black
               textAlign="right"
               fontSize={[13, 16]}
               fontWeight={800}
               color={poolColor}
-            >{`My Vote: ${position.powerAllocated.toFixed(2)}%`}</TYPE.black>
+            >{`My Vote: ${userGauge.powerAllocated.toFixed(2)}%`}</TYPE.black>
           </div>
         </SecondSection>
-        {poolInfo.isDisabled && (
-          <SecondSection mobile={isMobile}>
-            <TYPE.red fontWeight={600} fontSize={[12, 16]}>
-              Any inflation allocated toward this gauge will be burnt.
-            </TYPE.red>
-          </SecondSection>
-        )}
       </PositionWrapper>
     </>
   )

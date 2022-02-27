@@ -1,21 +1,20 @@
-import { CardNoise } from 'components/claim/styled'
+import { JSBI } from '@ubeswap/sdk'
 import { AutoColumn } from 'components/Column'
 import Loader from 'components/Loader'
 import { AutoRow, RowBetween, RowFixed } from 'components/Row'
-import { useColor } from 'hooks/useColor'
+import { StablePools } from 'constants/pools'
 import { useWindowSize } from 'hooks/useWindowSize'
 import { darken } from 'polished'
-import React, { useState } from 'react'
+import React from 'react'
 import { isMobile } from 'react-device-detect'
 import { RadialChart } from 'react-vis'
-import { GaugeSummary } from 'state/staking/hooks'
-import { useIsDarkMode } from 'state/user/hooks'
+import { GaugeInfo } from 'state/gauges/hooks'
 import styled from 'styled-components'
 import { TYPE } from 'theme'
 
-import GaugeVoteModal from './GaugeVoteModal'
+import { CHAIN } from '../../constants'
 
-const Wrapper = styled(AutoColumn)<{ showBackground: boolean; background: any }>`
+const Wrapper = styled(AutoColumn)`
   border-radius: 12px;
   width: 100%;
   overflow: hidden;
@@ -23,26 +22,15 @@ const Wrapper = styled(AutoColumn)<{ showBackground: boolean; background: any }>
   padding: 1rem;
   background: ${({ theme }) => theme.bg1};
   color: ${({ theme }) => theme.text1} !important;
-  ${({ showBackground }) =>
-    showBackground &&
-    `  box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.01), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04),
-    0px 24px 32px rgba(0, 0, 0, 0.01);`}
   ${({ theme }) => theme.mediaWidth.upToSmall`
 `}
-margin-top: 1rem;
+  margin-top: 1rem;
 `
 const WrappedRow = styled.div`
   display: flex;
   width: 100%;
   align-items: center;
   justify-content: center;
-`
-
-const CardContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  margin-top: 1rem;
-  justify-content: space-between;
 `
 
 const ColorBox = styled.div<{ color: string }>`
@@ -57,21 +45,21 @@ const ColorBox = styled.div<{ color: string }>`
 const colorsForChart = ['#35D07F', '#73DDFF', '#BF97FF', '#3488EC', '#FB7C6D', '#FBCC5C', '#FEF2D6']
 
 interface GaugeWeightsProps {
-  summaries: GaugeSummary[]
+  gauges: (GaugeInfo | null)[]
 }
 
 // TO DO: Account for Vote Power Allocations
-export default function GaugeWeights({ summaries }: GaugeWeightsProps) {
+export default function GaugeWeights({ gauges }: GaugeWeightsProps) {
   const numColors = colorsForChart.length
-  const data = summaries.map((summary, i) => ({
-    label: summary.pool,
-    angle: parseInt(summary.currentWeight.multiply('360').toFixed(0)),
-    radius: summary.workingBalance.greaterThan('0') ? 10 : 9.5,
-    subLabel: `${summary.currentWeight.toFixed(2)}%`,
+  const data = gauges.map((g, i) => ({
+    label: StablePools[CHAIN][i].name,
+    angle: parseInt(g?.weight.multiply('360').toFixed(0) ?? '0'),
+    radius: JSBI.greaterThan(g?.workingSupply ?? JSBI.BigInt(0), JSBI.BigInt(0)) ? 10 : 9.5,
+    subLabel: `${g?.weight.toFixed(2) ?? '0'}%`,
     color: darken(Math.floor(i / numColors) * 0.2, colorsForChart[i % numColors]),
   }))
-  const isDarkMode = useIsDarkMode()
-  const { width, height } = useWindowSize()
+
+  const { width } = useWindowSize()
 
   return (
     <Wrapper>
@@ -100,7 +88,7 @@ export default function GaugeWeights({ summaries }: GaugeWeightsProps) {
             />
             {!isMobile && (
               <RowBetween style={{ flexWrap: 'wrap', maxWidth: '20rem' }}>
-                {data.map(({ label, subLabel, color }) => (
+                {data.map(({ label, color }) => (
                   <RowFixed key={`legend-${label}`} style={{ width: '49%' }}>
                     <ColorBox color={color} /> <TYPE.subHeader>{label}</TYPE.subHeader>
                   </RowFixed>
@@ -110,7 +98,7 @@ export default function GaugeWeights({ summaries }: GaugeWeightsProps) {
           </WrappedRow>
           {isMobile && (
             <RowBetween style={{ flexWrap: 'wrap', maxWidth: '20rem', marginRight: 'auto', marginLeft: 'auto' }}>
-              {data.map(({ label, subLabel, color }) => (
+              {data.map(({ label, color }) => (
                 <RowFixed key={`legend-${label}`} style={{ width: '49%' }}>
                   <ColorBox color={color} /> <TYPE.subHeader>{label}</TYPE.subHeader>
                 </RowFixed>
@@ -120,82 +108,5 @@ export default function GaugeWeights({ summaries }: GaugeWeightsProps) {
         </>
       )}
     </Wrapper>
-  )
-}
-
-const PositionWrapper = styled(AutoColumn)<{
-  showBackground: boolean
-  bgColor: any
-  activated: boolean
-  disabled: boolean
-}>`
-  border-radius: 12px;
-  width: 100%;
-  height: fit-content;
-  overflow: hidden;
-  position: relative;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-  opacity: ${({ activated }) => (activated ? 1 : 0.9)};
-  overflow: hidden;
-  position: relative;
-  background: ${({ bgColor, theme }) =>
-    `radial-gradient(91.85% 100% at 1.84% 0%, ${bgColor} 0%, ${theme.black} 100%) `};
-  color: ${({ theme, showBackground }) => (showBackground ? theme.white : theme.text1)} !important;
-  ${({ showBackground }) =>
-    showBackground &&
-    `  box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.01), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04),
-    0px 24px 32px rgba(0, 0, 0, 0.01);`}
-  ${({ theme }) => theme.mediaWidth.upToSmall`
-`}
-  &:hover {
-    opacity: 1;
-  }
-`
-const RowWithGap = styled(RowFixed)`
-  gap: 8px;
-`
-
-function WeightCard({
-  position,
-  showUserVote,
-  disabled,
-}: {
-  position: GaugeSummary
-  showUserVote: boolean
-  disabled: boolean
-}) {
-  const backgroundColor = useColor(position.firstToken)
-  const [voteModalOpen, setVoteModalOpen] = useState(false)
-
-  return (
-    <>
-      <GaugeVoteModal summary={position} isOpen={voteModalOpen} onDismiss={() => setVoteModalOpen(false)} />
-
-      <PositionWrapper
-        activated={voteModalOpen}
-        showBackground={true}
-        bgColor={backgroundColor}
-        disabled={disabled}
-        onClick={() => !disabled && setVoteModalOpen(true)}
-      >
-        <CardNoise />
-        <RowBetween>
-          <TYPE.mediumHeader color="white">{position.pool}</TYPE.mediumHeader>
-          {showUserVote ? (
-            <RowWithGap gap="4px">
-              <TYPE.white color="white">Your Vote: </TYPE.white>
-              <TYPE.white color="white">{`${position.powerAllocated.toFixed(2)}%`}</TYPE.white>
-            </RowWithGap>
-          ) : (
-            <RowWithGap gap="4px">
-              <TYPE.white color="white">{`Current: ${position.currentWeight.toFixed(2)}%`}</TYPE.white>
-              <TYPE.white color="white">{`Future: ${position.futureWeight.toFixed(2)}%`}</TYPE.white>
-            </RowWithGap>
-          )}
-        </RowBetween>
-      </PositionWrapper>
-    </>
   )
 }

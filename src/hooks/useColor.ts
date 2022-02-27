@@ -1,9 +1,9 @@
 import { ChainId, Token } from '@ubeswap/sdk'
+import { DisplayPool } from 'constants/pools'
 import { Coins, STATIC_POOL_INFO } from 'constants/StablePools'
 import Vibrant from 'node-vibrant'
 import { shade } from 'polished'
 import { useLayoutEffect, useState } from 'react'
-import { StablePoolInfo } from 'state/stablePools/hooks'
 import { useTheme } from 'styled-components'
 import uriToHttp from 'utils/uriToHttp'
 import { hex } from 'wcag-contrast'
@@ -82,9 +82,9 @@ export function generateColorPallete(tokens: Token[]) {
   return colors.join('\n')
 }
 
-export function usePoolColor(pool: StablePoolInfo) {
+export function usePoolColor(pool: DisplayPool) {
   const theme = useTheme()
-  const coin = pool.coin
+  const coin = pool.peg.coin
   if (coin === Coins.USD) return theme.cusd
   if (coin === Coins.Eur) return theme.ceur
   if (coin === Coins.Ether) return theme.ether
