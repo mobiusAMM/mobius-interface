@@ -1,6 +1,7 @@
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
 import { Fraction } from '@ubeswap/sdk'
 import { useWeb3Context } from 'hooks'
+import { useMobi } from 'hooks/Tokens'
 import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -103,11 +104,17 @@ export function useTokenPrice(address: string | undefined): Fraction | undefined
   return priceStringToFraction(prices[address])
 }
 
-export function priceStringToFraction(priceString: string | undefined): Fraction | undefined {
+export function useMobiPrice(): Fraction {
+  const mobi = useMobi()
+  const prices = useTokenPrices()
+  return priceStringToFraction(prices[mobi.address.toLowerCase()]) ?? new Fraction('0')
+}
+
+function priceStringToFraction(priceString: string | undefined): Fraction | undefined {
   if (!priceString) return undefined
   const price = parseFloat(priceString) * 10 ** 4
   const asFraction = new Fraction(price.toFixed(0), '10000')
-  return asFraction ?? undefined
+  return asFraction
 }
 
 export function useTokenPrices() {

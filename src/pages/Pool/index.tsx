@@ -1,13 +1,13 @@
 import { ErrorBoundary } from '@sentry/react'
-import { cUSD, JSBI, TokenAmount } from '@ubeswap/sdk'
+import { JSBI, TokenAmount } from '@ubeswap/sdk'
 import QuestionHelper from 'components/QuestionHelper'
 import { RowFixed } from 'components/Row'
 import { Chain, Coins, PRICE } from 'constants/StablePools'
-import { useMobi } from 'hooks/Tokens'
+import { CUSD } from 'constants/tokens'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
+import { useMobiPrice } from 'state/application/hooks'
 import styled from 'styled-components'
-import { useCUSDPrice } from 'utils/useCUSDPrice'
 
 import { AutoColumn } from '../../components/Column'
 import { StablePoolCard } from '../../components/earn/StablePoolCard'
@@ -80,8 +80,8 @@ export default function Pool() {
       const priceDeposited = JSBI.multiply(poolInfo?.totalDeposited?.raw ?? JSBI.BigInt('0'), lpPrice)
       return JSBI.add(accum, priceDeposited)
     }, JSBI.BigInt('0'))
-  const tvlAsTokenAmount = new TokenAmount(cUSD[CHAIN], tvl)
-  const mobiprice = useCUSDPrice(useMobi())
+  const tvlAsTokenAmount = new TokenAmount(CUSD[CHAIN], tvl)
+  const mobiprice = useMobiPrice()
   const sortCallback = (pool1: StablePoolInfo, pool2: StablePoolInfo) => {
     if (!pool1 || !pool2) return true
     const isStaking1 = pool1.amountDeposited?.greaterThan(JSBI.BigInt('0')) || pool1.stakedAmount?.greaterThan('0')
