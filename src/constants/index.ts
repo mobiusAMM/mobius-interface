@@ -23,7 +23,7 @@ export const POOL_PROXY = '0x1bc2DbB8c4d04AaCF4A7fefcDB060766964B5237'
 // used for display in the default list when adding liquidity
 export const SUGGESTED_BASES: ChainTokenList = {}
 
-export const CHAIN = ChainId.MAINNET
+export const CHAIN = ChainId.Mainnet
 
 // default allowed slippage, in bips
 export const INITIAL_ALLOWED_SLIPPAGE = 50

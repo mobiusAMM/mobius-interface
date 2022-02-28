@@ -1,6 +1,5 @@
-import { DisplayPool } from 'constants/pools'
-import { Coins, STATIC_POOL_INFO } from 'constants/StablePools'
-import { ChainId, Token } from 'lib/token-utils'
+import { Coins, DisplayPool } from 'constants/pools'
+import { Token } from 'lib/token-utils'
 import Vibrant from 'node-vibrant'
 import { shade } from 'polished'
 import { useLayoutEffect, useState } from 'react'
@@ -10,19 +9,7 @@ import { hex } from 'wcag-contrast'
 
 const images: Record<string, string> = {}
 
-const stablePoolTokens = Object.values(STATIC_POOL_INFO)
-  .flatMap((pools) => pools)
-  .flatMap(({ tokens }) => tokens)
-
-stablePoolTokens.forEach((token) => {
-  images[token.address] = token.logoURI ?? ''
-})
-
 async function getColorFromToken(token: Token): Promise<string | null> {
-  if (token.chainId === ChainId.ALFAJORES && token.address === '0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735') {
-    return Promise.resolve('#FAAB14')
-  }
-
   const path = images[token.address]
   if (!path) {
     return '#35D07F'

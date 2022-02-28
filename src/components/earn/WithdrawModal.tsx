@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 
 import { useColor } from '../../hooks/useColor'
-import { StablePoolInfo } from '../../state/stablePools/hooks'
 import { CloseIcon, StyledInternalLink, TYPE } from '../../theme'
 import { ButtonPrimary } from '../Button'
 import { AutoColumn } from '../Column'

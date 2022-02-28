@@ -1,5 +1,5 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { VestingAddresses } from 'constants/StablePools'
+import { VestingAddresses } from 'constants/tokens'
 import { darken } from 'polished'
 import React from 'react'
 import { VestType } from 'state/claim/reducer'

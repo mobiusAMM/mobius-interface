@@ -1,6 +1,10 @@
 import JSBI from 'jsbi'
 import { ChainId, Percent, Token, TokenAmount } from 'lib/token-utils'
 
+import celoLogo from '../assets/images/celo-chain-logo.png'
+import ethLogo from '../assets/images/ethereum-chain-logo.png'
+import polygonLogo from '../assets/images/polygon-chain-logo.png'
+import terraLogo from '../assets/images/terra-logo.png'
 import { CHAIN } from './'
 import { CELO, CETH, CUSD, UST, WETH } from './tokens'
 
@@ -112,6 +116,15 @@ export enum Chain {
   Terra,
 }
 
+export const ChainLogo: { [c in Chain]: string } = {
+  [Chain.Celo]: celoLogo,
+  [Chain.Ethereum]: ethLogo,
+  [Chain.Polygon]: polygonLogo,
+  [Chain.Solana]: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_SOL.png',
+  [Chain.Avax]: 'https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png',
+  [Chain.Terra]: terraLogo,
+}
+
 export interface DisplayPool {
   name: string
   chain: Chain
@@ -142,7 +155,7 @@ export const RECOMMENDED_FEES: Fees = {
 export const RECOMMENDED_AMP = JSBI.BigInt('100')
 
 export const StablePools: { [K in ChainId]: DisplayPool[] } = {
-  [ChainId.MAINNET]: [
+  [ChainId.Mainnet]: [
     {
       name: 'UST (Allbridge)',
       chain: Chain.Terra,
@@ -150,13 +163,13 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
       pool: {
         address: '0x9F4AdBD0af281C69a582eB2E6fa2A594D4204CAe',
         lpToken: new Token({
-          chainId: ChainId.MAINNET,
+          chainId: ChainId.Mainnet,
           address: '0x9438e7281D7E3e99A9dD21e0EAd9c6a254e17ab2',
           decimals: 18,
           symbol: 'MobLP',
           name: 'Mobius cUSD/aUST LP',
         }),
-        tokens: [CUSD[ChainId.MAINNET], UST[ChainId.MAINNET]],
+        tokens: [CUSD[ChainId.Mainnet], UST[ChainId.Mainnet]],
       },
       gauge: {
         address: '0x107F94409746E8c8E6eFF139A100D17D9ca7FdfE',
@@ -170,13 +183,13 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
       pool: {
         address: '0x74ef28D635c6C5800DD3Cd62d4c4f8752DaACB09',
         lpToken: new Token({
-          chainId: ChainId.MAINNET,
+          chainId: ChainId.Mainnet,
           address: '0x4fF08e2a4E7114af4B575AeF9250144f95790982',
           decimals: 18,
           symbol: 'MobLP',
           name: 'Mobius cUSD/aUST LP',
         }),
-        tokens: [CETH[ChainId.MAINNET], WETH[ChainId.MAINNET]],
+        tokens: [CETH[ChainId.Mainnet], WETH[ChainId.Mainnet]],
       },
       gauge: {
         address: '0x487c30CB18AA9Ced435911E2B414e0e85D7E52bB',
@@ -184,6 +197,6 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
       },
     },
   ],
-  [ChainId.ALFAJORES]: [],
-  [ChainId.BAKLAVA]: [],
+  [ChainId.Alfajores]: [],
+  [ChainId.Baklava]: [],
 }

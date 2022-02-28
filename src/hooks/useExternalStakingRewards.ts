@@ -1,4 +1,3 @@
-import { calcApy } from 'components/earn/StablePoolCard'
 import { ExternalRewardsToken } from 'constants/staking'
 import JSBI from 'jsbi'
 import { Percent, TokenAmount } from 'lib/token-utils'

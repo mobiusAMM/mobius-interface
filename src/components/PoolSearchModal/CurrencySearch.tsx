@@ -7,7 +7,6 @@ import React, { useCallback, useRef } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList } from 'react-window'
 import { Text } from 'rebass'
-import { WrappedTokenInfo } from 'state/lists/hooks'
 import styled from 'styled-components'
 
 import { CHAIN } from '../../constants'
@@ -36,17 +35,7 @@ export function CurrencySearch({ selectedCurrency, onCurrencySelect, onDismiss }
   // refs for fixed size lists
   const fixedList = useRef<FixedSizeList>()
 
-  const tokensToSelect = StablePools[CHAIN].map(
-    (s) =>
-      new WrappedTokenInfo(
-        {
-          ...s.pool.lpToken,
-          symbol: s.name,
-          name: s.name,
-        },
-        []
-      )
-  )
+  const tokensToSelect = StablePools[CHAIN].map((s) => s.pool.lpToken)
 
   const handleCurrencySelect = useCallback(
     (currency: Token) => {

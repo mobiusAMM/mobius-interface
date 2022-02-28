@@ -1,7 +1,6 @@
 import { AutoColumn } from 'components/Column'
 import { RowFixed } from 'components/Row'
-import { DisplayPool, StablePools } from 'constants/pools'
-import { ChainLogo } from 'constants/StablePools'
+import { ChainLogo, DisplayPool, StablePools } from 'constants/pools'
 import { usePoolColor } from 'hooks/useColor'
 import { useVotePowerLeft } from 'hooks/useStaking'
 import React, { useState } from 'react'

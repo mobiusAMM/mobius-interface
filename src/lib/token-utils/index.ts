@@ -6,7 +6,6 @@ export * from './tokenList'
 
 // re-export token-math types
 // so consumers don't need to use them
-export { ChainId } from '@ubeswap/sdk'
 export type { BigintIsh, IFormatUint, NumberFormat } from '@ubeswap/token-math'
 export {
   Fraction,

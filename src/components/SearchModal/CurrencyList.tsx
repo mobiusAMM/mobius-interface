@@ -6,14 +6,12 @@ import { Text } from 'rebass'
 import styled from 'styled-components'
 
 import { useWeb3Context } from '../../hooks'
-import { WrappedTokenInfo } from '../../state/lists/hooks'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { TYPE } from '../../theme'
 import Column from '../Column'
 import CurrencyLogo from '../CurrencyLogo'
 import Loader from '../Loader'
 import { RowFixed } from '../Row'
-import { MouseoverTooltip } from '../Tooltip'
 import { MenuItem } from './styleds'
 
 function currencyKey(currency: Token): string {
@@ -59,33 +57,28 @@ const TagContainer = styled.div`
   justify-content: flex-end;
 `
 
+// TODO: Add this feature back in
 function TokenTags({ currency }: { currency: Token }) {
-  if (!(currency instanceof WrappedTokenInfo)) {
-    return <span />
-  }
+  const tags = currency.info.extensions
+  if (!tags) return <span />
 
-  const tags = currency.tags
-  if (!tags || tags.length === 0) return <span />
-
-  const tag = tags[0]
-
-  return (
-    <TagContainer>
-      <MouseoverTooltip text={tag.description}>
-        <Tag key={tag.id}>{tag.name}</Tag>
-      </MouseoverTooltip>
-      {tags.length > 1 ? (
-        <MouseoverTooltip
-          text={tags
-            .slice(1)
-            .map(({ name, description }) => `${name}: ${description}`)
-            .join('; \n')}
-        >
-          <Tag>...</Tag>
-        </MouseoverTooltip>
-      ) : null}
-    </TagContainer>
-  )
+  // return (
+  //   <TagContainer>
+  //     <MouseoverTooltip text={tag.description}>
+  //       <Tag key={tag.id}>{tag.name}</Tag>
+  //     </MouseoverTooltip>
+  //     {tags.length > 1 ? (
+  //       <MouseoverTooltip
+  //         text={tags
+  //           .slice(1)
+  //           .map(({ name, description }) => `${name}: ${description}`)
+  //           .join('; \n')}
+  //       >
+  //         <Tag>...</Tag>
+  //       </MouseoverTooltip>
+  //     ) : null}
+  //   </TagContainer>
+  // )
 }
 
 function CurrencyRow({
@@ -123,7 +116,7 @@ function CurrencyRow({
           {currency.name}
         </TYPE.darkGray>
       </Column>
-      <TokenTags currency={currency} />
+      {/* <TokenTags currency={currency} /> */}
       <RowFixed style={{ justifySelf: 'flex-end' }}>
         {balance ? <Balance balance={balance} /> : connected ? <Loader /> : null}
       </RowFixed>

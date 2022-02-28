@@ -1,4 +1,3 @@
-import { ChainId } from './'
 /**
  * These types all come from the @solana/spl-token-registry package.
  *
@@ -6,7 +5,17 @@ import { ChainId } from './'
  * that package, which is massive.
  */
 
-export declare enum NetworkNames {
+export enum ChainId {
+  Mainnet = 42220,
+  Alfajores = 44787,
+  Baklava = 62320,
+}
+export enum TradeType {
+  EXACT_INPUT = 0,
+  EXACT_OUTPUT = 1,
+}
+
+export enum NetworkNames {
   Alfajores = 'Alfajores',
   Baklava = 'Baklava',
   Mainnet = 'Mainnet',
@@ -25,21 +34,21 @@ export const Alfajores: Network = {
   rpcUrl: 'https://alfajores-forno.celo-testnet.org',
   graphQl: 'https://alfajores-blockscout.celo-testnet.org/graphiql',
   explorer: 'https://alfajores-blockscout.celo-testnet.org',
-  chainId: ChainId.ALFAJORES,
+  chainId: ChainId.Alfajores,
 }
 export const Baklava: Network = {
   name: NetworkNames.Baklava,
   rpcUrl: 'https://baklava-forno.celo-testnet.org',
   graphQl: 'https://baklava-blockscout.celo-testnet.org/graphiql',
   explorer: 'https://baklava-blockscout.celo-testnet.org',
-  chainId: ChainId.BAKLAVA,
+  chainId: ChainId.Baklava,
 }
 export const Mainnet: Network = {
   name: NetworkNames.Mainnet,
   rpcUrl: 'https://forno.celo.org',
   graphQl: 'https://explorer.celo.org/graphiql',
   explorer: 'https://explorer.celo.org',
-  chainId: ChainId.MAINNET,
+  chainId: ChainId.Mainnet,
 }
 
 /**

@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 
 import { CHAIN } from '../../constants'
-import { VestingAddresses } from '../../constants/StablePools'
+import { VestingAddresses } from '../../constants/tokens'
 import { VestingEscrow } from '../../generated'
 import { useWeb3Context } from '../../hooks'
 import { useVestingContract } from '../../hooks/useContract'

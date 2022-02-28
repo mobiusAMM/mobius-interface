@@ -5,13 +5,11 @@ import Logo from 'components/Logo'
 import Row, { RowBetween, RowFixed } from 'components/Row'
 import Toggle from 'components/Toggle'
 import VolumeChart from 'components/VolumeChart'
-import { ChainLogo, Coins, PRICE } from 'constants/StablePools'
 import useTheme from 'hooks/useTheme'
 import { useWindowSize } from 'hooks/useWindowSize'
 import React, { useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { usePools } from 'state/mobiusPools/hooks'
-import { StableSwapPool } from 'state/stablePools/reducer'
 import styled from 'styled-components'
 import { Sel, TYPE } from 'theme'
 
@@ -98,10 +96,6 @@ const timeFormat: { [g: Granularity]: (n: number) => string } = {
   [Granularity.Hour]: (t: number) => new Date(t * 1000).toLocaleTimeString(),
   [Granularity.Day]: (t: number) => new Date(t * 1000).toLocaleDateString(),
   [Granularity.Week]: (t: number) => new Date(t * 1000).toLocaleDateString(),
-}
-
-function getPoolName(pools: StableSwapPool[], address: string) {
-  return pools.filter((p) => p.address.toLowerCase() == address)[0]?.name ?? 'Unknown'
 }
 
 export default function Charts() {
