@@ -133,7 +133,7 @@
     "@ethersproject/strings": "^5.3.0",
     "@ethersproject/units": "^5.3.0",
     "@ledgerhq/hw-transport-webusb": "^6.24.1",
-    "@sentry/react": "^6.9.0",
+    "@sentry/react": "^6.18.1",
     "@sentry/tracing": "^6.9.0",
     "@types/react-date-range": "^1.1.8",
     "@types/react-vis": "^1.11.7",
