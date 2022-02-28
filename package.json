@@ -115,7 +115,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.4.16",
-    "@celo-tools/use-contractkit": "2.1.4",
+    "@celo-tools/use-contractkit": "3.0.1",
     "@celo/connect": "^1.5.2",
     "@celo/contractkit": "1.5.2",
     "@celo/utils": "^1.5.2",
