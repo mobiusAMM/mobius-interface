@@ -67,7 +67,7 @@ function useSwapCallArguments(
       args: [
         trade.input.raw.toString(),
         minDy.toString(),
-        trade.input.currency.address.toLowerCase() === CELO[CHAIN].address.toLowerCase() ? 'true' : '',
+        trade.input.token.address.toLowerCase() === CELO[CHAIN].address.toLowerCase() ? 'true' : '',
       ],
       value: '0',
     }
@@ -172,8 +172,8 @@ export function useSwapCallback(
           gasLimit: calculateGasMargin(gasEstimate),
         })
           .then((response: ContractTransaction) => {
-            const inputSymbol = trade.input.currency.symbol
-            const outputSymbol = trade.output.currency.symbol
+            const inputSymbol = trade.input.token.symbol
+            const outputSymbol = trade.output.token.symbol
             const inputAmount = trade.input.toSignificant(6)
             const outputAmount = trade.output.toSignificant(6)
 

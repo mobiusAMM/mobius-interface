@@ -26,7 +26,6 @@ const dedupe = (strings: string[]): string[] => {
 }
 
 const fetchPegPrices = async (dispatch: Dispatch<any>) => {
-  // https://api.coingecko.com/api/v3/simple/price?ids=bitcoin%2Ccelo&vs_currencies=usd
   const pegQueries = dedupe(StablePools[CHAIN].map(({ peg }) => peg.priceQuery).filter((s) => s !== null) as string[])
   const ids = pegQueries.reduce((acc, cur) => acc.concat(cur).concat('%2'), '')
   const resp = await axios.get(

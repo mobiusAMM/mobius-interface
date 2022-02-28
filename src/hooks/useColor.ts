@@ -63,7 +63,6 @@ async function getColorFromUriPath(uri: string): Promise<string | null> {
 // `radial-gradient(91.85% 100% at 1.84% 0%, ${bgColor1} 0%, ${bgColor2} 100%) `};
 
 export function generateGradient(tokens: Token[]) {
-  const prevColor = ''
   let colors = tokens.map((t) => useColor(t))
   const numColors = colors.length + 1
   const increment = 100 / numColors
@@ -74,7 +73,6 @@ export function generateGradient(tokens: Token[]) {
 }
 
 export function generateColorPallete(tokens: Token[]) {
-  const prevColor = ''
   let colors = tokens.map((t) => useColor(t))
   const increment = 100 / colors.length
   colors = colors.map((color, i) => `${i * increment}% { background: ${color};}`)

@@ -4,6 +4,7 @@ import { SwapParameters } from '@ubeswap/sdk'
 import { ContractTransaction } from 'ethers'
 import JSBI from 'jsbi'
 import { useMemo } from 'react'
+import { poolInfoToExchange } from 'state/mobiusPools/hooks'
 import isZero from 'utils/isZero'
 
 import { BIPS_BASE, INITIAL_ALLOWED_SLIPPAGE } from '../constants'
@@ -57,12 +58,12 @@ function useSwapCallArguments(
   return useMemo(() => {
     if (!trade || !recipient || !provider || !connected || !deadline) return []
 
-    const contract = getStableSwapContract(trade.pool.address, provider, connected)
+    const contract = getStableSwapContract(poolInfoToExchange(trade.pool).address, provider, connected)
     const { indexFrom = 0, indexTo = 0 } = trade || {}
     const outputRaw = trade.output.raw
     const minDy = JSBI.subtract(outputRaw, JSBI.divide(outputRaw, JSBI.divide(BIPS_BASE, JSBI.BigInt(allowedSlippage))))
     const swapCallParameters: SwapParameters = {
-      methodName: trade.isMeta ? 'swapUnderlying' : 'swap',
+      methodName: 'swap',
       args: [
         indexFrom.toString(),
         indexTo.toString(),
@@ -134,11 +135,6 @@ export function useSwapCallback(
                     console.debug('Call threw error', call, callError)
                     let errorMessage: string
                     switch (callError.reason) {
-                      case 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT':
-                      case 'UniswapV2Router: EXCESSIVE_INPUT_AMOUNT':
-                        errorMessage =
-                          'This transaction will not succeed either due to price movement or fee on transfer. Try increasing your slippage tolerance.'
-                        break
                       default:
                         errorMessage = `The transaction cannot succeed due to error: ${callError.reason}. This is probably an issue with one of the tokens you are swapping.`
                     }
@@ -173,8 +169,8 @@ export function useSwapCallback(
           gasLimit: gasEstimate,
         })
           .then((response: ContractTransaction) => {
-            const inputSymbol = trade.input.currency.symbol
-            const outputSymbol = trade.output.currency.symbol
+            const inputSymbol = trade.input.token.symbol
+            const outputSymbol = trade.output.token.symbol
             const inputAmount = trade.input.toSignificant(6)
             const outputAmount = trade.output.toSignificant(6)
 

@@ -162,6 +162,7 @@ export function useAllProposalData(): { data: ProposalData[]; loading: boolean }
   // get metadata from past events
 
   // early return until events are fetched
+  // TODO: look at this fix
   const formattedLogs = useFormattedProposalCreatedLogs(gov, govProposalIndexes) ?? []
   return useMemo(() => {
     const proposalsCallData = proposals

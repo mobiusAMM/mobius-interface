@@ -45,7 +45,7 @@ const BodyWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  ${({ giveSpace }) => giveSpace && `padding-top: 100px;`}
+  padding-top: 100px;
   align-items: center;
   flex: 1;
   overflow-y: auto;
@@ -81,6 +81,7 @@ export default function App() {
         if (params.get('status') === DappKitResponseStatus.SUCCESS) {
           localStorage.setItem(localStorageKey, window.location.href)
           const mobileOS = getMobileOperatingSystem()
+          // TODO: test the effect of this with h
           if (mobileOS === Mobile.ANDROID) {
             window.close()
           }
@@ -94,7 +95,7 @@ export default function App() {
 
   return (
     <Suspense fallback={null}>
-      <AppWrapper giveSpace={location.pathname !== '/'} id="app-wrapper">
+      <AppWrapper id="app-wrapper">
         {location.pathname !== '/' && (
           <>
             <URLWarning />
@@ -132,7 +133,6 @@ export default function App() {
               <Route exact strict path="/charts" component={Charts} />
               <Route exact strict path="/opensum" component={OpenSum} />
               <Route exact strict path="/init-burn" component={BurnPage} />
-              {/* <Route exact strict path="/optics" component={Optics} /> */}
             </Switch>
           </ErrorBoundary>
           {location.pathname !== '/' && <Marginer />}

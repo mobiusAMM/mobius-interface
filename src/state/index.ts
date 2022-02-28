@@ -11,7 +11,6 @@ import mentoPools from './mentoPools/reducer'
 import pools from './mobiusPools/reducer'
 import multicall from './multicall/reducer'
 import openSum from './openSum/reducer'
-import stablePools from './stablePools/reducer'
 import staking from './staking/reducer'
 import swap from './swap/reducer'
 import transactions from './transactions/reducer'
@@ -26,7 +25,6 @@ const store = configureStore({
     transactions,
     swap,
     multicall,
-    stablePools,
     pools,
     mentoPools,
     mento,
