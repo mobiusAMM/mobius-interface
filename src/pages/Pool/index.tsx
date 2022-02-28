@@ -1,4 +1,3 @@
-import { ErrorBoundary } from '@sentry/react'
 import QuestionHelper from 'components/QuestionHelper'
 import { RowFixed } from 'components/Row'
 import { Chain, Coins, PRICE } from 'constants/StablePools'
@@ -152,11 +151,7 @@ export default function Pool() {
           ) : (
             sortedFilterdPools
               .filter((pool) => !pool.isKilled && !pool.disabled)
-              .map((pool) => (
-                <ErrorBoundary key={pool.poolAddress || '000'}>
-                  <StablePoolCard poolInfo={pool} />
-                </ErrorBoundary>
-              ))
+              .map((pool) => <StablePoolCard poolInfo={pool} key={pool.name} />)
           )}
         </PoolSection>
         <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px', justifyContent: 'center' }}>
@@ -181,11 +176,7 @@ export default function Pool() {
           {showDeprecated &&
             sortedFilterdPools
               .filter((pool) => pool.isKilled || pool.disabled)
-              .map((pool) => (
-                <ErrorBoundary key={pool.poolAddress || '000'}>
-                  <StablePoolCard poolInfo={pool} />
-                </ErrorBoundary>
-              ))}
+              .map((pool) => <StablePoolCard poolInfo={pool} key={pool.name} />)}
         </PoolSection>
       </AutoColumn>
     </PageWrapper>
