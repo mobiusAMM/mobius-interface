@@ -23,7 +23,6 @@ import Reset from './Reset'
 import RiskPage from './Risk'
 import Staking from './Staking'
 import Swap from './Swap'
-import { RedirectToSwap } from './Swap/redirects'
 import Vote from './Vote'
 import VotePage from './Vote/VotePage'
 
@@ -123,7 +122,6 @@ export default function App() {
               <Route exact strict path="/swap" component={Swap} />
               <Route exact path="/mint" component={Mento} />
               <Route exact strict path="/pool" component={Pool} />
-              <Route exact strict path="/swap/:outputCurrency" component={RedirectToSwap} />
               <Route exact strict path="/risk" component={RiskPage} />
               <Route path="/claim" component={Claim} />
               <Route exact strict path="/farm/:poolName" component={Manage} />{' '}

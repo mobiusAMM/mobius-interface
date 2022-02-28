@@ -49,7 +49,7 @@ const CreateProposalButton = ({
   const formattedProposalThreshold = proposalThreshold
     ? JSBI.divide(
         proposalThreshold.quotient,
-        JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(proposalThreshold.currency.decimals))
+        JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(proposalThreshold.token.decimals))
       ).toLocaleString()
     : undefined
   return (

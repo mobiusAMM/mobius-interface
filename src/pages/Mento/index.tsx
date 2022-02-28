@@ -138,7 +138,7 @@ export default function Mento() {
         ReactGA.event({
           category: 'Swap',
           action: 'Swap',
-          label: [trade?.input?.currency?.symbol, trade?.output?.currency?.symbol].join('/'),
+          label: [trade?.input?.token?.symbol, trade?.output?.token?.symbol].join('/'),
         })
       })
       .catch((error) => {

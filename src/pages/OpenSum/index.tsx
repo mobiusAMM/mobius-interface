@@ -28,7 +28,6 @@ import { CHAIN } from '../../constants'
 import { useWeb3Context } from '../../hooks'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
 import { MentoTrade } from '../../state/mento/hooks'
-import { useIsDarkMode } from '../../state/user/hooks'
 import { TYPE } from '../../theme'
 import AppBody from '../AppBody'
 
@@ -40,8 +39,6 @@ const VoteCard = styled(DataCard)`
 // #fbcc5c
 
 export default function OpenSum() {
-  const isDarkMode = useIsDarkMode()
-
   const { address, connect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)
 
@@ -111,7 +108,7 @@ export default function OpenSum() {
         ReactGA.event({
           category: 'Swap',
           action: 'Swap',
-          label: [input?.currency?.symbol, output?.currency?.symbol].join('/'),
+          label: [input?.token?.symbol, output?.token?.symbol].join('/'),
         })
 
         ReactGA.event({
@@ -136,8 +133,8 @@ export default function OpenSum() {
     inputValue,
     inputToken?.symbol,
     outputToken?.symbol,
-    input?.currency?.symbol,
-    output?.currency?.symbol,
+    input?.token?.symbol,
+    output?.token?.symbol,
   ])
   // TODO: check for endless loop
 
@@ -342,7 +339,7 @@ export default function OpenSum() {
                 disabled={!isValid}
                 error={!isValid}
               >
-                <Text fontSize={20} fontWeight={500} color={isValid && actionLabel && (isDarkMode ? 'black' : 'white')}>
+                <Text fontSize={20} fontWeight={500}>
                   {swapInputError ? swapInputError : `${actionLabel}`}
                 </Text>
               </ButtonError>
