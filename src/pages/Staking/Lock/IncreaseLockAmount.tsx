@@ -1,13 +1,14 @@
 import 'react-date-range/dist/styles.css' // main style file
 import 'react-date-range/dist/theme/default.css' // theme css file
 
-import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import CurrencyLogo from 'components/CurrencyLogo'
 import Loader from 'components/Loader'
 import { AutoRow, RowBetween } from 'components/Row'
 import { DisplayPool } from 'constants/pools'
 import { useMobi } from 'hooks/Tokens'
 import { useDoTransaction } from 'hooks/useDoTransaction'
+import JSBI from 'jsbi'
+import { Token, TokenAmount } from 'lib/token-utils'
 import React, { useState } from 'react'
 import { Text } from 'rebass'
 import { useTokenBalance } from 'state/wallet/hooks'

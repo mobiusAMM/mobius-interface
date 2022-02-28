@@ -1,6 +1,6 @@
-import { ChainId, Token } from '@ubeswap/sdk'
 import { DisplayPool } from 'constants/pools'
 import { Coins, STATIC_POOL_INFO } from 'constants/StablePools'
+import { ChainId, Token } from 'lib/token-utils'
 import Vibrant from 'node-vibrant'
 import { shade } from 'polished'
 import { useLayoutEffect, useState } from 'react'

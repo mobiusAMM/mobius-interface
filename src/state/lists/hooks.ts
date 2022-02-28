@@ -1,5 +1,5 @@
-import { Token } from '@ubeswap/sdk'
 import { Tags, TokenInfo } from '@uniswap/token-lists'
+import { Token } from 'lib/token-utils'
 
 type TagDetails = Tags[keyof Tags]
 export interface TagInfo extends TagDetails {

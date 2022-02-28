@@ -1,4 +1,5 @@
-import { ChainId, JSBI, Percent, Token } from '@ubeswap/sdk'
+import JSBI from 'jsbi'
+import { ChainId, Percent, Token } from 'lib/token-utils'
 
 export { MOBI } from './tokens'
 

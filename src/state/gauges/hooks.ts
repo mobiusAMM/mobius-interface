@@ -1,7 +1,8 @@
 import { invariant } from '@apollo/client/utilities/globals'
-import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
 import { IGauge, StablePools } from 'constants/pools'
 import { useMobi } from 'hooks/Tokens'
+import JSBI from 'jsbi'
+import { Percent, TokenAmount } from 'lib/token-utils'
 import { useSelector } from 'react-redux'
 
 import { CHAIN } from '../../constants'

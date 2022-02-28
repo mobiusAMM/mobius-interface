@@ -1,7 +1,7 @@
-import { cUSD, Token } from '@ubeswap/sdk'
 import { useOnClickOutside } from 'hooks/useOnClickOutside'
 import useTheme from 'hooks/useTheme'
 import useToggle from 'hooks/useToggle'
+import { Token } from 'lib/token-utils'
 import React, { KeyboardEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ReactGA from 'react-ga'
 import { useTranslation } from 'react-i18next'

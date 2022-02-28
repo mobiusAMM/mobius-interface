@@ -1,5 +1,5 @@
 import { MaxUint256 } from '@ethersproject/constants'
-import { TokenAmount } from '@ubeswap/sdk'
+import { TokenAmount } from 'lib/token-utils'
 import { useCallback, useMemo } from 'react'
 import { MobiusTrade } from 'state/swap/hooks'
 import { useUserMinApprove } from 'state/user/hooks'

@@ -1,12 +1,14 @@
 import { parseUnits } from '@ethersproject/units'
-import { JSBI, Percent, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
+import { TradeType } from '@ubeswap/sdk'
 import { IMentoExchangeInfo } from 'constants/mento'
 import { CELO } from 'constants/tokens'
+import JSBI from 'jsbi'
 import {
   calculateEstimatedSwapInputAmount,
   calculateEstimatedSwapOutputAmount,
   calculateSwapPrice,
 } from 'lib/mentoCalculator'
+import { Percent, Price, Token, TokenAmount } from 'lib/token-utils'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import invariant from 'tiny-invariant'

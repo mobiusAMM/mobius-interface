@@ -1,5 +1,5 @@
-import { Token, TokenAmount } from '@ubeswap/sdk'
 import useCurrentBlockTimestamp from 'hooks/useCurrentBlockTimestamp'
+import { Token, TokenAmount } from 'lib/token-utils'
 import { useEffect, useMemo, useState } from 'react'
 import { useBlockNumber } from 'state/application/hooks'
 

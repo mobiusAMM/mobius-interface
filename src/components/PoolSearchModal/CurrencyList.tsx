@@ -1,4 +1,4 @@
-import { currencyEquals, Token } from '@ubeswap/sdk'
+import { Token } from 'lib/token-utils'
 import React, { CSSProperties, MutableRefObject, useCallback } from 'react'
 import { FixedSizeList } from 'react-window'
 import { Text } from 'rebass'
@@ -121,7 +121,7 @@ export default function CurrencyList({
   const Row = useCallback(
     ({ data, index, style }) => {
       const currency: Token = data[index]
-      const isSelected = Boolean(selectedCurrency && currencyEquals(selectedCurrency, currency))
+      const isSelected = Boolean(selectedCurrency && selectedCurrency.equals(currency))
       const handleSelect = () => onCurrencySelect(currency)
 
       // const token = currency

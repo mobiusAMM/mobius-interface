@@ -1,4 +1,4 @@
-import { JSBI } from '@ubeswap/sdk'
+import JSBI from 'jsbi'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 

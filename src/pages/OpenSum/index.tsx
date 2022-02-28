@@ -1,6 +1,6 @@
-import { Token, TokenAmount } from '@ubeswap/sdk'
 import { useConstantSumContract } from 'hooks/useContract'
 import useTransactionDeadline from 'hooks/useTransactionDeadline'
+import { Token, TokenAmount } from 'lib/token-utils'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { ArrowDown } from 'react-feather'

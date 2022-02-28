@@ -1,7 +1,8 @@
-import { IExchangeInfo, Volume } from 'constants/pools'
+import { IExchange, IExchangeInfo, StablePools, Volume } from 'constants/pools'
 import { useSelector } from 'react-redux'
 import invariant from 'tiny-invariant'
 
+import { CHAIN } from '../../constants'
 import { AppState } from '..'
 
 export function useCurrentPool(token0: string, token1: string): IExchangeInfo | null {
@@ -39,4 +40,12 @@ export function useCurrentPoolVolume(exchangeAddress: string): Volume | null {
 
 export function usePoolsVolume(): readonly Volume[] {
   return useSelector<AppState, Volume[]>((state) => state.pools.pools)
+}
+
+export function poolInfoToExchange(info: IExchangeInfo): IExchange {
+  const exchange = StablePools[CHAIN].filter(
+    (e) => e.pool.lpToken.address.toLowerCase() === info.lpTotalSupply.token.address.toLowerCase()
+  )
+  invariant(exchange.length === 1, 'cant find exchange')
+  return exchange[0].pool
 }

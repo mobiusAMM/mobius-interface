@@ -1,4 +1,5 @@
-import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
+import JSBI from 'jsbi'
+import { Token, TokenAmount } from 'lib/token-utils'
 
 import { StablePoolInfo } from '../state/stablePools/hooks'
 

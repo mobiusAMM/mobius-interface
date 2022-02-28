@@ -1,7 +1,7 @@
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
-import { Fraction } from '@ubeswap/sdk'
 import { useWeb3Context } from 'hooks'
 import { useMobi } from 'hooks/Tokens'
+import { Fraction } from 'lib/token-utils'
 import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 

@@ -1,9 +1,8 @@
-import { Token } from '@ubeswap/sdk'
+import { Token } from 'lib/token-utils'
 import React, { useMemo } from 'react'
 import styled from 'styled-components'
 
 import useHttpLocations from '../../hooks/useHttpLocations'
-import { WrappedTokenInfo } from '../../state/lists/hooks'
 import Logo from '../Logo'
 
 const StyledLogo = styled(Logo)<{ size: string }>`
@@ -23,15 +22,11 @@ export default function CurrencyLogo({
   size?: string
   style?: React.CSSProperties
 }) {
-  const uriLocations = useHttpLocations(currency instanceof WrappedTokenInfo ? currency.logoURI : undefined)
+  const uriLocations = useHttpLocations(currency?.icon ?? undefined)
 
   const srcs: string[] = useMemo(() => {
-    if (currency instanceof Token) {
-      if (currency instanceof WrappedTokenInfo) {
-        return [...uriLocations, currency.logoURI ?? currency.address]
-      }
-
-      return []
+    if (currency) {
+      return [...uriLocations, currency.icon ?? currency.address]
     }
     return []
   }, [currency, uriLocations])

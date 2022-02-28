@@ -1,6 +1,6 @@
-import { Token } from '@ubeswap/sdk'
 import { MENTO_POOL_INFO } from 'constants/mento'
 import { IExchange, StablePools } from 'constants/pools'
+import { Token } from 'lib/token-utils'
 import { stableToToken } from 'state/mentoPools/hooks'
 import { dedupeTokens } from 'utils/tokens'
 

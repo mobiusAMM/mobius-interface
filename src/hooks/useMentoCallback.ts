@@ -1,7 +1,8 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
-import { JSBI, SwapParameters } from '@ubeswap/sdk'
+import { SwapParameters } from '@ubeswap/sdk'
 import { ContractTransaction } from 'ethers'
+import JSBI from 'jsbi'
 import { useMemo } from 'react'
 
 import { BIPS_BASE, CHAIN, INITIAL_ALLOWED_SLIPPAGE } from '../constants'

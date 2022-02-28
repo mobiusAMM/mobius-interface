@@ -1,6 +1,6 @@
 import { Interface } from '@ethersproject/abi'
-import { JSBI } from '@ubeswap/sdk'
 import { ConstantSum, ConstantSumInfo } from 'constants/ConstantSum'
+import JSBI from 'jsbi'
 import { useMemo } from 'react'
 import { useDispatch } from 'react-redux'
 import { useMultipleContractSingleData } from 'state/multicall/hooks'
@@ -8,8 +8,11 @@ import { useMultipleContractSingleData } from 'state/multicall/hooks'
 import { CHAIN } from '../../constants'
 import CONSTANT_SUM from '../../constants/abis/ConstantSum.json'
 import { AppDispatch } from '../index'
-import { BigIntToJSBI } from '../stablePools/updater'
 import { updateBalances } from './actions'
+
+export const BigIntToJSBI = (num: BigInt | undefined, fallBack = '0') => {
+  return JSBI.BigInt(num?.toString() ?? fallBack)
+}
 
 const ConstantSumInterface = new Interface(CONSTANT_SUM.abi)
 const ZERO = JSBI.BigInt('0')

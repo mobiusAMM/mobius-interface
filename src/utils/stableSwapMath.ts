@@ -1,4 +1,5 @@
-import { BigintIsh, JSBI } from '@ubeswap/sdk'
+import JSBI from 'jsbi'
+import { BigintIsh } from 'lib/token-utils'
 import { StableSwapMathConstants, StableSwapVariable } from 'state/stablePools/reducer'
 
 const ZERO = JSBI.BigInt(0)

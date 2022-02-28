@@ -3,11 +3,11 @@ import { Contract } from '@ethersproject/contracts'
 import { TransactionResponse } from '@ethersproject/providers'
 import { toUtf8String, Utf8ErrorFuncs } from '@ethersproject/strings'
 import { formatUnits } from '@ethersproject/units'
-// eslint-disable-next-line no-restricted-imports
-import { TokenAmount } from '@ubeswap/sdk'
 import { abi as GOV_ABI } from '@uniswap/governance/build/GovernorAlpha.json'
 import { useWeb3Context } from 'hooks'
 import { useGovernanceContract, useVotingEscrowContract } from 'hooks/useContract'
+// eslint-disable-next-line no-restricted-imports
+import { TokenAmount } from 'lib/token-utils'
 import { useCallback, useMemo } from 'react'
 import { calculateGasMargin } from 'utils/calculateGasMargin'
 

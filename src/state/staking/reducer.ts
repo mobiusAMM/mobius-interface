@@ -1,5 +1,5 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { JSBI } from '@ubeswap/sdk'
+import JSBI from 'jsbi'
 
 import { updateStaking, updateStakingUser } from './actions'
 

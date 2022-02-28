@@ -1,4 +1,4 @@
-import { ChainId } from '@ubeswap/sdk'
+import { ChainId } from 'lib/token-utils'
 
 import MULTICALL_ABI from './abi.json'
 

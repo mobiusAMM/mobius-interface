@@ -1,6 +1,6 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { TokenAmount } from '@ubeswap/sdk'
 import { IExchange, IExchangeInfo, RECOMMENDED_AMP, RECOMMENDED_FEES, StablePools, Volume } from 'constants/pools'
+import { TokenAmount } from 'lib/token-utils'
 
 import { CHAIN } from '../../constants'
 import { updatePools } from './actions'

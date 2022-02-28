@@ -1,7 +1,7 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import Loader from 'components/Loader'
 import { useMobi } from 'hooks/Tokens'
+import { JSBI, Token, TokenAmount } from 'lib/token-utils'
 import React, { useCallback, useState } from 'react'
 import { StablePoolInfo } from 'state/stablePools/hooks'
 import styled from 'styled-components'

@@ -1,4 +1,4 @@
-import { Price } from '@ubeswap/sdk'
+import { Price } from 'lib/token-utils'
 
 import type { IMentoExchangeInfo } from '../../constants/mento'
 

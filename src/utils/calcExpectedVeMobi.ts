@@ -1,4 +1,5 @@
-import { Fraction, JSBI, Token, TokenAmount } from '@ubeswap/sdk'
+import JSBI from 'jsbi'
+import { Fraction, Token, TokenAmount } from 'lib/token-utils'
 import { GaugeSummary } from 'state/staking/hooks'
 
 // TODO double check that this math is correct

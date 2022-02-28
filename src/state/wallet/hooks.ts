@@ -1,6 +1,7 @@
 import { invariant } from '@apollo/client/utilities/globals'
-import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import { getAllTokens } from 'hooks/Tokens'
+import JSBI from 'jsbi'
+import { Token, TokenAmount } from 'lib/token-utils'
 import { useEffect, useMemo, useState } from 'react'
 import { useBlockNumber } from 'state/application/hooks'
 

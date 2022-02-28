@@ -1,7 +1,7 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { Percent, TokenAmount } from '@ubeswap/sdk'
 import { IMentoExchange, IMentoExchangeInfo } from 'constants/mento'
 import { CELO } from 'constants/tokens'
+import { Percent, TokenAmount } from 'lib/token-utils'
 
 import { CHAIN } from '../../constants'
 import { MENTO_POOL_INFO } from '../../constants/mento'

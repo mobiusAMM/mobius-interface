@@ -1,5 +1,5 @@
-import { Pair, Token } from '@ubeswap/sdk'
 import { useColor } from 'hooks/useColor'
+import { Token } from 'lib/token-utils'
 import { darken } from 'polished'
 import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,7 +12,6 @@ import { useIsDarkMode } from '../../state/user/hooks'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { TYPE } from '../../theme'
 import CurrencyLogo from '../CurrencyLogo'
-import DoubleCurrencyLogo from '../DoubleLogo'
 import { Input as NumericalInput } from '../NumericalInput'
 import { RowBetween } from '../Row'
 import CurrencySearchModal from '../SearchModal/CurrencySearchModal'
@@ -47,7 +46,6 @@ const CurrencySelect = styled.button<{
   walletConnected: boolean
   bgColor: any
   isDarkMode: boolean
-  pair: boolean
 }>`
   display: flex;
   align-items: center;
@@ -64,7 +62,7 @@ const CurrencySelect = styled.button<{
   cursor: pointer;
   user-select: none;
   border: none;
-  width: ${({ pair }) => (pair ? '14rem' : '10rem')};
+  width: 10rem;
   height: 2.4rem;
   padding: 0 8px;
 
@@ -146,7 +144,6 @@ interface CurrencyInputPanelProps {
   currency?: Token | null
   disableCurrencySelect?: boolean
   hideBalance?: boolean
-  pair?: Pair | null
   hideInput?: boolean
   disableInput?: boolean
   otherCurrency?: Token | null
@@ -165,7 +162,6 @@ export default function CurrencyInputPanel({
   disableCurrencySelect = false,
   hideBalance = false,
   disableInput = false,
-  pair = null, // used for double token logo
   hideInput = false,
   otherCurrency,
   id,
@@ -217,7 +213,6 @@ export default function CurrencyInputPanel({
             bgColor={tokenSelectBackground}
             selected={!!currency}
             walletConnected={connected}
-            pair={!!pair}
             className="open-currency-select-button"
             onClick={() => {
               if (!disableCurrencySelect) {
@@ -226,24 +221,15 @@ export default function CurrencyInputPanel({
             }}
           >
             <Aligner>
-              {pair ? (
-                <DoubleCurrencyLogo currency0={pair.token0} currency1={pair.token1} size={24} margin={true} />
-              ) : currency ? (
-                <CurrencyLogo currency={currency} size={'24px'} />
-              ) : null}
-              {pair ? (
-                <StyledTokenName active={!!currency} className="pair-name-container">
-                  {pair?.token0.symbol}:{pair?.token1.symbol}
-                </StyledTokenName>
-              ) : (
-                <StyledTokenName className="token-symbol-container" active={Boolean(currency && currency.symbol)}>
-                  {(currency && currency.symbol && currency.symbol.length > 20
-                    ? currency.symbol.slice(0, 4) +
-                      '...' +
-                      currency.symbol.slice(currency.symbol.length - 5, currency.symbol.length)
-                    : currency?.symbol) || t('Select Token')}
-                </StyledTokenName>
-              )}
+              {currency ? <CurrencyLogo currency={currency} size={'24px'} /> : null}
+              <StyledTokenName className="token-symbol-container" active={Boolean(currency && currency.symbol)}>
+                {(currency && currency.symbol && currency.symbol.length > 20
+                  ? currency.symbol.slice(0, 4) +
+                    '...' +
+                    currency.symbol.slice(currency.symbol.length - 5, currency.symbol.length)
+                  : currency?.symbol) || t('Select Token')}
+              </StyledTokenName>
+
               {!disableCurrencySelect && <StyledDropDown selected={!!currency} />}
             </Aligner>
           </CurrencySelect>

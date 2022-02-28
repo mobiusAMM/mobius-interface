@@ -1,6 +1,6 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { TokenAmount } from '@ubeswap/sdk'
 import { useMobi } from 'hooks/Tokens'
+import { TokenAmount } from 'lib/token-utils'
 import React, { useState } from 'react'
 import { StablePoolInfo } from 'state/stablePools/hooks'
 import styled from 'styled-components'

@@ -1,5 +1,6 @@
-import { ChainId, JSBI, Token } from '@ubeswap/sdk'
 import BigNumber from 'bignumber.js'
+import JSBI from 'jsbi'
+import { ChainId, Token } from 'lib/token-utils'
 import { VestType } from 'state/claim/reducer'
 import { WrappedTokenInfo } from 'state/lists/hooks'
 

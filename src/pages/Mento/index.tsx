@@ -1,6 +1,7 @@
-import { JSBI, TokenAmount } from '@ubeswap/sdk'
 import { describeTrade } from 'components/swap/routing/describeTrade'
 import { useMentoTradeCallback } from 'components/swap/routing/useMentoTradeCallback'
+import JSBI from 'jsbi'
+import { TokenAmount } from 'lib/token-utils'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { ArrowDown } from 'react-feather'

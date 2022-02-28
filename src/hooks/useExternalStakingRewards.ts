@@ -1,6 +1,7 @@
-import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
 import { calcApy } from 'components/earn/StablePoolCard'
 import { ExternalRewardsToken } from 'constants/staking'
+import JSBI from 'jsbi'
+import { Percent, TokenAmount } from 'lib/token-utils'
 import { useTokenPrice } from 'state/application/hooks'
 import { useStakingState, useStakingStateCombined } from 'state/staking/hooks'
 

@@ -1,4 +1,4 @@
-import { ChainId } from '@ubeswap/sdk'
+import { ChainId } from './'
 /**
  * These types all come from the @solana/spl-token-registry package.
  *
@@ -20,26 +20,26 @@ export interface Network {
   chainId: ChainId
 }
 
-export declare const Alfajores: {
-  readonly name: NetworkNames.Alfajores
-  readonly rpcUrl: 'https://alfajores-forno.celo-testnet.org'
-  readonly graphQl: 'https://alfajores-blockscout.celo-testnet.org/graphiql'
-  readonly explorer: 'https://alfajores-blockscout.celo-testnet.org'
-  readonly chainId: ChainId.ALFAJORES
+export const Alfajores: Network = {
+  name: NetworkNames.Alfajores,
+  rpcUrl: 'https://alfajores-forno.celo-testnet.org',
+  graphQl: 'https://alfajores-blockscout.celo-testnet.org/graphiql',
+  explorer: 'https://alfajores-blockscout.celo-testnet.org',
+  chainId: ChainId.ALFAJORES,
 }
-export declare const Baklava: {
-  readonly name: NetworkNames.Baklava
-  readonly rpcUrl: 'https://baklava-forno.celo-testnet.org'
-  readonly graphQl: 'https://baklava-blockscout.celo-testnet.org/graphiql'
-  readonly explorer: 'https://baklava-blockscout.celo-testnet.org'
-  readonly chainId: ChainId.BAKLAVA
+export const Baklava: Network = {
+  name: NetworkNames.Baklava,
+  rpcUrl: 'https://baklava-forno.celo-testnet.org',
+  graphQl: 'https://baklava-blockscout.celo-testnet.org/graphiql',
+  explorer: 'https://baklava-blockscout.celo-testnet.org',
+  chainId: ChainId.BAKLAVA,
 }
-export declare const Mainnet: {
-  readonly name: NetworkNames.Mainnet
-  readonly rpcUrl: 'https://forno.celo.org'
-  readonly graphQl: 'https://explorer.celo.org/graphiql'
-  readonly explorer: 'https://explorer.celo.org'
-  readonly chainId: ChainId.MAINNET
+export const Mainnet: Network = {
+  name: NetworkNames.Mainnet,
+  rpcUrl: 'https://forno.celo.org',
+  graphQl: 'https://explorer.celo.org/graphiql',
+  explorer: 'https://explorer.celo.org',
+  chainId: ChainId.MAINNET,
 }
 
 /**

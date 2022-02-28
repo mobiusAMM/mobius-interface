@@ -1,6 +1,7 @@
-import { JSBI, Percent, Token, TokenAmount } from '@ubeswap/sdk'
 import { ExternalRewardsToken } from 'constants/staking'
 import { useMobi, useVeMobi } from 'hooks/Tokens'
+import JSBI from 'jsbi'
+import { Percent, Token, TokenAmount } from 'lib/token-utils'
 import { useSelector } from 'react-redux'
 import { AppState } from 'state'
 

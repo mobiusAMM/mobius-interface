@@ -1,5 +1,5 @@
-import { JSBI } from '@ubeswap/sdk'
 import BigNumber from 'bignumber.js'
+import JSBI from 'jsbi'
 
 // See https://github.com/d-mooers/swappa/blob/main/src/pairs/stableswap.ts
 

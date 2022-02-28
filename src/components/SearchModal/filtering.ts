@@ -1,4 +1,4 @@
-import { Token } from '@ubeswap/sdk'
+import { Token } from 'lib/token-utils'
 
 import { isAddress } from '../../utils'
 

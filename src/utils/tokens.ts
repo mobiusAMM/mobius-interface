@@ -1,4 +1,4 @@
-import { Token } from '@ubeswap/sdk'
+import { Token } from 'lib/token-utils'
 /**
  * Dedupes a list of tokens, picking the first instance of the token in a list.
  * @param tokens

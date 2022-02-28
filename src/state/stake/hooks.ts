@@ -1,4 +1,4 @@
-import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
+import { JSBI, Token, TokenAmount } from 'lib/token-utils'
 
 // Hooks
 import { useWeb3Context } from '../../hooks'

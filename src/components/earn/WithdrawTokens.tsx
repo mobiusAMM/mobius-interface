@@ -1,6 +1,7 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { JSBI, TokenAmount } from '@ubeswap/sdk'
 import CurrencyLogo from 'components/CurrencyLogo'
+import JSBI from 'jsbi'
+import { TokenAmount } from 'lib/token-utils'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 

@@ -1,4 +1,3 @@
-import { currencyEquals } from '@ubeswap/sdk'
 import React, { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { MentoTrade } from 'state/mento/hooks'
@@ -19,9 +18,9 @@ import SwapModalHeader from './SwapModalHeader'
  */
 function tradeMeaningfullyDiffers(tradeA: MobiusTrade | MentoTrade, tradeB: MobiusTrade | MentoTrade): boolean {
   return (
-    !currencyEquals(tradeA.input.currency, tradeB.input.currency) ||
+    !tradeA.input.token.equals(tradeB.input.token) ||
     !tradeA.input.equalTo(tradeB.input) ||
-    !currencyEquals(tradeA.output.currency, tradeB.output.currency) ||
+    !tradeA.output.token.equals(tradeB.output.token) ||
     !tradeA.output.equalTo(tradeB.output)
   )
 }

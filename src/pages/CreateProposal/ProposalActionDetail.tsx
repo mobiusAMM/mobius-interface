@@ -1,6 +1,6 @@
-import { Token } from '@ubeswap/sdk'
 import AddressInputPanel from 'components/AddressInputPanel'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
+import { Token } from 'lib/token-utils'
 import React from 'react'
 import styled from 'styled-components/macro'
 

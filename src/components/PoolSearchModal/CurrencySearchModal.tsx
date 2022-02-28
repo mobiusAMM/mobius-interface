@@ -1,4 +1,4 @@
-import { Token } from '@ubeswap/sdk'
+import { Token } from 'lib/token-utils'
 import React, { useCallback } from 'react'
 
 import Modal from '../Modal'

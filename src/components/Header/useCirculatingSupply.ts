@@ -1,7 +1,8 @@
 import { BigNumber } from '@ethersproject/bignumber'
-import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
 import { MOBI } from 'constants/tokens'
 import { useMobiContract } from 'hooks/useContract'
+import JSBI from 'jsbi'
+import { TokenAmount } from 'lib/token-utils'
 import { useEffect, useState } from 'react'
 import { useSingleContractMultipleData } from 'state/multicall/hooks'
 
@@ -21,7 +22,7 @@ const nonCirculatingAddresses = {
 /**
  * Fetches the circulating supply
  */
-export const useCirculatingSupply = (): { supply: TokenAmount; staked: Percent } | undefined => {
+export const useCirculatingSupply = (): { supply: TokenAmount; staked: TokenAmount } | undefined => {
   const mobi = MOBI[CHAIN]
   const mobiContract = useMobiContract()
 

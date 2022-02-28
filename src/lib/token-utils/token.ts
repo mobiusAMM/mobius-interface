@@ -1,7 +1,6 @@
-import { ChainId } from '@ubeswap/sdk'
 import type { Token as UToken } from '@ubeswap/token-math'
 
-import { Alfajores, Baklava, Mainnet, Network } from './splTokenRegistry'
+import { Alfajores, Baklava, ChainId, Mainnet, Network } from './'
 import type { TokenInfo } from './tokenList'
 
 /**

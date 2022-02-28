@@ -1,5 +1,5 @@
 // To-Do: Implement Hooks to update Client-Side contract representation
-import { JSBI } from '@ubeswap/sdk'
+import JSBI from 'jsbi'
 import { useSelector } from 'react-redux'
 
 import { AppState } from '..'

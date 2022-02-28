@@ -1,10 +1,9 @@
 import Loader from 'components/Loader'
 import QuestionHelper from 'components/QuestionHelper'
-import { useMobi } from 'hooks/Tokens'
 import React from 'react'
 import { X } from 'react-feather'
+import { useMobiPrice } from 'state/application/hooks'
 import styled from 'styled-components'
-import { useCUSDPrice } from 'utils/useCUSDPrice'
 
 import tokenLogo from '../../assets/images/MOBI-200.png'
 import { CHAIN, MOBI } from '../../constants'
@@ -44,8 +43,7 @@ export default function UbeBalanceContent({ setShowUbeBalanceModal }: { setShowU
   const ube = MOBI[CHAIN]
 
   const total = useAggregateUbeBalance()
-  const mobi = useMobi()
-  const mobiprice = useCUSDPrice(mobi)
+  const mobiprice = useMobiPrice()
   const ret = useCirculatingSupply()
 
   return (

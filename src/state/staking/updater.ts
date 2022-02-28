@@ -1,7 +1,7 @@
-import { JSBI } from '@ubeswap/sdk'
 import { ExternalStakingRewards } from 'constants/staking'
 import { VEMOBI } from 'constants/tokens'
 import { useWeb3Context } from 'hooks'
+import JSBI from 'jsbi'
 import { roundDate } from 'pages/Staking/Lock/Lock'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'

@@ -1,7 +1,7 @@
 import { Interface } from '@ethersproject/abi'
-import { JSBI } from '@ubeswap/sdk'
 import { IGauge, StablePools } from 'constants/pools'
 import { useWeb3Context } from 'hooks'
+import JSBI from 'jsbi'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from 'state'

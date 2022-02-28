@@ -1,5 +1,5 @@
-import { TokenAmount } from '@ubeswap/sdk'
 import { useMobi } from 'hooks/Tokens'
+import { TokenAmount } from 'lib/token-utils'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
 import { useAllGaugesInfo, useAllUserGaugesInfo, UserGaugeInfo } from 'state/gauges/hooks'

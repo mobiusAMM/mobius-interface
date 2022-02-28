@@ -1,4 +1,4 @@
-import { Price } from '@ubeswap/sdk'
+import { Price } from 'lib/token-utils'
 import React, { useContext } from 'react'
 import { Repeat } from 'react-feather'
 import { Text } from 'rebass'

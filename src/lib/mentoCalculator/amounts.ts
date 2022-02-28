@@ -1,5 +1,5 @@
-import { TokenAmount } from '@ubeswap/sdk'
 import JSBI from 'jsbi'
+import { TokenAmount } from 'lib/token-utils'
 
 import { BIPS_BASE } from '../../constants'
 import type { IMentoExchangeInfo } from '../../constants/mento'

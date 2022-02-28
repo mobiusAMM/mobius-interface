@@ -1,6 +1,8 @@
 export * from './price'
+export * from './splTokenRegistry'
 export * from './token'
 export * from './tokenAmount'
+export * from './tokenList'
 
 // re-export token-math types
 // so consumers don't need to use them

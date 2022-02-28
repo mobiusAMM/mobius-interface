@@ -1,6 +1,7 @@
 // To-Do: Implement Hooks to update Client-Side contract representation
-import { ChainId, JSBI, Price, Token, TokenAmount } from '@ubeswap/sdk'
 import { ConstantSum, ConstantSumInfo } from 'constants/ConstantSum'
+import JSBI from 'jsbi'
+import { ChainId, Price, Token, TokenAmount, ZERO } from 'lib/token-utils'
 import { useSelector } from 'react-redux'
 import { tryParseAmount } from 'state/swap/hooks'
 
@@ -8,7 +9,6 @@ import { CHAIN } from '../../constants'
 import { AppState } from '..'
 import { ConstantSumPool } from './reducer'
 
-const ZERO = JSBI.BigInt('0')
 export interface MentoPoolInfo {
   readonly poolAddress?: string
   readonly tokens: readonly Token[]

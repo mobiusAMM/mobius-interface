@@ -1,6 +1,6 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { JSBI } from '@ubeswap/sdk'
 import { IGauge, StablePools } from 'constants/pools'
+import JSBI from 'jsbi'
 
 import { CHAIN } from '../../constants'
 import { updateGauges, updateGaugesUser } from './actions'

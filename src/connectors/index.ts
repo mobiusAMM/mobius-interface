@@ -1,4 +1,5 @@
-import { ChainId, parseNetwork } from '@ubeswap/sdk'
+import { parseNetwork } from '@ubeswap/sdk'
+import { ChainId } from 'lib/token-utils'
 
 const networkChainIDFromHostname: ChainId = window.location.hostname.includes('alfajores')
   ? ChainId.ALFAJORES

@@ -1,7 +1,7 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { JSBI } from '@ubeswap/sdk'
 import { NETWORK_CHAIN_ID } from 'connectors'
 import { ConstantSum } from 'constants/ConstantSum'
+import JSBI from 'jsbi'
 import { WrappedTokenInfo } from 'state/lists/hooks'
 
 import { updateBalances } from './actions'
