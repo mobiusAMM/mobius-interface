@@ -1,6 +1,6 @@
 import QuestionHelper from 'components/QuestionHelper'
 import { RowFixed } from 'components/Row'
-import { Chain, DisplayPool, IExchangeInfo, StablePools } from 'constants/pools'
+import { Chain, DisplayPool, IExchangeInfo, StablePools, Volume } from 'constants/pools'
 import { useValueOfAllPools } from 'hooks/useStablePools'
 import JSBI from 'jsbi'
 import { TokenAmount } from 'lib/token-utils'
@@ -8,7 +8,7 @@ import React from 'react'
 import { isMobile } from 'react-device-detect'
 import { useMobiPrice } from 'state/application/hooks'
 import { GaugeInfo, useAllGaugesInfo, useAllUserGaugesInfo, UserGaugeInfo } from 'state/gauges/hooks'
-import { useAllLpBalances, usePools } from 'state/mobiusPools/hooks'
+import { useAllLpBalances, usePools, usePoolsVolume } from 'state/mobiusPools/hooks'
 import { useStakingInfo, useUserStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 
@@ -68,6 +68,15 @@ type SelectChain = SpecialChain | Chain
 
 const OtherChains = new Set<Chain>([Chain.Avax, Chain.Polygon, Chain.Celo])
 
+export type Meta = {
+  display: DisplayPool
+  userGauge: UserGaugeInfo | null
+  gauge: GaugeInfo | null
+  lpBalance: TokenAmount
+  exchangeInfo: IExchangeInfo
+  volume: Volume
+}
+
 export default function Pool() {
   const userGauges = useAllUserGaugesInfo()
   const gauges = useAllGaugesInfo()
@@ -75,14 +84,7 @@ export default function Pool() {
   const userStakingInfo = useUserStakingInfo()
   const exchanges = usePools()
   const lpBalances = useAllLpBalances()
-
-  type Meta = {
-    display: DisplayPool
-    userGauge: UserGaugeInfo | null
-    gauge: GaugeInfo | null
-    lpBalance: TokenAmount
-    exchangeInfo: IExchangeInfo
-  }
+  const volumes = usePoolsVolume()
 
   const meta: Meta[] = StablePools[CHAIN].map((el, i) => {
     return {
@@ -91,6 +93,7 @@ export default function Pool() {
       gauge: gauges[i],
       lpBalance: lpBalances[i],
       exchangeInfo: exchanges[i],
+      volume: volumes[i],
     }
   })
 

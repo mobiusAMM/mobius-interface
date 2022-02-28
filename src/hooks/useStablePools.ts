@@ -1,5 +1,5 @@
 import { invariant } from '@apollo/client/utilities/globals'
-import { IExchangeInfo, StablePools } from 'constants/pools'
+import { IExchangeInfo, IGauge, StablePools } from 'constants/pools'
 import JSBI from 'jsbi'
 import { calculateVirtualPrice } from 'lib/calculator'
 import { Fraction, TokenAmount } from 'lib/token-utils'
@@ -28,8 +28,8 @@ export function useValueOfAllPools(): Fraction {
   const prices = useTokenPrices()
   const pools = usePools()
   return StablePools[CHAIN].reduce((acc, cur, i) => {
-    const price = cur.peg.priceQuery ? priceStringToFraction(prices[cur.peg.priceQuery]) : new Fraction(1)
-    invariant(price, 'price')
+    const price = cur.peg.priceQuery ? priceStringToFraction(prices[cur.peg.priceQuery]) : new Fraction(0)
+    if (!price) return acc
     const virtualPrice = calculateVirtualPrice(pools[i])
 
     return virtualPrice ? acc.add(price.multiply(virtualPrice).multiply(pools[i].lpTotalSupply)) : acc
@@ -41,10 +41,20 @@ export function useValueOfAllLP(amounts: JSBI[]): Fraction {
   const pools = usePools()
   invariant(amounts.length === pools.length, 'invalid amounts entry')
   return StablePools[CHAIN].reduce((acc, cur, i) => {
-    const price = cur.peg.priceQuery ? priceStringToFraction(prices[cur.peg.priceQuery]) : new Fraction(1)
-    invariant(price, 'price')
+    const price = cur.peg.priceQuery ? priceStringToFraction(prices[cur.peg.priceQuery]) : new Fraction(0)
+    if (!price) return acc
     const virtualPrice = calculateVirtualPrice(pools[i])
 
     return virtualPrice ? acc.add(price.multiply(virtualPrice).multiply(amounts[i])) : acc
+  }, new Fraction(0))
+}
+
+export function useValueOfExternalRewards(gauge: IGauge | null): Fraction {
+  const prices = useTokenPrices()
+  if (!gauge) return new Fraction(0)
+  return gauge.additionalRewards.reduce((acc, cur) => {
+    const price = priceStringToFraction(prices[cur.token.address.toLowerCase()]) ?? new Fraction(0)
+    if (!price) return acc
+    return acc.add(price.multiply(cur))
   }, new Fraction(0))
 }
