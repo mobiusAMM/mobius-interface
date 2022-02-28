@@ -86,8 +86,8 @@ export default function ConfirmSwapModal({
 
   // text to show while loading
   const pendingText = `Swapping ${trade?.input?.toSignificant(6)} ${
-    trade?.input?.currency?.symbol
-  } for ${trade?.output?.toSignificant(6)} ${trade?.output?.currency?.symbol}`
+    trade?.input?.token?.symbol
+  } for ${trade?.output?.toSignificant(6)} ${trade?.output?.token?.symbol}`
 
   const confirmationContent = useCallback(
     () =>

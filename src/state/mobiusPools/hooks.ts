@@ -1,5 +1,8 @@
-import { IExchange, IExchangeInfo, StablePools, Volume } from 'constants/pools'
+import { DisplayPool, IExchange, IExchangeInfo, StablePools, Volume } from 'constants/pools'
+import { useWeb3Context } from 'hooks'
+import { TokenAmount } from 'lib/token-utils'
 import { useSelector } from 'react-redux'
+import { useTokenBalance, useTokenBalances } from 'state/wallet/hooks'
 import invariant from 'tiny-invariant'
 
 import { CHAIN } from '../../constants'
@@ -48,4 +51,33 @@ export function poolInfoToExchange(info: IExchangeInfo): IExchange {
   )
   invariant(exchange.length === 1, 'cant find exchange')
   return exchange[0].pool
+}
+
+export function poolInfoToDisplay(info: IExchangeInfo): DisplayPool {
+  const exchange = StablePools[CHAIN].filter(
+    (e) => e.pool.lpToken.address.toLowerCase() === info.lpTotalSupply.token.address.toLowerCase()
+  )
+  invariant(exchange.length === 1, 'cant find exchange')
+  return exchange[0]
+}
+
+export function useLpBalance(exchange: IExchange): TokenAmount {
+  const { address, connected } = useWeb3Context()
+  const balance = useTokenBalance(address, exchange.lpToken)
+  return connected ? balance ?? new TokenAmount(exchange.lpToken, 0) : new TokenAmount(exchange.lpToken, 0)
+}
+
+export function useAllLpBalances(): TokenAmount[] {
+  const { address, connected } = useWeb3Context()
+
+  const balances = useTokenBalances(
+    address,
+    StablePools[CHAIN].map(({ pool }) => pool.lpToken)
+  )
+
+  return StablePools[CHAIN].map((el) =>
+    connected
+      ? balances[el.pool.lpToken.address] ?? new TokenAmount(el.pool.lpToken, 0)
+      : new TokenAmount(el.pool.lpToken, 0)
+  )
 }

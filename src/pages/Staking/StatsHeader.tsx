@@ -1,8 +1,11 @@
 import Column from 'components/Column'
 import Loader from 'components/Loader'
 import { useExternalStakingRewards } from 'hooks/useExternalStakingRewards'
+import { useValueOfAllLP } from 'hooks/useStablePools'
+import JSBI from 'jsbi'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
+import { UserGaugeInfo } from 'state/gauges/hooks'
 import { StakingInfo, UserStakingInfo } from 'state/staking/hooks'
 import { useIsDarkMode } from 'state/user/hooks'
 import styled from 'styled-components'
@@ -65,10 +68,11 @@ const StatSpan = styled.span`
 type PropType = {
   stakingInfo: StakingInfo
   userStakingInfo: UserStakingInfo
+  userGauges: (UserGaugeInfo | null)[]
 }
-function StatsHeader({ stakingInfo, userStakingInfo }: PropType) {
+function StatsHeader({ stakingInfo, userStakingInfo, userGauges }: PropType) {
   // TODO: fix price of deposits
-  // const priceOfDeposits = undefined
+  const priceOfDeposits = useValueOfAllLP(userGauges.map((el) => el?.balance ?? JSBI.BigInt(0)))
   const { avgApr } = useExternalStakingRewards()
   const isDarkMode = useIsDarkMode()
 
@@ -80,8 +84,7 @@ function StatsHeader({ stakingInfo, userStakingInfo }: PropType) {
     },
     {
       label: 'Your total deposits',
-      // value: priceOfDeposits ? '$' + priceOfDeposits?.toSignificant(4, { groupSeparator: ',' }) : undefined,
-      value: 'FIX',
+      value: '$' + priceOfDeposits?.toSignificant(4, { groupSeparator: ',' }),
       img: isDarkMode ? cashDark : cashLight,
     },
     {

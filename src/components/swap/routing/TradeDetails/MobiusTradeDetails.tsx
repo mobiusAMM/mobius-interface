@@ -34,8 +34,8 @@ export const MobiusTradeDetails: React.FC<Props> = ({ trade, allowedSlippage }: 
         <RowFixed>
           <TYPE.black color={theme.text1} fontSize={14}>
             {isExactIn
-              ? `${slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4)} ${trade.output.currency.symbol}` ?? '-'
-              : `${slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4)} ${trade.input.currency.symbol}` ?? '-'}
+              ? `${slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4)} ${trade.output.token.symbol}` ?? '-'
+              : `${slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4)} ${trade.input.token.symbol}` ?? '-'}
           </TYPE.black>
         </RowFixed>
       </RowBetween>
@@ -57,7 +57,7 @@ export const MobiusTradeDetails: React.FC<Props> = ({ trade, allowedSlippage }: 
           <QuestionHelper text="A portion of each trade goes to liquidity providers as a protocol incentive." />
         </RowFixed>
         <TYPE.black fontSize={14} color={theme.text1}>
-          {realizedLPFee ? `${realizedLPFee.toSignificant(4)} ${trade.input.currency.symbol}` : '-'}
+          {realizedLPFee ? `${realizedLPFee.toSignificant(4)} ${trade.input.token.symbol}` : '-'}
         </TYPE.black>
       </RowBetween>
     </>

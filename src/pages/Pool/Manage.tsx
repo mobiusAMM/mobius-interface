@@ -4,7 +4,7 @@ import Loader from 'components/Loader'
 import QuestionHelper from 'components/QuestionHelper'
 import { useMobi } from 'hooks/Tokens'
 import JSBI from 'jsbi'
-import { Fraction, JSBI, TokenAmount } from 'lib/token-utils'
+import { Fraction, TokenAmount } from 'lib/token-utils'
 import React, { useCallback, useState } from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
 import { useExternalRewards, useStablePoolInfoByName } from 'state/stablePools/hooks'
@@ -24,7 +24,7 @@ import { useWeb3Context } from '../../hooks'
 import { useColor } from '../../hooks/useColor'
 import usePrevious from '../../hooks/usePrevious'
 import { useTokenBalance } from '../../state/wallet/hooks'
-import { ExternalLinkIcon, TYPE } from '../../theme'
+import { TYPE } from '../../theme'
 
 const PageWrapper = styled(AutoColumn)`
   margin-top: 3rem;
@@ -476,9 +476,3 @@ export default function Manage({
     </PageWrapper>
   )
 }
-
-const PairLinkIcon = styled(ExternalLinkIcon)`
-  svg {
-    stroke: ${(props) => props.theme.primary1};
-  }
-`

@@ -94,7 +94,7 @@ export default function Staking() {
 
   return (
     <OuterContainer>
-      <StatsHeader stakingInfo={stakingInfo} userStakingInfo={userStakingInfo} />
+      <StatsHeader stakingInfo={stakingInfo} userStakingInfo={userStakingInfo} userGauges={userGauges} />
       <div style={{ alignItems: 'center', marginBottom: '1rem', marginTop: '1rem', display: 'flex', width: '100%' }}>
         <HeaderLinks>
           <Sel onClick={() => setView(View.Lock)} selected={view === View.Lock}>

@@ -4,7 +4,6 @@ import { darken } from 'polished'
 import React from 'react'
 import { VestType } from 'state/claim/reducer'
 import styled from 'styled-components'
-import { humanFriendlyWei } from 'utils/eth'
 
 import { CHAIN } from '../../constants'
 import { useVestingContract } from '../../hooks/useContract'
@@ -109,11 +108,11 @@ export const ClaimCard: React.FC<Props> = ({ info, type }: Props) => {
   const addTransaction = useTransactionAdder()
 
   async function onClaim() {
-    if (claimContract && unclaimedAmount) {
+    if (claimContract) {
       await claimContract?.['claim()']()
         .then((response: TransactionResponse) => {
           addTransaction(response, {
-            summary: `Claim ${humanFriendlyWei(unclaimedAmount.toString())} MOBI`,
+            summary: `Claim ${unclaimedAmount.toSignificant(3)} MOBI`,
           })
           // setHash(response.hash)
         })
@@ -165,21 +164,21 @@ export const ClaimCard: React.FC<Props> = ({ info, type }: Props) => {
               <RowBetween>
                 <TYPE.black>Total allocated amount</TYPE.black>
                 <RowFixed>
-                  <TYPE.black>{allocatedAmount ? humanFriendlyWei(allocatedAmount.toString()) : '--'}</TYPE.black>
+                  <TYPE.black>{allocatedAmount.toSignificant(3)}</TYPE.black>
                   <div style={{ width: '26px' }} />
                 </RowFixed>
               </RowBetween>
               <RowBetween>
                 <TYPE.black>Claimed amount</TYPE.black>
                 <RowFixed>
-                  <TYPE.black>{claimedAmount ? humanFriendlyWei(claimedAmount.toString()) : '--'}</TYPE.black>
+                  <TYPE.black>{claimedAmount.toSignificant(3)}</TYPE.black>
                   <div style={{ width: '26px' }} />
                 </RowFixed>
               </RowBetween>
               <RowBetween>
                 <TYPE.black>Unclaimed vested amount</TYPE.black>
                 <RowFixed>
-                  <TYPE.black>{unclaimedAmount ? humanFriendlyWei(unclaimedAmount.toString()) : '--'}</TYPE.black>
+                  <TYPE.black>{unclaimedAmount.toSignificant(3)}</TYPE.black>
                   <div style={{ width: '26px' }} />
                 </RowFixed>
               </RowBetween>
