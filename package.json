@@ -150,7 +150,7 @@
     "react-date-range": "^1.4.0",
     "react-hamburger-menu": "^1.2.1",
     "react-responsive": "^9.0.0-beta.4",
-    "react-router": "^5.2.0",
+    "react-router": "^6.2.2",
     "react-vis": "^1.11.7",
     "rebass": "^4.0.7",
     "redux": "^4.1.0",
