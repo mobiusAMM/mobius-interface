@@ -22,10 +22,14 @@ export function UpdatePools() {
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()
   const stablePools = StablePools[CHAIN]
+
   const lpTokenAddress = stablePools.map((p) => p.pool.lpToken.address)
   const poolAddress = stablePools.map((p) => p.pool.address)
+
   const lpTotalSupply = useMultipleContractSingleData(lpTokenAddress, lpInterface, 'totalSupply')
   const balances = useMultipleContractSingleData(poolAddress, SwapInterface, 'getBalances')
+
+  const virtualPrices = useMultipleContractSingleData(poolAddress, SwapInterface, 'getVirtualPrice')
 
   const query = gql`
     {
@@ -46,7 +50,6 @@ export function UpdatePools() {
   const { data, loading } = useQuery(query)
 
   useEffect(() => {
-    if (loading) return
     // const inSubgraph: Set<string> =
     //   data?.swaps.reduce((accum: Set<string>, cur: any) => new Set([...accum, cur.id]), new Set()) ?? new Set()
     try {
@@ -75,6 +78,6 @@ export function UpdatePools() {
     } catch (error) {
       console.error(error)
     }
-  }, [loading, data?.swaps, dispatch, stablePools, lpTotalSupply, blockNumber, balances])
+  }, [dispatch, stablePools, lpTotalSupply, blockNumber, balances])
   return null
 }

@@ -113,7 +113,7 @@ export function useMobiPrice(): Fraction {
 export function priceStringToFraction(priceString: string | undefined): Fraction | undefined {
   if (!priceString) return undefined
   const price = parseFloat(priceString) * 10 ** 4
-  const asFraction = new Fraction(price.toFixed(0), '10000')
+  const asFraction = new Fraction(price.toFixed(0), 10000)
   return asFraction
 }
 

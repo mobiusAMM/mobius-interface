@@ -82,6 +82,7 @@ export default function Pool() {
   const gauges = useAllGaugesInfo()
   const stakingInfo = useStakingInfo()
   const exchanges = usePools()
+  console.log(exchanges[0].lpTotalSupply.toString())
   const lpBalances = useAllLpBalances()
   const volumes = usePoolsVolume()
 

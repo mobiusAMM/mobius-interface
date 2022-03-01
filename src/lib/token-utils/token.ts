@@ -13,7 +13,7 @@ export class Token implements UToken<Token> {
   readonly network: Network
 
   constructor(readonly info: TokenInfo) {
-    this.network = chainIdToNetwork(info.chainId) ?? 'localnet'
+    this.network = chainIdToNetwork(info.chainId) ?? Mainnet
   }
 
   /**
@@ -95,9 +95,9 @@ export const tokensEqual = (a: Token | undefined, b: Token | undefined): boolean
 export type TokenMap = { [c in ChainId]: Token }
 
 export const CHAIN_ID_TO_NETWORK = {
-  [ChainId.MAINNET]: Mainnet,
-  [ChainId.ALFAJORES]: Alfajores,
-  [ChainId.BAKLAVA]: Baklava,
+  [ChainId.Mainnet]: Mainnet,
+  [ChainId.Alfajores]: Alfajores,
+  [ChainId.Baklava]: Baklava,
 }
 
 /**

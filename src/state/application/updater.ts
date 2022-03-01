@@ -31,10 +31,8 @@ const fetchPegPrices = async (dispatch: Dispatch<any>) => {
   const resp = await axios.get(
     `https://api.coingecko.com/api/v3/simple/price?ids=${ids.slice(0, -2)}&vs_currencies=usd`
   )
-
   const prices: TokenPrices = pegQueries.reduce((acc, cur) => {
-    console.log(resp.data[cur]?.['usd'])
-    return { ...acc, [cur]: resp.data[cur]?.['usd'] }
+    return { ...acc, [cur]: (resp.data[cur]?.['usd'] as number).toString() }
   }, {})
   dispatch(addPrices({ prices: prices }))
 }
@@ -55,7 +53,6 @@ export function PriceData(): null {
   const { data, loading, error } = useQuery(mobiPriceQuery, { client: ubeswapClient })
   useEffect(() => {
     if (!loading && !error && data) {
-      console.log('update prices')
       fetchPegPrices(dispatch)
       dispatch(addPrice({ token: mobi.address.toLowerCase(), price: data.token.derivedCUSD }))
     }

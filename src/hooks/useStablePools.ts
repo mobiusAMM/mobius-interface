@@ -28,11 +28,13 @@ export function useValueOfAllPools(): Fraction {
   const prices = useTokenPrices()
   const pools = usePools()
   return StablePools[CHAIN].reduce((acc, cur, i) => {
-    const price = cur.peg.priceQuery ? priceStringToFraction(prices[cur.peg.priceQuery]) : new Fraction(0)
+    const price = cur.peg.priceQuery ? priceStringToFraction(prices[cur.peg.priceQuery]) : new Fraction(1)
     if (!price) return acc
     const virtualPrice = calculateVirtualPrice(pools[i])
 
-    return virtualPrice ? acc.add(price.multiply(virtualPrice).multiply(pools[i].lpTotalSupply)) : acc
+    return virtualPrice
+      ? acc.add(price.multiply(virtualPrice).multiply(pools[i].lpTotalSupply))
+      : acc.add(price).multiply(pools[i].lpTotalSupply)
   }, new Fraction(0))
 }
 
