@@ -1,5 +1,5 @@
 import type { BigintIsh, NumberFormat, Percent } from '@ubeswap/token-math'
-import { TokenAmount as UTokenAmount, validateU64 } from '@ubeswap/token-math'
+import { TokenAmount as UTokenAmount } from '@ubeswap/token-math'
 
 import type { Token } from './token'
 
@@ -18,7 +18,6 @@ export class TokenAmount extends UTokenAmount<Token> {
   // amount _must_ be raw, i.e. in the native representation
   constructor(token: Token, amount: BigintIsh) {
     super(token, amount)
-    validateU64(this.raw)
   }
 
   /**
