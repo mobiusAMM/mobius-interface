@@ -55,7 +55,7 @@ export enum Coins {
   Eur,
 }
 
-enum WarningType {
+export enum WarningType {
   POOF = 'poof',
 }
 
