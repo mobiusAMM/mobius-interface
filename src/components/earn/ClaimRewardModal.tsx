@@ -3,7 +3,6 @@ import { useMobi } from 'hooks/Tokens'
 import { TokenAmount } from 'lib/token-utils'
 import React, { useEffect, useState } from 'react'
 import { useBlockNumber } from 'state/application/hooks'
-import { StablePoolInfo } from 'state/stablePools/hooks'
 import styled from 'styled-components'
 
 import { useWeb3Context } from '../../hooks'

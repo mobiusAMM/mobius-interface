@@ -5,7 +5,7 @@ import { calculateEstimatedMintAmount, calculateVirtualPrice } from 'lib/calcula
 import { Fraction, TokenAmount } from 'lib/token-utils'
 import { Meta } from 'pages/Pool'
 import React, { useMemo, useState } from 'react'
-import { StakingInfo, UserStakingInfo } from 'state/staking/hooks'
+import { tryParseAmount } from 'state/swap/hooks'
 import styled from 'styled-components'
 
 import { useWeb3Context } from '../../hooks'
@@ -38,8 +38,6 @@ interface DepositModalProps {
   isOpen: boolean
   onDismiss: () => void
   meta: Meta
-  stakingInfo: StakingInfo
-  userStakingInfo: UserStakingInfo
 }
 
 export default function DepositModal({ isOpen, onDismiss, meta }: DepositModalProps) {
@@ -58,10 +56,9 @@ export default function DepositModal({ isOpen, onDismiss, meta }: DepositModalPr
   const [useEqualAmount, setUseEqualAmount] = useState<boolean>(forceEqualDeposit)
   const deadline = useTransactionDeadline()
 
-  // TODO: i think we need to parse the amount
   const inputTokens = useMemo(() => {
-    return input.map((el, i) =>
-      el ? new TokenAmount(meta.display.pool.tokens[i], el) : new TokenAmount(meta.display.pool.tokens[i], 0)
+    return input.map(
+      (el, i) => tryParseAmount(el, meta.display.pool.tokens[i]) ?? new TokenAmount(meta.display.pool.tokens[i], 0)
     )
   }, [input, meta.display.pool.tokens])
 

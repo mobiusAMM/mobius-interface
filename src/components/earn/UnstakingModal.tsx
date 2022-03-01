@@ -2,7 +2,6 @@ import { TransactionResponse } from '@ethersproject/providers'
 import { useMobi } from 'hooks/Tokens'
 import { TokenAmount } from 'lib/token-utils'
 import React, { useState } from 'react'
-import { StablePoolInfo } from 'state/stablePools/hooks'
 import styled from 'styled-components'
 
 import { useWeb3Context } from '../../hooks'

@@ -1,7 +1,9 @@
 import { TransactionResponse } from '@ethersproject/providers'
 import CurrencyLogo from 'components/CurrencyLogo'
 import JSBI from 'jsbi'
+import { calculateEstimatedWithdrawAmount } from 'lib/calculator'
 import { Token, TokenAmount } from 'lib/token-utils'
+import { Meta } from 'pages/Pool'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 
@@ -18,35 +20,33 @@ import { Input as NumericalInput } from '../NumericalInput'
 interface WithdrawModalProps {
   setAttempting: (attempting: boolean) => void
   setHash: (hash: string | undefined) => void
-  poolInfo: StablePoolInfo
+  meta: Meta
 }
 
-export default function WithdrawLP({ poolInfo, setHash, setAttempting }: WithdrawModalProps) {
+export default function WithdrawLP({ meta, setHash, setAttempting }: WithdrawModalProps) {
   const { connected } = useWeb3Context()
 
-  // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
-  const { tokens, lpToken } = poolInfo
-  const lpBalance = poolInfo.amountDeposited?.subtract(poolInfo.stakedAmount)
   const [approving, setApproving] = useState(false)
   const [input, setInput] = useState<string>('')
-  const selectedAmount = tryParseAmount(input, lpToken) || new TokenAmount(lpToken, '0')
-  // const [selectedAmount, setSelectedAmount] = useState<TokenAmount>(new TokenAmount(lpToken, JSBI.BigInt('0')))
+  const selectedAmount =
+    tryParseAmount(input, meta.display.pool.lpToken) || new TokenAmount(meta.display.pool.lpToken, 0)
 
   const deadline = useTransactionDeadline()
 
-  const expectedTokens = useExpectedTokens(poolInfo, selectedAmount)
-  const [approvalStatus, approvalCallback] = useApproveCallback(selectedAmount, poolInfo.poolAddress)
-  const stakingContract = useStableSwapContract(poolInfo.poolAddress)
+  const expectedAmount = calculateEstimatedWithdrawAmount({ poolTokenAmount: selectedAmount, ...meta.exchangeInfo })
+  const [approvalStatus, approvalCallback] = useApproveCallback(selectedAmount, meta.display.pool.address)
+  const stakingContract = useStableSwapContract(meta.display.pool.address)
+
   async function onWithdraw() {
-    if (stakingContract && poolInfo?.stakedAmount) {
+    if (stakingContract && deadline) {
       setAttempting(true)
-      const expected = expectedTokens.map((amount) => BigInt(amount.raw.toString()))
+      const expected = expectedAmount.withdrawAmounts.map((amount) => amount.raw.toString())
       await stakingContract
         .removeLiquidity(selectedAmount.raw.toString(), expected, deadline)
         .then((response: TransactionResponse) => {
           addTransaction(response, {
-            summary: `Withdraw Liquidity from ${poolInfo.name}`,
+            summary: `Withdraw Liquidity from ${meta.display.name}`,
           })
           setHash(response.hash)
         })
@@ -61,40 +61,44 @@ export default function WithdrawLP({ poolInfo, setHash, setAttempting }: Withdra
   if (!connected) {
     error = 'Connect Wallet'
   }
-  if (!poolInfo?.stakedAmount) {
-    error = error ?? 'Enter an amount'
-  }
 
-  if (selectedAmount.greaterThan(lpBalance || JSBI.BigInt('0'))) {
+  if (selectedAmount.greaterThan(meta.lpBalance)) {
     error = error ?? 'Insufficient Funds'
   }
 
-  const decimalPlacesForBalance = lpBalance?.greaterThan('1') ? 2 : lpBalance?.greaterThan('0') ? 10 : 2
+  const decimalPlacesForBalance = meta.lpBalance?.greaterThan('1') ? 2 : meta.lpBalance?.greaterThan('0') ? 10 : 2
 
   return (
     <>
-      {poolInfo.stakedAmount.greaterThan(JSBI.BigInt(0)) && (
+      {meta.userGauge && JSBI.greaterThan(meta.userGauge.balance, JSBI.BigInt(0)) && (
         <TYPE.mediumHeader>
-          {poolInfo.stakedAmount.toFixed(decimalPlacesForBalance)} MobLP currently deposited in the farm
+          {new TokenAmount(meta.display.pool.lpToken, meta.userGauge.balance).toFixed(decimalPlacesForBalance)} MobLP
+          currently deposited in the farm
         </TYPE.mediumHeader>
       )}
-      <CurrencyRow val={input} token={lpToken} balance={lpBalance} setTokenAmount={setInput} />
+      <CurrencyRow
+        val={input}
+        token={meta.display.pool.lpToken}
+        balance={meta.lpBalance}
+        setTokenAmount={setInput}
+        readOnly={false}
+      />
       {selectedAmount.greaterThan(JSBI.BigInt('0')) && (
         <div>
           <TYPE.mediumHeader style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
             You will receive
           </TYPE.mediumHeader>
-          {expectedTokens.map((tokenAmount, i) => (
+          {expectedAmount.withdrawAmounts.map((tokenAmount, i) => (
             <>
               <CurrencyRow
                 key={'expected-' + tokenAmount.token.address}
-                token={tokenAmount.currency}
+                token={tokenAmount.token}
                 val={tokenAmount.toExact()}
-                setTokenAmount={(val: string) => null}
+                setTokenAmount={() => null}
                 readOnly={true}
-                balance={lpBalance}
+                balance={meta.lpBalance}
               />
-              {i !== expectedTokens.length - 1 && (
+              {i !== expectedAmount.withdrawAmounts.length - 1 && (
                 <TYPE.largeHeader style={{ marginTop: '1rem', width: '100%', textAlign: 'center' }}>+</TYPE.largeHeader>
               )}
             </>
@@ -115,7 +119,7 @@ export default function WithdrawLP({ poolInfo, setHash, setAttempting }: Withdra
         </ButtonPrimary>
       )}
       {approvalStatus === ApprovalState.APPROVED && (
-        <ButtonError disabled={!!error} error={!!error && !!poolInfo?.stakedAmount} onClick={onWithdraw}>
+        <ButtonError disabled={!!error} error={!!error} onClick={onWithdraw}>
           {error ?? 'Withdraw'}
         </ButtonError>
       )}
@@ -131,15 +135,11 @@ type CurrencyRowProps = {
   balance?: TokenAmount
 }
 
-const InputRowLeft = styled.div``
-
-const TokenInfo = styled.div``
-
-const InputRow = styled.div<{ selected: boolean }>`
+const InputRow = styled.div`
   ${({ theme }) => theme.flexRowNoWrap};
   align-items: center;
   justify-content: space-between;
-  padding: ${({ selected }) => (selected ? '0.75rem 0.5rem 0.75rem 1rem' : '0.75rem 0.75rem 0.75rem 1rem')};
+  padding: 0.75rem 0.75rem 0.75rem 1rem;
 `
 
 const InputDiv = styled.div`
@@ -151,22 +151,6 @@ const Aligner = styled.span`
   display: flex;
   align-items: center;
   justify-content: space-between;
-`
-
-const InputPanel = styled.div<{ hideInput?: boolean }>`
-  ${({ theme }) => theme.flexColumnNoWrap}
-  position: relative;
-  border-radius: ${({ hideInput }) => (hideInput ? '8px' : '20px')};
-  background-color: ${({ theme }) => theme.bg2};
-  z-index: 1;
-  width: 100%;
-`
-
-const Container = styled.div<{ hideInput: boolean }>`
-  border-radius: ${({ hideInput }) => (hideInput ? '8px' : '20px')};
-  border: 1px solid ${({ theme }) => theme.bg2};
-  background-color: ${({ theme }) => theme.bg1};
-  padding: 0.5rem;
 `
 
 const StyledTokenName = styled.span<{ active?: boolean }>`
@@ -181,7 +165,6 @@ const BalanceText = styled(TYPE.subHeader)`
 const CurrencyRow = ({ val, token, setTokenAmount, balance, readOnly }: CurrencyRowProps) => {
   const currency = token
   const tokenBalance = balance
-  const TEN = JSBI.BigInt('10')
 
   const mainRow = (
     <InputRow>
@@ -225,12 +208,4 @@ const CurrencyRow = ({ val, token, setTokenAmount, balance, readOnly }: Currency
       {mainRow}
     </div>
   )
-}
-
-const insertDecimal = (tokenAmount: TokenAmount) => {
-  const { token } = tokenAmount
-  const amount = tokenAmount.divide(
-    new TokenAmount(token, JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt(token.decimals)))
-  )
-  return amount.toFixed(2)
 }
