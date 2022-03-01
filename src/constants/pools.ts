@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js'
 import JSBI from 'jsbi'
 import { ChainId, Percent, Token, TokenAmount } from 'lib/token-utils'
 
@@ -162,6 +163,11 @@ function lp(chainId: ChainId, address: string, name: string): Token {
     symbol: 'MobLP',
     name,
   })
+}
+
+const weeklyEmissionToSeconds = (n: number) => {
+  const yearlyEmission = new BigNumber(`${n}e+18`).dividedBy(7 * 24 * 60 * 60)
+  return yearlyEmission.toFixed(0)
 }
 
 export const StablePools: { [K in ChainId]: DisplayPool[] } = {

@@ -1,10 +1,4 @@
-import BigNumber from 'bignumber.js'
-import { ChainId } from 'lib/token-utils'
-
-const weeklyEmissionToSeconds = (n: number) => {
-  const yearlyEmission = new BigNumber(`${n}e+18`).dividedBy(7 * 24 * 60 * 60)
-  return yearlyEmission.toFixed(0)
-}
+import type { ChainId } from 'lib/token-utils'
 
 // export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
 //   [ChainId.MAINNET]: [
