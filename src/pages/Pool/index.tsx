@@ -84,7 +84,6 @@ export default function Pool() {
   const exchanges = usePools()
   const lpBalances = useAllLpBalances()
   const volumes = usePoolsVolume()
-  console.log(volumes)
 
   const meta: Meta[] = StablePools[CHAIN].map((el, i) => {
     return {

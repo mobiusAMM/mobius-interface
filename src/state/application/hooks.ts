@@ -104,6 +104,13 @@ export function useTokenPrice(address: string | undefined): Fraction | undefined
   return priceStringToFraction(prices[address])
 }
 
+export function usePegPrice(query: string | null): Fraction | undefined {
+  const prices = useTokenPrices()
+  if (query === null) return new Fraction(1)
+
+  return priceStringToFraction(prices[query])
+}
+
 export function useMobiPrice(): Fraction {
   const mobi = useMobi()
   const prices = useTokenPrices()

@@ -56,11 +56,9 @@ export function UpdatePools() {
     }
   `
   const { data, loading, error } = useQuery(query)
-
   useEffect(() => {
     // const inSubgraph: Set<string> =
     //   data?.swaps.reduce((accum: Set<string>, cur: any) => new Set([...accum, cur.id]), new Set()) ?? new Set()
-
     try {
       if (error) console.log(error)
       const volume = loading ? null : index(data.swaps)
@@ -99,6 +97,6 @@ export function UpdatePools() {
     } catch (error) {
       console.error(error)
     }
-  }, [dispatch, stablePools, lpTotalSupply, blockNumber, balances, error, loading, data.swaps])
+  }, [dispatch, stablePools, lpTotalSupply, blockNumber, balances, error, loading, data])
   return null
 }

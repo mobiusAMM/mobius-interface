@@ -12,7 +12,7 @@ import React, { useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { useHistory } from 'react-router'
 import { NavLink } from 'react-router-dom'
-import { useMobiPrice, useTokenPrice } from 'state/application/hooks'
+import { useMobiPrice, usePegPrice } from 'state/application/hooks'
 import { StakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 import { calcRates } from 'utils/calcRate'
@@ -165,7 +165,7 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) =>
     virtualPrice?.multiply(meta.lpBalance.asFraction.add(meta.userGauge?.balance ?? JSBI.BigInt(0))) ??
     new TokenAmount(meta.display.pool.lpToken, 0)
 
-  const pegPrice = useTokenPrice(meta.display.peg.priceQuery ?? undefined)
+  const pegPrice = usePegPrice(meta.display.peg.priceQuery)
 
   const totalDepositedValue = pegPrice ? totalDeposited.multiply(pegPrice) : new Fraction(0)
 
