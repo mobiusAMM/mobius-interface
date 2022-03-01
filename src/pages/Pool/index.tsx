@@ -60,8 +60,8 @@ const HeaderLinks = styled(Row)`
 `
 
 enum SpecialChain {
-  Other,
-  All,
+  Other = 'other',
+  All = 'all',
 }
 
 type SelectChain = SpecialChain | Chain
@@ -82,9 +82,9 @@ export default function Pool() {
   const gauges = useAllGaugesInfo()
   const stakingInfo = useStakingInfo()
   const exchanges = usePools()
-  console.log(exchanges[0].lpTotalSupply.toString())
   const lpBalances = useAllLpBalances()
   const volumes = usePoolsVolume()
+  console.log(volumes)
 
   const meta: Meta[] = StablePools[CHAIN].map((el, i) => {
     return {
@@ -120,7 +120,6 @@ export default function Pool() {
         selection === pool.display.chain ||
         (selection === SpecialChain.Other && OtherChains.has(pool.display.chain))
     )
-
   return (
     <PageWrapper gap="lg" justify="center" style={{ marginTop: isMobile ? '-1rem' : '3rem' }}>
       <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px', justifyContent: 'center', alignItems: 'center' }}>

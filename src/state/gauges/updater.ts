@@ -83,7 +83,7 @@ export function GaugeUpdater() {
           return display.gauge === null
             ? null
             : {
-                isKilled: isKilled[0].result?.[0] === false,
+                isKilled: isKilled[0].result?.[0] === true,
                 lastClaim: parseInt(lastClaims?.[i]?.result?.[0].toString() ?? '0'),
                 weight: JSBI.BigInt(weights[i].result?.[0] ?? 0),
                 futureWeight: JSBI.BigInt(futureWeights[i].result?.[0] ?? 0),

@@ -1,9 +1,10 @@
 import QuestionHelper from 'components/QuestionHelper'
 import { ChainLogo, Coins } from 'constants/pools'
 import { useWeb3Context } from 'hooks'
+import { useMobi } from 'hooks/Tokens'
 import { useValueOfExternalRewards } from 'hooks/useStablePools'
 import JSBI from 'jsbi'
-import { calculateEstimatedWithdrawAmount, calculateVirtualPrice } from 'lib/calculator'
+import { calculateVirtualPrice } from 'lib/calculator'
 import { Fraction, TokenAmount } from 'lib/token-utils'
 import { Meta } from 'pages/Pool'
 import { darken } from 'polished'
@@ -152,6 +153,7 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) =>
   const [openWithdraw, setOpenWithdraw] = useState(false)
   const [openManage, setOpenManage] = useState(false)
 
+  const mobi = useMobi()
   const mobiPrice = useMobiPrice()
 
   const virtualPrice = calculateVirtualPrice(meta.exchangeInfo)
@@ -167,7 +169,7 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) =>
 
   const totalDepositedValue = pegPrice ? totalDeposited.multiply(pegPrice) : new Fraction(0)
 
-  const mobiRate = meta.gauge?.weight.multiply(stakingInfo.mobiRate).asFraction ?? new Fraction(0)
+  const mobiRate = new TokenAmount(mobi, meta.gauge?.weight.multiply(stakingInfo.mobiRate).quotient ?? 0)
   const mobiRateValue = mobiPrice.multiply(mobiRate).multiply(BIG_INT_SECONDS_IN_YEAR)
 
   // const totalStakedAmount = totalValueDeposited
@@ -212,7 +214,7 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) =>
   // } catch (e) {
   //   console.error('Weekly apy overflow', e)
   // }
-  const balances = calculateEstimatedWithdrawAmount({ poolTokenAmount: meta.lpBalance, ...meta.exchangeInfo })
+  const balances = meta.exchangeInfo.reserves
 
   // let userBalances: TokenAmount[] = []
   // if (totalDeposited.greaterThan('0')) {
@@ -232,9 +234,15 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) =>
 
   const totalDisplay = (amount: TokenAmount | Fraction): string => {
     const decimals = meta.display.peg.decimals
-    if (amount.lessThan(10 ** (2 - decimals))) return display(amount.toFixed(decimals + 1))
-    else if (amount.lessThan(10 ** 6)) return display(amount.toFixed(decimals))
-    else return display(amount.divide(10 ** 6).toFixed(2))
+    if (amount.lessThan(10 ** (2 - decimals))) return display(amount.toFixed(decimals + 1, { groupSeparator: ',' }))
+    else if (amount.lessThan(10 ** 6) || openManage) return display(amount.toFixed(decimals, { groupSeparator: ',' }))
+    else
+      return display(
+        amount
+          .divide(10 ** 6)
+          .toFixed(2, { groupSeparator: ',' })
+          .concat('M')
+      )
   }
 
   return (
@@ -292,7 +300,7 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) =>
                 <TYPE.darkGray>Total deposited</TYPE.darkGray>
                 <RowFixed>
                   <QuestionHelper
-                    text={balances.withdrawAmountsBeforeFees
+                    text={balances
                       .map(
                         (balance) =>
                           `${balance?.toFixed(meta.display.peg.decimals, { groupSeparator: ',' })} ${
@@ -309,7 +317,9 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) =>
                 <TYPE.darkGray>Weekly volume</TYPE.darkGray>
                 <RowFixed>
                   <TYPE.black fontWeight={800}>
-                    {meta.volume.volume ? totalDisplay(new Fraction(meta.volume.volume?.week)) : 'Subgraph Syncing...'}
+                    {meta.volume.volume
+                      ? totalDisplay(new Fraction(Math.floor(meta.volume.volume?.week)))
+                      : 'Subgraph Syncing...'}
                   </TYPE.black>
                 </RowFixed>
               </RowBetween>
@@ -321,7 +331,7 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) =>
                     <RowFixed>
                       <TYPE.black fontWeight={800}>
                         {meta.volume.volume
-                          ? totalDisplay(new Fraction(meta.volume.volume?.total))
+                          ? totalDisplay(new Fraction(Math.floor(meta.volume.volume?.total)))
                           : 'Subgraph Syncing...'}
                       </TYPE.black>
                     </RowFixed>

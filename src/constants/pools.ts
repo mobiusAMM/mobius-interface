@@ -177,12 +177,12 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
       chain: Chain.Terra,
       peg: Dollar,
       pool: {
-        address: '0x9F4AdBD0af281C69a582eB2E6fa2A594D4204CAe',
-        lpToken: lp(ChainId.Mainnet, '0x9438e7281D7E3e99A9dD21e0EAd9c6a254e17ab2', 'Mobius cUSD/aUST LP'),
+        address: '0x9F4AdBD0af281C69a582eB2E6fa2A594D4204CAe'.toLowerCase(),
+        lpToken: lp(ChainId.Mainnet, '0x9438e7281D7E3e99A9dD21e0EAd9c6a254e17ab2'.toLowerCase(), 'Mobius cUSD/aUST LP'),
         tokens: [CUSD[ChainId.Mainnet], UST[ChainId.Mainnet]],
       },
       gauge: {
-        address: '0x107F94409746E8c8E6eFF139A100D17D9ca7FdfE',
+        address: '0x107F94409746E8c8E6eFF139A100D17D9ca7FdfE'.toLowerCase(),
         additionalRewards: [new TokenAmount(CELO[CHAIN], '12000000000000000')],
       },
     },
@@ -191,12 +191,12 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
       chain: Chain.Ethereum,
       peg: Ether,
       pool: {
-        address: '0x74ef28D635c6C5800DD3Cd62d4c4f8752DaACB09',
-        lpToken: lp(ChainId.Mainnet, '0x4fF08e2a4E7114af4B575AeF9250144f95790982', 'Mobius cETH/wETH LP'),
+        address: '0x74ef28D635c6C5800DD3Cd62d4c4f8752DaACB09'.toLowerCase(),
+        lpToken: lp(ChainId.Mainnet, '0x4fF08e2a4E7114af4B575AeF9250144f95790982'.toLowerCase(), 'Mobius cETH/wETH LP'),
         tokens: [CETH[ChainId.Mainnet], WETH[ChainId.Mainnet]],
       },
       gauge: {
-        address: '0x487c30CB18AA9Ced435911E2B414e0e85D7E52bB',
+        address: '0x487c30CB18AA9Ced435911E2B414e0e85D7E52bB'.toLowerCase(),
         additionalRewards: [],
       },
     },

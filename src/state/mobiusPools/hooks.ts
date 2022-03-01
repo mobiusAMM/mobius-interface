@@ -42,7 +42,7 @@ export function useCurrentPoolVolume(exchangeAddress: string): Volume | null {
 }
 
 export function usePoolsVolume(): readonly Volume[] {
-  return useSelector<AppState, Volume[]>((state) => state.pools.pools)
+  return useSelector<AppState, Volume[]>((state) => state.pools.pools.map((p) => p as Volume))
 }
 
 export function poolInfoToExchange(info: IExchangeInfo): IExchange {

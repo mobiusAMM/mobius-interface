@@ -18,6 +18,16 @@ import { updatePools } from './actions'
 const lpInterface = new Interface(LP.abi)
 const SwapInterface = new Interface(SWAP.abi)
 
+function index(swaps: any[]): { [address: string]: any } {
+  return swaps.reduce((acc: { [address: string]: any }, cur: any) => {
+    return { ...acc, [cur.id.toLowerCase()]: cur }
+  }, {})
+
+  // pegQueries.reduce((acc, cur) => {
+  //   return { ...acc, [cur]: (resp.data[cur]?.['usd'] as number).toString() }
+  // }, {})
+}
+
 export function UpdatePools() {
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()
@@ -28,8 +38,6 @@ export function UpdatePools() {
 
   const lpTotalSupply = useMultipleContractSingleData(lpTokenAddress, lpInterface, 'totalSupply')
   const balances = useMultipleContractSingleData(poolAddress, SwapInterface, 'getBalances')
-
-  const virtualPrices = useMultipleContractSingleData(poolAddress, SwapInterface, 'getVirtualPrice')
 
   const query = gql`
     {
@@ -47,19 +55,32 @@ export function UpdatePools() {
       }
     }
   `
-  const { data, loading } = useQuery(query)
+  const { data, loading, error } = useQuery(query)
 
   useEffect(() => {
     // const inSubgraph: Set<string> =
     //   data?.swaps.reduce((accum: Set<string>, cur: any) => new Set([...accum, cur.id]), new Set()) ?? new Set()
+
     try {
+      if (error) console.log(error)
+      const volume = loading ? null : index(data.swaps)
       dispatch(
         updatePools({
           pools: stablePools.map((displayPool, i) => {
             return {
               ...displayPool.pool,
               fees: RECOMMENDED_FEES,
-              volume: null,
+              volume:
+                volume && volume[displayPool.pool.address]
+                  ? {
+                      total: volume[displayPool.pool.address].dailyVolumes.reduce(
+                        (accum: number, el: any) => accum + parseFloat(el.volume),
+                        0
+                      ),
+                      day: parseFloat(volume[displayPool.pool.address].dailyVolumes[0]?.volume ?? '0'),
+                      week: parseFloat(volume[displayPool.pool.address].weeklyVolumes[0]?.volume ?? '0'),
+                    }
+                  : null,
               ampFactor: RECOMMENDED_AMP,
               lpTotalSupply: new TokenAmount(
                 displayPool.pool.lpToken,
@@ -78,6 +99,6 @@ export function UpdatePools() {
     } catch (error) {
       console.error(error)
     }
-  }, [dispatch, stablePools, lpTotalSupply, blockNumber, balances])
+  }, [dispatch, stablePools, lpTotalSupply, blockNumber, balances, error, loading, data.swaps])
   return null
 }
