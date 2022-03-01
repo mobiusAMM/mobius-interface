@@ -25,9 +25,9 @@ export const StyledClose = styled(X)`
 `
 
 const appURL: { [id in ChainId]: string } = {
-  [ChainId.MAINNET]: 'mobius.money',
-  [ChainId.ALFAJORES]: 'app-alfajores.mobius.money',
-  [ChainId.BAKLAVA]: 'app-baklava.mobius.money',
+  [ChainId.Mainnet]: 'mobius.money',
+  [ChainId.Alfajores]: 'app-alfajores.mobius.money',
+  [ChainId.Baklava]: 'app-baklava.mobius.money',
 }
 
 export default function URLWarning() {
