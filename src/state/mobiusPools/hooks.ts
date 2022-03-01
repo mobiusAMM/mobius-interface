@@ -71,7 +71,7 @@ export function useAllLpBalances(): TokenAmount[] {
   const { address, connected } = useWeb3Context()
 
   const balances = useTokenBalances(
-    address,
+    connected ? address : undefined,
     StablePools[CHAIN].map(({ pool }) => pool.lpToken)
   )
 

@@ -58,8 +58,8 @@ export default function WithdrawModal({ isOpen, onDismiss, meta }: WithdrawModal
             <TYPE.largeHeader>Withdraw from {meta.display.name}</TYPE.largeHeader>
             <CloseIcon onClick={wrappedOndismiss} />
           </RowBetween>
-          {JSBI.greaterThan(JSBI.subtract(poolInfo.amountDeposited?.raw, poolInfo.stakedAmount.raw), JSBI.BigInt(0)) ? (
-            <WithdrawLP poolInfo={poolInfo} setAttempting={setAttempting} setHash={setHash} />
+          {meta.userGauge && !JSBI.equal(JSBI.BigInt(0), meta.userGauge?.balance) ? (
+            <WithdrawLP meta={meta} setAttempting={setAttempting} setHash={setHash} />
           ) : (
             <ContentWrapper>
               <RowBetween>

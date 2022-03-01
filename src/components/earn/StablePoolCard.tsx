@@ -12,7 +12,7 @@ import { isMobile } from 'react-device-detect'
 import { useHistory } from 'react-router'
 import { NavLink } from 'react-router-dom'
 import { useMobiPrice, useTokenPrice } from 'state/application/hooks'
-import { StakingInfo, UserStakingInfo } from 'state/staking/hooks'
+import { StakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 import { calcRates } from 'utils/calcRate'
 
@@ -142,10 +142,9 @@ const StyledNavLink = styled(NavLink)<{ color: string }>`
 interface Props {
   meta: Meta
   stakingInfo: StakingInfo
-  userStakingInfo: UserStakingInfo
 }
 
-export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo, userStakingInfo }: Props) => {
+export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) => {
   const { connect, connected } = useWeb3Context()
   const history = useHistory()
 
@@ -214,10 +213,7 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo, userStaking
   //   console.error('Weekly apy overflow', e)
   // }
   const balances = calculateEstimatedWithdrawAmount({ poolTokenAmount: meta.lpBalance, ...meta.exchangeInfo })
-  const userBalances = calculateEstimatedWithdrawAmount({
-    poolTokenAmount: meta.exchangeInfo.lpTotalSupply,
-    ...meta.exchangeInfo,
-  })
+
   // let userBalances: TokenAmount[] = []
   // if (totalDeposited.greaterThan('0')) {
   //   userBalances = balances.map((amount) => {
@@ -243,10 +239,8 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo, userStaking
 
   return (
     <Wrapper showBackground={true} background={null} onClick={() => setOpenManage(!openManage)}>
-      {openDeposit && <DepositModal isOpen={openDeposit} onDismiss={() => setOpenDeposit(false)} poolInfo={poolInfo} />}
-      {openWithdraw && (
-        <WithdrawModal isOpen={openWithdraw} onDismiss={() => setOpenWithdraw(false)} poolInfo={poolInfo} />
-      )}
+      {openDeposit && <DepositModal isOpen={openDeposit} onDismiss={() => setOpenDeposit(false)} meta={meta} />}
+      {openWithdraw && <WithdrawModal isOpen={openWithdraw} onDismiss={() => setOpenWithdraw(false)} meta={meta} />}
       <TopSection>
         <RowFixed style={{ gap: '10px' }}>
           <TYPE.black fontWeight={600} fontSize={[18, 24]}>

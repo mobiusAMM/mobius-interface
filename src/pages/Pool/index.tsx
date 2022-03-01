@@ -9,7 +9,7 @@ import { isMobile } from 'react-device-detect'
 import { useMobiPrice } from 'state/application/hooks'
 import { GaugeInfo, useAllGaugesInfo, useAllUserGaugesInfo, UserGaugeInfo } from 'state/gauges/hooks'
 import { useAllLpBalances, usePools, usePoolsVolume } from 'state/mobiusPools/hooks'
-import { useStakingInfo, useUserStakingInfo } from 'state/staking/hooks'
+import { useStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 
 import { AutoColumn } from '../../components/Column'
@@ -81,7 +81,6 @@ export default function Pool() {
   const userGauges = useAllUserGaugesInfo()
   const gauges = useAllGaugesInfo()
   const stakingInfo = useStakingInfo()
-  const userStakingInfo = useUserStakingInfo()
   const exchanges = usePools()
   const lpBalances = useAllLpBalances()
   const volumes = usePoolsVolume()
@@ -171,7 +170,7 @@ export default function Pool() {
           {sortedFilterdPools
             .filter((pool) => !pool.gauge?.isKilled)
             .map((pool) => (
-              <StablePoolCard poolInfo={pool} key={pool.display.pool.address} />
+              <StablePoolCard meta={pool} stakingInfo={stakingInfo} key={pool.display.pool.address} />
             ))}
         </PoolSection>
         <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px', justifyContent: 'center' }}>
@@ -196,7 +195,7 @@ export default function Pool() {
           {showDeprecated &&
             sortedFilterdPools
               .filter((pool) => pool.gauge?.isKilled)
-              .map((pool) => <StablePoolCard poolInfo={pool} key={pool.display.pool.address} />)}
+              .map((pool) => <StablePoolCard meta={pool} stakingInfo={stakingInfo} key={pool.display.pool.address} />)}
         </PoolSection>
       </AutoColumn>
     </PageWrapper>
