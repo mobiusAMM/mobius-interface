@@ -3,7 +3,6 @@ import { ChainLogo, Coins } from 'constants/pools'
 import { useWeb3Context } from 'hooks'
 import { useMobi } from 'hooks/Tokens'
 import { useValueOfExternalRewards } from 'hooks/useStablePools'
-import JSBI from 'jsbi'
 import { calculateVirtualPrice } from 'lib/calculator'
 import { Fraction, TokenAmount } from 'lib/token-utils'
 import { Meta } from 'pages/Pool'
@@ -161,9 +160,10 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) =>
   const totalDeposited =
     virtualPrice?.multiply(meta.exchangeInfo.lpTotalSupply) ?? new TokenAmount(meta.display.pool.lpToken, 0)
 
-  const userDeposited =
-    virtualPrice?.multiply(meta.lpBalance.asFraction.add(meta.userGauge?.balance ?? JSBI.BigInt(0))) ??
-    new TokenAmount(meta.display.pool.lpToken, 0)
+  const userDeposited = new TokenAmount(
+    meta.display.pool.lpToken,
+    virtualPrice?.multiply(meta.lpBalance.asFraction.add(meta.userGauge?.balance ?? 0)).quotient ?? 0
+  )
 
   const pegPrice = usePegPrice(meta.display.peg.priceQuery)
 
@@ -172,58 +172,13 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) =>
   const mobiRate = new TokenAmount(mobi, meta.gauge?.weight.multiply(stakingInfo.mobiRate).quotient ?? 0)
   const mobiRateValue = mobiPrice.multiply(mobiRate).multiply(BIG_INT_SECONDS_IN_YEAR)
 
-  // const totalStakedAmount = totalValueDeposited
-  //   ? totalValueDeposited.multiply(new Fraction(coinPrice?.numerator ?? '1', coinPrice?.denominator ?? '1'))
-  //   : new Fraction(JSBI.BigInt(0))
-  // const totalMobiRate = new TokenAmount(mobi, mobiRate ?? JSBI.BigInt('0'))
-
-  // const rewardPerYear = priceOfMobi.raw.multiply(totalMobiRate.multiply(BIG_INT_SECONDS_IN_YEAR))
   const externalRewardValue = useValueOfExternalRewards(meta.display.gauge).multiply(BIG_INT_SECONDS_IN_YEAR)
-  // let rewardPerYearExternal = new Fraction('0', '1')
-  // for (let i = 0; i < 8; i++) {
-  //   const rate = poolInfo.externalRewardRates?.[i] ?? totalMobiRate
-  //   const priceOfToken =
-  //     tokenPrices[rate.token.address.toLowerCase()] ?? tokenPrices['0x00be915b9dcf56a3cbe739d9b9c202ca692409ec']
-  //   if (poolInfo.externalRewardRates && i < poolInfo.externalRewardRates.length) {
-  //     rewardPerYearExternal = rewardPerYearExternal.add(
-  //       priceOfToken?.multiply(rate.multiply(BIG_INT_SECONDS_IN_YEAR)) ?? '0'
-  //     )
-  //   }
-  // }
 
   // TODO: investigate if this is the right method
   const { apr, dpr, apy } = calcRates(mobiRateValue.add(externalRewardValue), totalDepositedValue)
   const { apr: boostedApr } = calcRates(mobiRateValue.add(externalRewardValue), totalDepositedValue)
 
-  // const [boostedApyFraction, boostedApy, boostedDpy] =
-  //   mobiRate && totalStakedAmount && !totalStakedAmount.equalTo(JSBI.BigInt(0))
-  //     ? calcApy(
-  //         rewardPerYear.multiply(new Fraction(JSBI.BigInt(5), JSBI.BigInt(2))).add(rewardPerYearExternal),
-  //         totalStakedAmount
-  //       )
-  //     : [new Fraction('0', '1'), new Fraction('0', '1'), new Fraction('0', '1')]
-
-  // let weeklyAPY: React.ReactNode | undefined = <>🤯</>
-  // try {
-  //   weeklyAPY = apy
-  //     ? new Percent(
-  //         Math.floor(parseFloat(apy.divide('52').add('1').toFixed(10)) ** 52 * 1_000_000 - 1_000_000).toFixed(0),
-  //         '1000000'
-  //       ).toFixed(0, { groupSeparator: ',' })
-  //     : undefined
-  // } catch (e) {
-  //   console.error('Weekly apy overflow', e)
-  // }
   const balances = meta.exchangeInfo.reserves
-
-  // let userBalances: TokenAmount[] = []
-  // if (totalDeposited.greaterThan('0')) {
-  //   userBalances = balances.map((amount) => {
-  //     const fraction = new Fraction(userLP ? userLP.raw : JSBI.BigInt(0), totalDeposited.raw)
-  //     const ratio = fraction.multiply(amount.raw)
-  //     return new TokenAmount(amount.currency, JSBI.divide(ratio.numerator, ratio.denominator))
-  //   })
-  // }
 
   const poolColor = usePoolColor(meta.display)
 

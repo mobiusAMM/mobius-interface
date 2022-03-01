@@ -8,6 +8,7 @@ import React, { useMemo, useState } from 'react'
 import { tryParseAmount } from 'state/swap/hooks'
 import styled from 'styled-components'
 
+import { BIPS_BASE, weiScale } from '../../constants'
 import { useWeb3Context } from '../../hooks'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
 import { useStableSwapContract } from '../../hooks/useContract'
@@ -80,7 +81,7 @@ export default function DepositModal({ isOpen, onDismiss, meta }: DepositModalPr
     ? sumAmount.subtract(adjustedExpectedAmount)
     : adjustedExpectedAmount.subtract(sumAmount)
 
-  const perDiff = sumAmount.equalTo(0) ? new Fraction(0) : diff.divide(sumAmount)
+  const perDiff = sumAmount.equalTo(0) ? new Fraction(0) : diff.divide(sumAmount).multiply(BIPS_BASE)
 
   const decimalPlacesForLP = expectedAmounts.mintAmount.greaterThan(1)
     ? 2
@@ -88,7 +89,7 @@ export default function DepositModal({ isOpen, onDismiss, meta }: DepositModalPr
     ? 10
     : 2
 
-  const expectAmountWithSlippage = expectedAmounts.mintAmount.multiply(0.9)
+  const expectAmountWithSlippage = expectedAmounts.mintAmount.multiply(98).divide(100).multiply(weiScale)
   const approvals = [
     useApproveCallback(inputTokens[0], meta.display.pool.address),
     useApproveCallback(inputTokens[1], meta.display.pool.address),
@@ -109,9 +110,11 @@ export default function DepositModal({ isOpen, onDismiss, meta }: DepositModalPr
   async function onDeposit() {
     if (stakingContract && deadline) {
       setAttempting(true)
+      console.log(1)
       const tokenAmounts = inputTokens.map((el) => el.raw.toString())
+      console.log(2, tokenAmounts)
       await stakingContract
-        .addLiquidity(tokenAmounts, expectAmountWithSlippage.toString(), deadline, { gasLimit: 10000000 })
+        .addLiquidity(tokenAmounts, expectAmountWithSlippage.quotient.toString(), deadline, { gasLimit: 10000000 })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
             summary: `Deposit Liquidity into ${meta.display.name}`,
@@ -207,15 +210,15 @@ export default function DepositModal({ isOpen, onDismiss, meta }: DepositModalPr
                 <TYPE.mediumHeader
                   style={{
                     textAlign: 'center',
-                    color: perDiff.greaterThan(0.1) ? 'red' : 'black',
-                    fontSize: perDiff.greaterThan(0.1) ? 30 : 20,
-                    fontWeight: perDiff.greaterThan(0.1) ? 800 : 500,
+                    color: perDiff.greaterThan(500) ? 'red' : 'black',
+                    fontSize: perDiff.greaterThan(500) ? 30 : 20,
+                    fontWeight: perDiff.greaterThan(500) ? 800 : 500,
                   }}
                 >
                   Equivalent to: {display(adjustedExpectedAmount.toFixed(4))}
                 </TYPE.mediumHeader>
               )}
-              {toApprove.length > 0 && expectedAmounts.mintAmount.greaterThan('0') && (
+              {toApprove.includes(true) && expectedAmounts.mintAmount.greaterThan('0') && (
                 <div style={{ display: 'flex' }}>
                   {toApprove.map(
                     (el, i) =>
@@ -237,7 +240,7 @@ export default function DepositModal({ isOpen, onDismiss, meta }: DepositModalPr
                   )}
                 </div>
               )}
-              {toApprove.length === 0 && (
+              {!toApprove.includes(true) && expectedAmounts.mintAmount.greaterThan('0') && (
                 <ButtonError disabled={!!error} error={!!error} onClick={onDeposit}>
                   {error ?? 'Deposit'}
                 </ButtonError>
