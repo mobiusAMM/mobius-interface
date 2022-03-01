@@ -1,12 +1,12 @@
-import { ChainId } from 'lib/token-utils'
+import { ChainId, Token } from 'lib/token-utils'
 
 export type ConstantSumInfo = {
   address: string
-  tokens: [WrappedTokenInfo, WrappedTokenInfo]
+  tokens: [Token, Token]
 }
 
 export const ConstantSum: { [K in ChainId]: ConstantSumInfo[] } = {
-  [ChainId.MAINNET]: [
+  [ChainId.Mainnet]: [
     {
       // wETH v1/v2 pool
       address: '0xb1a0BDe36341065cA916c9f5619aCA82A43659A3',
@@ -149,6 +149,6 @@ export const ConstantSum: { [K in ChainId]: ConstantSumInfo[] } = {
     //   ],
     // },
   ],
-  [ChainId.ALFAJORES]: [],
-  [ChainId.BAKLAVA]: [],
+  [ChainId.Alfajores]: [],
+  [ChainId.Baklava]: [],
 }

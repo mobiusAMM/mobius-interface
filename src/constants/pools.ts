@@ -154,6 +154,16 @@ export const RECOMMENDED_FEES: Fees = {
 
 export const RECOMMENDED_AMP = JSBI.BigInt('100')
 
+function lp(chainId: ChainId, address: string, name: string): Token {
+  return new Token({
+    chainId,
+    address,
+    decimals: 18,
+    symbol: 'MobLP',
+    name,
+  })
+}
+
 export const StablePools: { [K in ChainId]: DisplayPool[] } = {
   [ChainId.Mainnet]: [
     {
@@ -162,13 +172,7 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
       peg: Dollar,
       pool: {
         address: '0x9F4AdBD0af281C69a582eB2E6fa2A594D4204CAe',
-        lpToken: new Token({
-          chainId: ChainId.Mainnet,
-          address: '0x9438e7281D7E3e99A9dD21e0EAd9c6a254e17ab2',
-          decimals: 18,
-          symbol: 'MobLP',
-          name: 'Mobius cUSD/aUST LP',
-        }),
+        lpToken: lp(ChainId.Mainnet, '0x9438e7281D7E3e99A9dD21e0EAd9c6a254e17ab2', 'Mobius cUSD/aUST LP'),
         tokens: [CUSD[ChainId.Mainnet], UST[ChainId.Mainnet]],
       },
       gauge: {
@@ -182,13 +186,7 @@ export const StablePools: { [K in ChainId]: DisplayPool[] } = {
       peg: Ether,
       pool: {
         address: '0x74ef28D635c6C5800DD3Cd62d4c4f8752DaACB09',
-        lpToken: new Token({
-          chainId: ChainId.Mainnet,
-          address: '0x4fF08e2a4E7114af4B575AeF9250144f95790982',
-          decimals: 18,
-          symbol: 'MobLP',
-          name: 'Mobius cUSD/aUST LP',
-        }),
+        lpToken: lp(ChainId.Mainnet, '0x4fF08e2a4E7114af4B575AeF9250144f95790982', 'Mobius cETH/wETH LP'),
         tokens: [CETH[ChainId.Mainnet], WETH[ChainId.Mainnet]],
       },
       gauge: {
