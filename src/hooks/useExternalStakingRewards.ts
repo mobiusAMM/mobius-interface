@@ -1,11 +1,10 @@
 import { ExternalRewardsToken } from 'constants/staking'
 import JSBI from 'jsbi'
 import { Percent, TokenAmount } from 'lib/token-utils'
-import { useTokenPrice } from 'state/application/hooks'
+import { useMobiPrice, useTokenPrice } from 'state/application/hooks'
 import { useStakingState, useStakingStateCombined } from 'state/staking/hooks'
 
 import { CHAIN } from '../constants'
-import { useMobi } from './Tokens'
 
 const SECONDS_IN_YEAR = JSBI.BigInt(365 * 24 * 60 * 60)
 const SECONDS_IN_WEEK = JSBI.BigInt(7 * 24 * 60 * 60)
@@ -22,9 +21,8 @@ export type ExternalUserRewardInfo = {
 
 export function useExternalStakingRewards(): ExternalRewardInfo {
   const stakingState = useStakingState()
-  const mobi = useMobi()
   const priceOfReward = useTokenPrice(ExternalRewardsToken[CHAIN].address)
-  const priceOfMobi = useTokenPrice(mobi?.address)
+  const priceOfMobi = useMobiPrice()
   const yearlyRate = JSBI.multiply(stakingState.externalRewardsRate, SECONDS_IN_YEAR)
 
   const avgApr =

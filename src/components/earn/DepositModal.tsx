@@ -69,13 +69,6 @@ export default function DepositModal({ isOpen, onDismiss, meta }: DepositModalPr
 
   const virtualPrice = calculateVirtualPrice(meta.exchangeInfo)
   const adjustedExpectedAmount = expectedAmounts.mintAmount.multiply(virtualPrice ?? 1)
-  // const valueOfLP = new TokenAmount(
-  //   poolInfo.lpToken,
-  //   JSBI.divide(
-  //     JSBI.multiply(expectedLPTokens.raw, poolInfo.virtualPrice),
-  //     JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt('18'))
-  //   )
-  // )
 
   const diff = sumAmount.greaterThan(adjustedExpectedAmount)
     ? sumAmount.subtract(adjustedExpectedAmount)
@@ -132,10 +125,6 @@ export default function DepositModal({ isOpen, onDismiss, meta }: DepositModalPr
   if (!connected) {
     error = 'Connect Wallet'
   }
-  // TODO: try this
-  // if (!poolInfo?.stakedAmount) {
-  //   error = error ?? 'Enter an amount'
-  // }
 
   const display = (str: string): string => {
     const peg = meta.display.peg
@@ -194,7 +183,6 @@ export default function DepositModal({ isOpen, onDismiss, meta }: DepositModalPr
                         setInput([...input.slice(0, i), val, ...input.slice(i + 1)])
                       }
                     }}
-                    // setUsingInsufficientFunds={setInsufficientFunds}
                   />
                   {i !== inputTokens.length - 1 && (
                     <TYPE.largeHeader style={{ marginTop: '1rem', width: '100%', textAlign: 'center' }}>

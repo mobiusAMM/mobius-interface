@@ -43,7 +43,7 @@ export function useValueOfAllLP(amounts: JSBI[]): Fraction {
   const pools = usePools()
   invariant(amounts.length === pools.length, 'invalid amounts entry')
   return StablePools[CHAIN].reduce((acc, cur, i) => {
-    const price = cur.peg.priceQuery ? priceStringToFraction(prices[cur.peg.priceQuery]) : new Fraction(0)
+    const price = cur.peg.priceQuery ? priceStringToFraction(prices[cur.peg.priceQuery]) : new Fraction(1)
     if (!price) return acc
     const virtualPrice = calculateVirtualPrice(pools[i])
 
