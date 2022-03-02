@@ -9,7 +9,6 @@ import Header from '../components/Header'
 import Polling from '../components/Header/Polling'
 import URLWarning from '../components/Header/URLWarning'
 import Popups from '../components/Popups'
-import { getMobileOperatingSystem, Mobile } from '../utils/mobile'
 import ApeViewer from './ApeViewer'
 import BurnPage from './Burn'
 import Charts from './Charts'
@@ -80,10 +79,10 @@ export default function App() {
         const params = new URLSearchParams(query)
         if (params.get('status') === DappKitResponseStatus.SUCCESS) {
           localStorage.setItem(localStorageKey, window.location.href)
-          const mobileOS = getMobileOperatingSystem()
-          if (mobileOS === Mobile.ANDROID) {
-            window.close()
-          }
+          // const mobileOS = getMobileOperatingSystem()
+          // if (mobileOS === Mobile.ANDROID) {
+          //   window.close()
+          // }
         }
       }
     }
