@@ -19,10 +19,27 @@ export function useCurrentPool(token0: string, token1: string): IExchangeInfo | 
   invariant(pools.length === 1)
   return pools[0]
 }
+
 export function useCurrentPoolAddress(exchangeAddress: string): IExchangeInfo | null {
   const pools = useSelector<AppState, IExchangeInfo[]>((state) =>
     state.pools.pools.filter((pool) => pool.address === exchangeAddress)
   )
+  if (pools.length === 0) return null
+  invariant(pools.length === 1)
+  return pools[0]
+}
+
+export function getCurrentExchangeAddress(exchangeAddress: string): IExchange | null {
+  const stablePools = StablePools[CHAIN]
+  const pools = stablePools.filter(({ pool }) => pool.address === exchangeAddress)
+  if (pools.length === 0) return null
+  invariant(pools.length === 1)
+  return pools[0].pool
+}
+
+export function getCurrentDisplayAddress(exchangeAddress: string): DisplayPool | null {
+  const stablePools = StablePools[CHAIN]
+  const pools = stablePools.filter(({ pool }) => pool.address === exchangeAddress)
   if (pools.length === 0) return null
   invariant(pools.length === 1)
   return pools[0]

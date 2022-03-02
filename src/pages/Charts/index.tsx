@@ -5,13 +5,19 @@ import Logo from 'components/Logo'
 import Row, { RowBetween, RowFixed } from 'components/Row'
 import Toggle from 'components/Toggle'
 import VolumeChart from 'components/VolumeChart'
+import { ChainLogo, StablePools } from 'constants/pools'
 import useTheme from 'hooks/useTheme'
 import { useWindowSize } from 'hooks/useWindowSize'
+import { Fraction } from 'lib/token-utils'
 import React, { useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { usePools } from 'state/mobiusPools/hooks'
+import { useTokenPrices } from 'state/application/hooks'
+import { getCurrentDisplayAddress, getCurrentExchangeAddress } from 'state/mobiusPools/hooks'
 import styled from 'styled-components'
 import { Sel, TYPE } from 'theme'
+import invariant from 'tiny-invariant'
+
+import { CHAIN } from '../../constants'
 
 const OuterContainer = styled.div`
   width: min(1280px, 100%);
@@ -92,7 +98,7 @@ const granularityMapping: { [g in Granularity]: string } = {
   [Granularity.Week]: 'weeklyVolumes',
 }
 
-const timeFormat: { [g: Granularity]: (n: number) => string } = {
+const timeFormat: { [g in Granularity]: (n: number) => string } = {
   [Granularity.Hour]: (t: number) => new Date(t * 1000).toLocaleTimeString(),
   [Granularity.Day]: (t: number) => new Date(t * 1000).toLocaleDateString(),
   [Granularity.Week]: (t: number) => new Date(t * 1000).toLocaleDateString(),
@@ -102,22 +108,23 @@ export default function Charts() {
   const { data, loading, error } = useQuery(volumeQuery)
   const [granularity, setGranularity] = useState<Granularity>(Granularity.Week)
   const [showTotal, setShowTotal] = useState(true)
-  const [selectedPools, setSelectedPools] = useState<Record<string, number | undefined>>({})
+  const [selectedPools, setSelectedPools] = useState<Record<string, number | null>>({})
   const [showPoolSelect, setShowPoolSelect] = useState(false)
-  const pools = usePools().slice()
+  const displayPools = StablePools[CHAIN]
   const { width } = useWindowSize()
   const theme = useTheme()
+  const prices = useTokenPrices()
 
   const totals = data
-    ? data.swaps.reduce((accum, info) => {
-        const price =
-          info.id === '0x19260b9b573569dDB105780176547875fE9fedA3'.toLowerCase()
-            ? PRICE[Coins.Bitcoin]
-            : info.id === '0xE0F2cc70E52f05eDb383313393d88Df2937DA55a'.toLowerCase()
-            ? PRICE[Coins.Ether]
-            : PRICE[Coins.USD]
-        info[granularityMapping[granularity]].forEach((vol, i) => {
-          accum[vol.timestamp] = price * parseInt(vol.volume) + (accum[vol.timestamp] ?? 0)
+    ? data.swaps.reduce((accum: { [timestamp: string]: number }, info: any) => {
+        const exchange = getCurrentDisplayAddress(info.id)
+        if (exchange === null) return accum
+        const price = exchange.peg.priceQuery !== null ? prices[exchange.peg.priceQuery] : new Fraction(1)
+        console.log(price.valueOf())
+
+        info[granularityMapping[granularity]].forEach((vol: any) => {
+          console.log(vol)
+          accum[vol.timestamp] = parseInt(price.toString()) * parseInt(vol.volume) + (accum[vol.timestamp] ?? 0)
         })
         return accum
       }, {})
@@ -125,15 +132,16 @@ export default function Charts() {
 
   let dataAndLabels = data
     ? data.swaps
-        .filter(({ id }: { id: string }) => selectedPools[id])
-        .sort((p1, p2) => {
+        .filter(({ id }: { id: string }) => selectedPools[id] !== null)
+        .sort((p1: any, p2: any) => {
+          invariant(selectedPools[p1.id] !== null && selectedPools[p2.id] !== null)
           if (selectedPools[p1.id] < selectedPools[p2.id]) return 1
           if (selectedPools[p1.id] > selectedPools[p2.id]) return -1
           return 0
         })
-        .map((info) => [
-          getPoolName(pools, info.id),
-          info[granularityMapping[granularity]].map((vol) => ({
+        .map((info: any) => [
+          getCurrentExchangeAddress(info.id),
+          info[granularityMapping[granularity]].map((vol: any) => ({
             x: parseInt(vol.timestamp),
             y: parseInt(vol.volume),
           })),
@@ -143,8 +151,8 @@ export default function Charts() {
     dataAndLabels.push(['Total', Object.entries(totals).map(([time, vol]) => ({ x: time, y: vol }))])
   }
   dataAndLabels = dataAndLabels.reverse()
-  const chartData = dataAndLabels.map((group) => group[1])
-  const labels = dataAndLabels.map((group) => group[0])
+  const chartData = dataAndLabels.map((group: any) => group[1])
+  const labels = dataAndLabels.map((group: any) => group[0])
 
   return (
     <OuterContainer>
@@ -181,24 +189,23 @@ export default function Charts() {
                         <Toggle isActive={showTotal} toggle={() => setShowTotal(!showTotal)} />
                       </PoolSelection>
 
-                      {pools
-                        .sort((p1, p2) => p1.displayChain - p2.displayChain)
-                        .filter(({ disabled }) => !disabled)
+                      {displayPools
+                        .sort((p1, p2) => p1.chain - p2.chain)
                         .map((p) => (
                           <PoolSelection key={`charts-${p.name}`}>
                             <RowFixed>
-                              <StyledLogo size={'32px'} srcs={[ChainLogo[p.displayChain]]} alt={'logo'} />{' '}
+                              <StyledLogo size={'32px'} srcs={[ChainLogo[p.chain]]} alt={'logo'} />{' '}
                               <TYPE.mediumHeader style={{ marginLeft: '0.2rem' }}>{p.name}</TYPE.mediumHeader>
                             </RowFixed>
                             <Toggle
-                              isActive={!!selectedPools[p.address.toLowerCase()]}
+                              isActive={!!selectedPools[p.pool.address.toLowerCase()]}
                               toggle={() => {
-                                if (selectedPools[p.address.toLowerCase()]) {
-                                  setSelectedPools({ ...selectedPools, [p.address.toLowerCase()]: undefined })
+                                if (selectedPools[p.pool.address.toLowerCase()]) {
+                                  setSelectedPools({ ...selectedPools, [p.pool.address.toLowerCase()]: null })
                                 } else {
                                   setSelectedPools({
                                     ...selectedPools,
-                                    [p.address.toLowerCase()]: Object.keys(selectedPools).length + 1,
+                                    [p.pool.address.toLowerCase()]: Object.keys(selectedPools).length + 1,
                                   })
                                 }
                               }}
@@ -213,7 +220,7 @@ export default function Charts() {
             <VolumeChart
               data={chartData}
               labels={labels}
-              width={Math.min(0.9 * width, 0.95 * 1280)}
+              width={Math.min(0.9 * (width ?? 420), 0.95 * 1280)}
               xLabelFormat={timeFormat[granularity]}
             />
           </ChartContainer>
