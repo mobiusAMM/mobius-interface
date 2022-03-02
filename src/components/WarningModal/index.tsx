@@ -22,7 +22,7 @@ interface ModalProps {
 
 export default function WarningModal({ isOpen, onDismiss }: ModalProps) {
   const [neverShow, setNeverShow] = useState(false)
-  const COOKIE_NAME = 'staking-rewards' // optics-warning
+  const COOKIE_NAME = 'ubi-for-ukraine'
   const dismiss = () => {
     if (neverShow) {
       setCookie(COOKIE_NAME, 'true', 31)
@@ -34,16 +34,17 @@ export default function WarningModal({ isOpen, onDismiss }: ModalProps) {
     <Modal isOpen={!cookieExists && isOpen} onDismiss={dismiss} maxHeight={90}>
       <ContentWrapper gap="lg">
         <RowBetween>
-          <TYPE.main fontSize={[18, 24]}>MOBI Stakers now receive CELO</TYPE.main>
+          <TYPE.main fontSize={[18, 24]}>To Our Ukraine Users</TYPE.main>
           <CloseIcon onClick={onDismiss} />
         </RowBetween>
         <TYPE.body>
-          We have partnered with the Celo Foundation and DeFi for the People to bring CELO rewards to users who
-          lock/stake veMOBI. As we fully decentralize, those who stake veMOBI will control all governable parameters of
-          the Mobius protocol. Reserve your spot governing the future of Mobius and earn double digit yield (while
-          supplies last).
+          🇺🇦 Are you in Ukraine or had to flee from the country due to the war, and need financial support to overcome
+          the difficulties? To start receiving basic income ubi, create a Valora wallet and send your address to
+          impactMarket through Whatsapp at +351910408753. <br />
+          If you are not in Ukraine but would like to provide monetary support, see the link below to donate to ubi
+          beneficiaries in Ukraine.
         </TYPE.body>
-        <ExternalLink href="https://mobius.money/#/stake">Start Staking</ExternalLink>
+        <ExternalLink href="https://www.impactmarket.com/communities/3467">UBI for Ukraine</ExternalLink>
         <RowBetween>
           <TYPE.mediumHeader>{"Don't"} show this again</TYPE.mediumHeader>
           <Toggle isActive={neverShow} toggle={() => setNeverShow(!neverShow)} />
