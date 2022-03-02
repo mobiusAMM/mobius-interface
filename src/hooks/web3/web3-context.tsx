@@ -1,5 +1,4 @@
 import { CeloContract } from '@celo/contractkit'
-import { Mainnet } from '@celo-tools/use-contractkit'
 import { JsonRpcProvider, StaticJsonRpcProvider, Web3Provider } from '@ethersproject/providers'
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import { CeloExtensionWalletConnector } from 'connectors/CeloExtensionWalletConnector'
@@ -144,7 +143,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
           },
           package: CeloExtensionWalletConnector,
           connector: async (p) => {
-            const re: CeloExtensionWalletConnector = new p(Mainnet, CeloContract.GoldToken)
+            const re: CeloExtensionWalletConnector = new p(CeloContract.GoldToken)
             await re.initialise()
             return re.kit.web3.currentProvider
           },
