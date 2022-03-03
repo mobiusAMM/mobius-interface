@@ -1,4 +1,5 @@
 import CurrencyPoolLogo from 'components/CurrencyPoolLogo'
+import StakingModal from 'components/earn/StakingModal'
 import { useMobi } from 'hooks/Tokens'
 import JSBI from 'jsbi'
 import { calculateVirtualPrice } from 'lib/calculator'
@@ -245,14 +246,17 @@ export default function Manage({
         </VoteCard>
       )}
 
-      {/* <>
+      <>
         <StakingModal
           isOpen={showStakingModal}
           onDismiss={() => setShowStakingModal(false)}
-          stakingInfo={stakingInfo}
+          userDeposited={userDeposited}
+          totalDeposited={totalDeposited}
           userLiquidityUnstaked={userLiquidityUnstaked}
+          gaugeAddress={display.gauge.address}
+          mobiRate={mobiRate}
         />
-        <UnstakingModal
+        {/* <UnstakingModal
           isOpen={showUnstakingModal}
           onDismiss={() => setShowUnstakingModal(false)}
           stakingInfo={stakingInfo}
@@ -266,8 +270,8 @@ export default function Manage({
           isOpen={showExternalRewardModal}
           onDismiss={() => setShowExternalRewardModal(false)}
           stakingInfo={stakingInfo}
-        />
-      </> */}
+        /> */}
+      </>
 
       <PositionInfo gap="lg" justify="center" dim={userDeposited.equalTo(0)}>
         <BottomSection gap="lg" justify="center">
