@@ -3,6 +3,7 @@ import JSBI from 'jsbi'
 import { Percent, TokenAmount } from 'lib/token-utils'
 import { useMobiPrice, useTokenPrice } from 'state/application/hooks'
 import { useStakingState, useStakingStateCombined } from 'state/staking/hooks'
+import { calcRates } from 'utils/calcRate'
 
 import { CHAIN } from '../constants'
 
@@ -27,7 +28,7 @@ export function useExternalStakingRewards(): ExternalRewardInfo {
 
   const avgApr =
     priceOfReward && priceOfMobi
-      ? calcApy(priceOfReward?.multiply(yearlyRate), priceOfMobi?.multiply(stakingState.totalVotingPower))[1] ??
+      ? calcRates(priceOfReward?.multiply(yearlyRate), priceOfMobi?.multiply(stakingState.totalVotingPower)).apr ??
         new Percent('0')
       : new Percent('0')
 

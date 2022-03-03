@@ -71,7 +71,10 @@ export function useGaugeInfo(gauge: IGauge | undefined): GaugeInfo | undefined {
   if (!gauge) return undefined
 
   const gaugeInfo = gauges
-    .filter((g, i) => !StablePools[CHAIN][i].gauge && (StablePools[CHAIN][i].gauge?.address === gauge.address ?? false))
+    .filter(
+      (g, i) =>
+        StablePools[CHAIN][i].gauge && (StablePools[CHAIN][i].gauge?.address === gauge.address.toLowerCase() ?? false)
+    )
     .map((g) =>
       !g
         ? null
@@ -95,7 +98,8 @@ export function useUserGaugeInfo(gauge: IGauge | undefined): UserGaugeInfo | und
 
   const gaugeInfo = gauges
     .filter(
-      (ug, i) => !StablePools[CHAIN][i].gauge && (StablePools[CHAIN][i].gauge?.address === gauge.address ?? false)
+      (ug, i) =>
+        StablePools[CHAIN][i].gauge && (StablePools[CHAIN][i].gauge?.address === gauge.address.toLowerCase() ?? false)
     )
     .map((ug) =>
       !ug

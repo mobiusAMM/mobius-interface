@@ -124,7 +124,7 @@ export default function App() {
               <Route exact strict path="/pool" component={Pool} />
               <Route exact strict path="/risk" component={RiskPage} />
               <Route path="/claim" component={Claim} />
-              <Route exact strict path="/farm/:poolName" component={Manage} />{' '}
+              <Route exact strict path="/farm/:gaugeAddress" component={Manage} />{' '}
               <Route exact strict path="/stake" component={Staking} />
               <Route exact strict path="/reset" component={Reset} />
               <Route exact strict path="/ape-mode" component={ApeViewer} />

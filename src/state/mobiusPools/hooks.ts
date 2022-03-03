@@ -78,6 +78,14 @@ export function poolInfoToDisplay(info: IExchangeInfo): DisplayPool {
   return exchange[0]
 }
 
+export function getCurrentDisplayFromGauge(gaugeAddress: string): DisplayPool | null {
+  const stablePools = StablePools[CHAIN]
+  const pools = stablePools.filter((pool) => pool.gauge?.address === gaugeAddress)
+  if (pools.length === 0) return null
+  invariant(pools.length === 1)
+  return pools[0]
+}
+
 export function useLpBalance(exchange: IExchange): TokenAmount {
   const { address, connected } = useWeb3Context()
   const balance = useTokenBalance(address, exchange.lpToken)

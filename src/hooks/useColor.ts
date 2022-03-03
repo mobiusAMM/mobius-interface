@@ -67,8 +67,9 @@ export function generateColorPallete(tokens: Token[]) {
   return colors.join('\n')
 }
 
-export function usePoolColor(pool: DisplayPool) {
+export function usePoolColor(pool: DisplayPool | null) {
   const theme = useTheme()
+  if (pool === null) return null
   const coin = pool.peg.coin
   if (coin === Coins.USD) return theme.cusd
   if (coin === Coins.Eur) return theme.ceur
