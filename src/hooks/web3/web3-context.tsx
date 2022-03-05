@@ -5,14 +5,16 @@ import WalletConnectProvider from '@walletconnect/web3-provider'
 import { CeloExtensionWalletConnector } from 'connectors/CeloExtensionWalletConnector'
 import { LedgerConnector, LedgerKit } from 'connectors/ledger/LedgerConnector'
 import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
-import Web3Modal from 'web3modal'
+import Web3Modal, { IProviderOptions, isMobile } from 'web3modal'
 
+import Valora from '../../assets/images/valoraIcon.png'
 import Celo from '../../assets/svg/celo-logo.svg'
 import Ledger from '../../assets/svg/ledger.svg'
 import { CHAIN } from '../../constants'
 
 const LEDGER_ID = 'custom-ledger'
 const CEW_ID = 'custom-cew'
+const VALORA_ID = 'custom-valora'
 
 type onChainProvider = {
   connect: () => Promise<Web3Provider>
@@ -103,22 +105,23 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [providerChainID, setProviderChainID] = useState(CHAIN)
   const [address, setAddress] = useState('')
 
-  // TODO: make dynamic
-  const uri = 'https://forno.celo.org'
-  const [provider, setProvider] = useState<JsonRpcProvider>(new StaticJsonRpcProvider(uri))
-
-  const [web3Modal] = useState<Web3Modal>(
-    new Web3Modal({
-      cacheProvider: true,
-      providerOptions: {
-        walletconnect: {
-          package: WalletConnectProvider,
-          options: {
-            rpc: {
-              [42220]: uri,
-            },
+  const additionalWallets: IProviderOptions = isMobile()
+    ? {
+        [VALORA_ID]: {
+          display: {
+            logo: Valora,
+            name: 'Valora Mobile Wallet',
+            description: 'Connect to your Valora Wallet',
+          },
+          package: CeloExtensionWalletConnector,
+          connector: async (p) => {
+            const re: CeloExtensionWalletConnector = new p(Mainnet, CeloContract.GoldToken)
+            await re.initialise()
+            return re.kit.web3.currentProvider
           },
         },
+      }
+    : {
         [LEDGER_ID]: {
           display: {
             logo: Ledger,
@@ -149,6 +152,25 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
             return re.kit.web3.currentProvider
           },
         },
+      }
+
+  // TODO: make dynamic
+  const uri = 'https://forno.celo.org'
+  const [provider, setProvider] = useState<JsonRpcProvider>(new StaticJsonRpcProvider(uri))
+
+  const [web3Modal] = useState<Web3Modal>(
+    new Web3Modal({
+      cacheProvider: true,
+      providerOptions: {
+        walletconnect: {
+          package: WalletConnectProvider,
+          options: {
+            rpc: {
+              [42220]: uri,
+            },
+          },
+        },
+        ...additionalWallets,
       },
     })
   )
