@@ -1,5 +1,5 @@
 import { useColor } from 'hooks/useColor'
-import { Token } from 'lib/token-utils'
+import { Token, TokenAmount } from 'lib/token-utils'
 import { darken } from 'polished'
 import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -137,7 +137,7 @@ export enum TokenType {
 interface CurrencyInputPanelProps {
   value: string
   onUserInput: (value: string) => void
-  onMax?: () => void
+  onMax?: (max?: TokenAmount) => void
   showMaxButton: boolean
   label?: string
   onCurrencySelect?: (currency: Token) => void
@@ -193,7 +193,7 @@ export default function CurrencyInputPanel({
               </TYPE.body>
               {connected && (
                 <TYPE.body
-                  onClick={onMax}
+                  onClick={() => (onMax ? onMax(selectedCurrencyBalance) : null)}
                   color={theme.text2}
                   fontWeight={500}
                   fontSize={14}

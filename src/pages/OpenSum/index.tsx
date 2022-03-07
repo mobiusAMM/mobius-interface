@@ -174,9 +174,12 @@ export default function OpenSum() {
     [setInputToken, setOutputToken, setApprovalSubmitted]
   )
 
-  const handleMaxInput = useCallback(() => {
-    maxAmountInput && setInputValue(maxAmountInput.toExact())
-  }, [maxAmountInput, setInputValue])
+  const handleMaxInput = useCallback(
+    (amount?: TokenAmount) => {
+      ;(amount && setInputValue(amount.toExact())) || (maxAmountInput && setInputValue(maxAmountInput.toExact()))
+    },
+    [maxAmountInput]
+  )
 
   const onSwitchTokens = () => {
     alert('You can only swap FROM v1 assets TO v2 assets')

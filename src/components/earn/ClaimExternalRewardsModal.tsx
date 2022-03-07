@@ -1,12 +1,10 @@
 import { TransactionResponse } from '@ethersproject/providers'
 import { useMobi } from 'hooks/Tokens'
-import { TokenAmount } from 'lib/token-utils'
-import React, { useEffect, useState } from 'react'
-import { useBlockNumber } from 'state/application/hooks'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 
 import { useWeb3Context } from '../../hooks'
-import { useLiquidityGaugeContract, useMobiMinterContract } from '../../hooks/useContract'
+import { useLiquidityGaugeContract } from '../../hooks/useContract'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { CloseIcon, TYPE } from '../../theme'
 import { ButtonError } from '../Button'
@@ -42,19 +40,6 @@ export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }:
   }
 
   const stakingContract = useLiquidityGaugeContract(stakingInfo.gaugeAddress)
-  const minter = useMobiMinterContract()
-
-  const [pendingMobi, setEarnedMobi] = useState<TokenAmount>()
-
-  const blockNumber = useBlockNumber()
-
-  useEffect(() => {
-    const updateMobi = async () => {
-      const bigInt = await stakingContract?.claimable_tokens(address)
-      setEarnedMobi(new TokenAmount(mobi, bigInt.toString()))
-    }
-    connected && updateMobi()
-  }, [stakingContract, setEarnedMobi, connected, address, mobi])
 
   async function onClaimReward() {
     if (stakingContract && stakingInfo?.stakedAmount) {
@@ -89,26 +74,20 @@ export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }:
             <TYPE.mediumHeader>Claim</TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOnDismiss} />
           </RowBetween>
-          {pendingMobi && (
-            <AutoColumn justify="center" gap="md">
-              {externalRewards &&
-                externalRewards.map((reward) => (
-                  <TYPE.body
-                    fontWeight={600}
-                    fontSize={36}
-                    key={`claim-reward-${stakingInfo.name}-${reward.token.symbol}`}
-                  >
-                    {reward.toSignificant(6)} {reward.token.symbol}
-                  </TYPE.body>
-                ))}
-              {/* {stakingInfo?.dualRewards && (
-                <TYPE.body fontWeight={600} fontSize={36}>
-                  {stakingInfo?.earnedAmount?.toSignificant(6)} {stakingInfo?.rewardToken?.symbol}
+
+          <AutoColumn justify="center" gap="md">
+            {externalRewards &&
+              externalRewards.map((reward) => (
+                <TYPE.body
+                  fontWeight={600}
+                  fontSize={36}
+                  key={`claim-reward-${stakingInfo.name}-${reward.token.symbol}`}
+                >
+                  {reward.toSignificant(6)} {reward.token.symbol}
                 </TYPE.body>
-              )} */}
-              <TYPE.body>Unclaimed rewards</TYPE.body>
-            </AutoColumn>
-          )}
+              ))}
+            <TYPE.body>Unclaimed rewards</TYPE.body>
+          </AutoColumn>
           <TYPE.subHeader style={{ textAlign: 'center' }}>
             When you claim without withdrawing your liquidity remains in the mining pool.
           </TYPE.subHeader>

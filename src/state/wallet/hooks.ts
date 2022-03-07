@@ -42,21 +42,21 @@ export function useTokenBalances(
   )
   const validatedTokenAddresses = useMemo(() => validatedTokens.map((vt) => vt.address), [validatedTokens])
   const balances = useMultipleContractSingleData(validatedTokenAddresses, ERC20_INTERFACE, 'balanceOf', [address])
-
-  return useMemo(
+  const hold = useMemo(
     () =>
       address && validatedTokens.length > 0
         ? validatedTokens.reduce<{ [tokenAddress: string]: TokenAmount | undefined }>((memo, token, i) => {
             const value = balances?.[i]?.result?.[0]
             const amount = value ? JSBI.BigInt(value.toString()) : undefined
             if (amount) {
-              memo[token.address] = new TokenAmount(token, amount)
+              memo[token.address.toLowerCase()] = new TokenAmount(token, amount)
             }
             return memo
           }, {})
         : {},
     [address, validatedTokens, balances]
   )
+  return hold
 }
 
 // mimics useAllBalances

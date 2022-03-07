@@ -1,6 +1,7 @@
 import CurrencyPoolLogo from 'components/CurrencyPoolLogo'
 import ClaimRewardModal from 'components/earn/ClaimRewardModal'
 import StakingModal from 'components/earn/StakingModal'
+import UnstakingModal from 'components/earn/UnstakingModal'
 import { useMobi } from 'hooks/Tokens'
 import JSBI from 'jsbi'
 import { calculateVirtualPrice } from 'lib/calculator'
@@ -263,11 +264,13 @@ export default function Manage({
           gaugeAddress={display.gauge.address}
           userGaugeInfo={userGaugeInfo}
         />
-        {/* <UnstakingModal
+        <UnstakingModal
           isOpen={showUnstakingModal}
           onDismiss={() => setShowUnstakingModal(false)}
-          stakingInfo={stakingInfo}
+          userDeposited={userDeposited}
+          gaugeAddress={display.gauge.address}
         />
+        {/* 
        
         <ExternalRewardsModal
           isOpen={showExternalRewardModal}

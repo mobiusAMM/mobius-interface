@@ -48,6 +48,7 @@ export function GaugeUpdater() {
   const effectiveBalances = useMultipleContractSingleData(gaugeAddresses, gaugeInterface, 'working_balances', [
     connected ? address : undefined,
   ])
+
   const lastVote = useSingleContractMultipleData(
     gaugeController,
     'last_user_vote',

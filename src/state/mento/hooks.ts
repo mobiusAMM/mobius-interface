@@ -172,8 +172,8 @@ export function useMentoTradeInfo(): {
   const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
 
   const currencyBalances = {
-    [Field.INPUT]: relevantTokenBalances[0],
-    [Field.OUTPUT]: relevantTokenBalances[1],
+    [Field.INPUT]: relevantTokenBalances[inputCurrency?.address.toLowerCase() ?? ''],
+    [Field.OUTPUT]: relevantTokenBalances[outputCurrency?.address.toLowerCase() ?? ''],
   }
 
   const currencies: { [field in Field]?: Token } = {

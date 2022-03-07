@@ -101,7 +101,7 @@ export default function StakingModal({
   const stakingContract = useLiquidityGaugeContract(gaugeAddress)
   const depositFunction = stakingContract?.['deposit(uint256)']
 
-  async function onStake() {
+  const onStake = useCallback(async () => {
     setAttempting(true)
     if (stakingContract && inputAmount && deadline && depositFunction) {
       if (approval === ApprovalState.APPROVED) {
@@ -118,7 +118,7 @@ export default function StakingModal({
         throw new Error('Attempting to stake without approval or a signature. Please contact support.')
       }
     }
-  }
+  }, [addTransaction, approval, deadline, depositFunction, inputAmount, stakingContract])
 
   let error: string | undefined
   if (!connected) {

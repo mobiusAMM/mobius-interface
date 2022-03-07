@@ -1,7 +1,6 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { useMobi } from 'hooks/Tokens'
 import { TokenAmount } from 'lib/token-utils'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import styled from 'styled-components'
 
 import { useWeb3Context } from '../../hooks'
@@ -23,10 +22,11 @@ const ContentWrapper = styled(AutoColumn)`
 interface StakingModalProps {
   isOpen: boolean
   onDismiss: () => void
-  stakingInfo: StablePoolInfo
+  userDeposited: TokenAmount
+  gaugeAddress: string
 }
 
-export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: StakingModalProps) {
+export default function UnstakingModal({ isOpen, onDismiss, userDeposited, gaugeAddress }: StakingModalProps) {
   const { connected } = useWeb3Context()
 
   // monitor call to help UI loading state
@@ -40,17 +40,13 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
     onDismiss()
   }
 
-  const stakingContract = useLiquidityGaugeContract(stakingInfo.gaugeAddress)
-  stakingContract?.['withdraw(uint256,bool)']
-  const mobi = useMobi()
-  const { stakedAmount } = stakingInfo
-  const pendingMobi = new TokenAmount(mobi, stakingInfo.pendingMobi ?? '0')
+  const stakingContract = useLiquidityGaugeContract(gaugeAddress)
   const withdrawFunction = stakingContract?.['withdraw(uint256,bool)']
 
-  async function onWithdraw() {
-    if (stakingContract && stakingInfo?.stakedAmount) {
+  const onWithdraw = useCallback(async () => {
+    if (withdrawFunction) {
       setAttempting(true)
-      await withdrawFunction(stakedAmount.raw.toString(), true, { gasLimit: 3000000 })
+      await withdrawFunction(userDeposited.raw.toString(), true, { gasLimit: 3000000 })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
             summary: `Withdraw deposited liquidity`,
@@ -62,14 +58,11 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
           console.log(error)
         })
     }
-  }
+  }, [addTransaction, userDeposited.raw, withdrawFunction])
 
   let error: string | undefined
   if (!connected) {
     error = 'Connect Wallet'
-  }
-  if (!stakingInfo?.stakedAmount) {
-    error = error ?? 'Enter an amount'
   }
 
   return (
@@ -80,34 +73,18 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
             <TYPE.mediumHeader>Withdraw</TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOndismiss} />
           </RowBetween>
-          {stakingInfo?.stakedAmount && (
-            <AutoColumn justify="center" gap="md">
-              <TYPE.body fontWeight={600} fontSize={36}>
-                {<FormattedCurrencyAmount currencyAmount={stakingInfo.stakedAmount} />}
-              </TYPE.body>
-              <TYPE.body>Deposited liquidity</TYPE.body>
-            </AutoColumn>
-          )}
-          {/* {pendingMobi && (
-            <AutoColumn justify="center" gap="md">
-              <TYPE.body fontWeight={600} fontSize={36}>
-                {<FormattedCurrencyAmount currencyAmount={pendingMobi} />}
-              </TYPE.body>
-              <TYPE.body>Unclaimed MOBI</TYPE.body>
-            </AutoColumn>
-          )} */}
-          {/* {stakingInfo?.dualRewards && stakingInfo?.earnedAmount && (
-            <AutoColumn justify="center" gap="md">
-              <TYPE.body fontWeight={600} fontSize={36}>
-                {<FormattedCurrencyAmount currencyAmount={stakingInfo?.earnedAmount} />}
-              </TYPE.body>
-              <TYPE.body>Unclaimed {stakingInfo?.rewardToken?.symbol}</TYPE.body>
-            </AutoColumn>
-          )} */}
+
+          <AutoColumn justify="center" gap="md">
+            <TYPE.body fontWeight={600} fontSize={36}>
+              {<FormattedCurrencyAmount currencyAmount={userDeposited} />}
+            </TYPE.body>
+            <TYPE.body>Deposited liquidity</TYPE.body>
+          </AutoColumn>
+
           <TYPE.subHeader style={{ textAlign: 'center' }}>
             When you withdraw, your liquidity is removed from the mining pool.
           </TYPE.subHeader>
-          <ButtonError disabled={!!error} error={!!error && !!stakingInfo?.stakedAmount} onClick={onWithdraw}>
+          <ButtonError disabled={!!error} error={!!error} onClick={onWithdraw}>
             {error ?? 'Withdraw'}
           </ButtonError>
         </ContentWrapper>
@@ -115,7 +92,7 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
       {attempting && !hash && (
         <LoadingView onDismiss={wrappedOndismiss}>
           <AutoColumn gap="12px" justify={'center'}>
-            <TYPE.body fontSize={20}>Withdrawing {stakingInfo?.stakedAmount?.toSignificant(4)} MOBI-LP</TYPE.body>
+            <TYPE.body fontSize={20}>Withdrawing {userDeposited.toSignificant(4)} MOBI-LP</TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
