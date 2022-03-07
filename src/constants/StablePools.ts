@@ -1,5 +1,3 @@
-import type { ChainId } from 'lib/token-utils'
-
 // export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
 //   [ChainId.MAINNET]: [
 //     {
@@ -1111,6 +1109,3 @@ import type { ChainId } from 'lib/token-utils'
 //   [ChainId.ALFAJORES]: [],
 //   [ChainId.BAKLAVA]: [],
 // }
-
-//todo: replace Mainnet and Baklava Pool Addresses
-type AddressMap = { [K in ChainId]: string }
