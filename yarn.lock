@@ -3948,18 +3948,6 @@
   dependencies:
     "@walletconnect/window-getters" "^1.0.0"
 
-"@web3-react/abstract-connector@^6.0.7":
-  version "6.0.7"
-  resolved "https://registry.yarnpkg.com/@web3-react/abstract-connector/-/abstract-connector-6.0.7.tgz#401b3c045f1e0fab04256311be49d5144e9badc6"
-  integrity sha512-RhQasA4Ox8CxUC0OENc1AJJm8UTybu/oOCM61Zjg6y0iF7Z0sqv1Ai1VdhC33hrQpA8qSBgoXN9PaP8jKmtdqg==
-  dependencies:
-    "@web3-react/types" "^6.0.7"
-
-"@web3-react/types@^6.0.7":
-  version "6.0.7"
-  resolved "https://registry.yarnpkg.com/@web3-react/types/-/types-6.0.7.tgz#34a6204224467eedc6123abaf55fbb6baeb2809f"
-  integrity sha512-ofGmfDhxmNT1/P/MgVa8IKSkCStFiyvXe+U5tyZurKdrtTDFU+wJ/LxClPDtFerWpczNFPUSrKcuhfPX1sI6+A==
-
 "@webassemblyjs/ast@1.9.0":
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.9.0.tgz#bd850604b4042459a5a41cd7d338cbed695ed964"
@@ -5032,15 +5020,6 @@ bip32@2.0.5:
     typeforce "^1.11.5"
     wif "^2.0.6"
 
-"bip39@git+https://github.com/bitcoinjs/bip39.git#d8ea080a18b40f301d4e2219a2991cd2417e83c2":
-  version "3.0.3"
-  resolved "git+https://github.com/bitcoinjs/bip39.git#d8ea080a18b40f301d4e2219a2991cd2417e83c2"
-  dependencies:
-    "@types/node" "11.11.6"
-    create-hash "^1.1.0"
-    pbkdf2 "^3.0.9"
-    randombytes "^2.0.1"
-
 "bip39@https://github.com/bitcoinjs/bip39#d8ea080a18b40f301d4e2219a2991cd2417e83c2":
   version "3.0.3"
   resolved "https://github.com/bitcoinjs/bip39#d8ea080a18b40f301d4e2219a2991cd2417e83c2"
@@ -5063,18 +5042,6 @@ blakejs@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/blakejs/-/blakejs-1.1.1.tgz#bf313053978b2cd4c444a48795710be05c785702"
   integrity sha512-bLG6PHOCZJKNshTjGRBvET0vTciwQE6zFKOKKXPDJfwFBd4Ac0yBfPZqcGvGJap50l7ktvlpFqc2jGVaUgbJgg==
-
-"bls12377js@git+https://github.com/celo-org/bls12377js.git#cb38a4cfb643c778619d79b20ca3e5283a2122a6":
-  version "0.1.0"
-  resolved "git+https://github.com/celo-org/bls12377js.git#cb38a4cfb643c778619d79b20ca3e5283a2122a6"
-  dependencies:
-    "@stablelib/blake2xs" "0.10.4"
-    "@types/node" "^12.11.7"
-    big-integer "^1.6.44"
-    chai "^4.2.0"
-    mocha "^6.2.2"
-    ts-node "^8.4.1"
-    typescript "^3.6.4"
 
 "bls12377js@https://github.com/celo-org/bls12377js#cb38a4cfb643c778619d79b20ca3e5283a2122a6":
   version "0.1.0"

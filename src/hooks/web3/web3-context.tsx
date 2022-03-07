@@ -127,12 +127,12 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ childre
           },
           package: LedgerConnector,
           connector: async (p) => {
-            web3Modal.clearCachedProvider()
             const re: LedgerConnector = new p()
             re.loadModal()
             const index = await re.enable()
+            console.log(index)
             const ledgerKit = await LedgerKit.init(CHAIN, [index])
-            return (await re.activate({ kit: ledgerKit, index })).provider
+            return re.activate(ledgerKit)
           },
         },
         //TODO: fix if on wrong chain
