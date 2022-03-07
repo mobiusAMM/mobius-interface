@@ -1,6 +1,6 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { useMobi } from 'hooks/Tokens'
-import React, { useState } from 'react'
+import { TokenAmount } from 'lib/token-utils'
+import React, { useCallback, useState } from 'react'
 import styled from 'styled-components'
 
 import { useWeb3Context } from '../../hooks'
@@ -21,13 +21,12 @@ const ContentWrapper = styled(AutoColumn)`
 interface StakingModalProps {
   isOpen: boolean
   onDismiss: () => void
-  stakingInfo: StablePoolInfo
+  externalRewards: TokenAmount[] | undefined
+  gaugeAddress: string
 }
 
-export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }: StakingModalProps) {
+export default function ExternalRewardsModal({ isOpen, onDismiss, externalRewards, gaugeAddress }: StakingModalProps) {
   const { address, connected } = useWeb3Context()
-  const mobi = useMobi()
-  const externalRewards = useExternalRewards({ address: stakingInfo.poolAddress ?? '' })
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
   const [hash, setHash] = useState<string | undefined>()
@@ -39,10 +38,10 @@ export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }:
     onDismiss()
   }
 
-  const stakingContract = useLiquidityGaugeContract(stakingInfo.gaugeAddress)
+  const stakingContract = useLiquidityGaugeContract(gaugeAddress)
 
-  async function onClaimReward() {
-    if (stakingContract && stakingInfo?.stakedAmount) {
+  const onClaimReward = useCallback(async () => {
+    if (stakingContract) {
       setAttempting(true)
       await stakingContract['claim_rewards(address)'](address, { gasLimit: 1000000 })
         .then((response: TransactionResponse) => {
@@ -56,14 +55,11 @@ export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }:
           console.log(error)
         })
     }
-  }
+  }, [addTransaction, address, stakingContract])
 
   let error: string | undefined
   if (!connected) {
     error = 'Connect Wallet'
-  }
-  if (!stakingInfo?.stakedAmount) {
-    error = error ?? 'Enter an amount'
   }
 
   return (
@@ -78,11 +74,7 @@ export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }:
           <AutoColumn justify="center" gap="md">
             {externalRewards &&
               externalRewards.map((reward) => (
-                <TYPE.body
-                  fontWeight={600}
-                  fontSize={36}
-                  key={`claim-reward-${stakingInfo.name}-${reward.token.symbol}`}
-                >
+                <TYPE.body fontWeight={600} fontSize={36} key={`claim-reward-${gaugeAddress}-${reward.token.symbol}`}>
                   {reward.toSignificant(6)} {reward.token.symbol}
                 </TYPE.body>
               ))}
@@ -91,7 +83,7 @@ export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }:
           <TYPE.subHeader style={{ textAlign: 'center' }}>
             When you claim without withdrawing your liquidity remains in the mining pool.
           </TYPE.subHeader>
-          <ButtonError disabled={!!error} error={!!error && !!stakingInfo?.stakedAmount} onClick={onClaimReward}>
+          <ButtonError disabled={!!error} error={!!error} onClick={onClaimReward}>
             {error ?? 'Claim'}
           </ButtonError>
         </ContentWrapper>

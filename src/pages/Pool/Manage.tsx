@@ -1,4 +1,5 @@
 import CurrencyPoolLogo from 'components/CurrencyPoolLogo'
+import ExternalRewardsModal from 'components/earn/ClaimExternalRewardsModal'
 import ClaimRewardModal from 'components/earn/ClaimRewardModal'
 import StakingModal from 'components/earn/StakingModal'
 import UnstakingModal from 'components/earn/UnstakingModal'
@@ -9,7 +10,7 @@ import { Fraction, TokenAmount } from 'lib/token-utils'
 import React, { useCallback, useState } from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
 import { usePegPrice } from 'state/application/hooks'
-import { useGaugeInfo, useUserGaugeInfo } from 'state/gauges/hooks'
+import { useExternalRewards, useGaugeInfo, useUserGaugeInfo } from 'state/gauges/hooks'
 import { getCurrentDisplayFromGauge, useCurrentPoolAddress } from 'state/mobiusPools/hooks'
 import { useStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
@@ -103,16 +104,6 @@ export default function Manage({
   const gaugeInfo = useGaugeInfo(display?.gauge ?? undefined)
   const userGaugeInfo = useUserGaugeInfo(display?.gauge ?? undefined)
   const exchangeInfo = useCurrentPoolAddress(display?.pool.address ?? '')
-  // get currencies and pair
-
-  // const stakingInfo = useStablePoolInfoByName(poolName)
-
-  // const { balances, stakedAmount, totalStakedAmount, tokens, peggedTo, pegComesAfter, lastClaim } = stakingInfo ?? {
-  //   balances: [],
-  //   stakedAmount: undefined,
-  //   totalStakedAmount: undefined,
-  //   tokens: [],
-  // }
 
   const userLiquidityUnstaked = useTokenBalance(connected ? address : undefined, display?.pool.lpToken)
   const [showStakingModal, setShowStakingModal] = useState(false)
@@ -123,6 +114,8 @@ export default function Manage({
 
   const mobiCountUpAmount = userGaugeInfo?.claimableMobi.toFixed(6) ?? '0'
   const mobiCountUpAmountPrevious = usePrevious(mobiCountUpAmount) ?? '0'
+
+  const externalRewards = useExternalRewards(display?.gauge)
 
   const handleDepositClick = useCallback(() => {
     if (connected) {
@@ -139,8 +132,6 @@ export default function Manage({
   const nextClaimableTime = gaugeInfo.lastClaim.valueOf() + MS_IN_HOUR
   const minutesUntilRefresh = Math.max(0, (nextClaimableTime - Date.now()) / MS_IN_MINUTE)
 
-  // const earnedMobi = new TokenAmount(mobi, stakingInfo?.pendingMobi ?? '0')
-
   const totalDeposited = exchangeInfo.lpTotalSupply
 
   const userDeposited = new TokenAmount(display.pool.lpToken, userGaugeInfo.balance)
@@ -148,37 +139,10 @@ export default function Manage({
   const userDepositedValue =
     pegPrice && virtualPrice ? virtualPrice.multiply(totalDeposited).multiply(pegPrice) : new Fraction(0)
 
-  // const { valueOfStaked, totalValueDeposited } = getDepositValues(stakingInfo)
-
   const userMobiRate = new TokenAmount(mobi, mobiRate.multiply(userDeposited).divide(totalDeposited).quotient)
   const userExternalRates = display.gauge.additionalRewards.map(
     (reward) => new TokenAmount(reward.token, reward.multiply(userDeposited).divide(totalDeposited).quotient)
   )
-  // const userExternalRates: TokenAmount[] = []
-  // if (
-  //   connected &&
-  //   stakingInfo &&
-  //   stakingInfo.externalRewardRates &&
-  //   totalStakedAmount &&
-  //   totalStakedAmount.greaterThan('0') &&
-  //   stakingInfo?.workingPercentage.greaterThan('0')
-  // ) {
-  //   userExternalRates = stakingInfo.externalRewardRates.map(
-  //     (rate) => new TokenAmount(rate.token, stakingInfo.totalPercentage.multiply(rate.raw).toFixed(0))
-  //   )
-  // }
-
-  // const totalMobiRate = new TokenAmount(mobi, stakingInfo?.mobiRate ?? JSBI.BigInt('0'))
-
-  // const userBalances = balances.map((amount) => {
-  //   const fraction = new Fraction(stakedAmount?.raw.toString() ?? '0', totalStakedAmount?.raw || JSBI.BigInt('0'))
-  //   const ratio = fraction.multiply(amount.raw)
-
-  //   if (JSBI.equal(ratio.denominator, JSBI.BigInt('0'))) {
-  //     return new TokenAmount(amount.currency, JSBI.BigInt('0'))
-  //   }
-  //   return new TokenAmount(amount.currency, JSBI.divide(ratio.numerator, ratio.denominator))
-  // })
 
   const decimalPlacesForLP = userDeposited.greaterThan('1') ? 6 : userDeposited.greaterThan('0') ? 12 : 2
 
@@ -270,13 +234,12 @@ export default function Manage({
           userDeposited={userDeposited}
           gaugeAddress={display.gauge.address}
         />
-        {/* 
-       
         <ExternalRewardsModal
           isOpen={showExternalRewardModal}
           onDismiss={() => setShowExternalRewardModal(false)}
-          stakingInfo={stakingInfo}
-        /> */}
+          gaugeAddress={display.gauge.address}
+          externalRewards={externalRewards}
+        />
       </>
 
       <PositionInfo gap="lg" justify="center" dim={userDeposited.equalTo(0)}>
@@ -380,27 +343,28 @@ export default function Manage({
                   <AutoRow>
                     <TYPE.subHeader>Next Refresh in {minutesUntilRefresh.toFixed(0)} minutes</TYPE.subHeader>
                   </AutoRow>
-                  {display.gauge.additionalRewards.map((rewardToken, i) => (
-                    <RowBetween
-                      style={{ alignItems: 'baseline' }}
-                      key={`reward-line-${display.name}-${rewardToken.token.address}`}
-                    >
-                      <TYPE.largeHeader fontSize={36} fontWeight={600}>
-                        {rewardToken.toFixed(4, { groupSeparator: ',' })}
-                      </TYPE.largeHeader>
-                      <TYPE.black fontSize={16} fontWeight={500}>
-                        <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px ' }}>
-                          ⚡
-                        </span>
-                        {stakingInfo
-                          ? userExternalRates?.[i]
-                              ?.multiply(BIG_INT_SECONDS_IN_WEEK)
-                              ?.toSignificant(4, { groupSeparator: ',' }) ?? '-'
-                          : '0'}
-                        {` ${rewardToken.token.symbol} / week`}
-                      </TYPE.black>
-                    </RowBetween>
-                  ))}
+                  {externalRewards &&
+                    externalRewards.map((rewardToken, i) => (
+                      <RowBetween
+                        style={{ alignItems: 'baseline' }}
+                        key={`reward-line-${display.name}-${rewardToken.token.address}`}
+                      >
+                        <TYPE.largeHeader fontSize={36} fontWeight={600}>
+                          {rewardToken.toFixed(4, { groupSeparator: ',' })}
+                        </TYPE.largeHeader>
+                        <TYPE.black fontSize={16} fontWeight={500}>
+                          <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px ' }}>
+                            ⚡
+                          </span>
+                          {stakingInfo
+                            ? userExternalRates?.[i]
+                                ?.multiply(BIG_INT_SECONDS_IN_WEEK)
+                                ?.toSignificant(4, { groupSeparator: ',' }) ?? '-'
+                            : '0'}
+                          {` ${rewardToken.token.symbol} / week`}
+                        </TYPE.black>
+                      </RowBetween>
+                    ))}
                 </>
               )}
             </AutoColumn>
