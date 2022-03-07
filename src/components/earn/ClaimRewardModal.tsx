@@ -1,12 +1,10 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { useMobi } from 'hooks/Tokens'
-import { TokenAmount } from 'lib/token-utils'
-import React, { useEffect, useState } from 'react'
-import { useBlockNumber } from 'state/application/hooks'
+import React, { useCallback, useState } from 'react'
+import { UserGaugeInfo } from 'state/gauges/hooks'
 import styled from 'styled-components'
 
 import { useWeb3Context } from '../../hooks'
-import { useLiquidityGaugeContract, useMobiMinterContract } from '../../hooks/useContract'
+import { useMobiMinterContract } from '../../hooks/useContract'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { CloseIcon, TYPE } from '../../theme'
 import { ButtonError } from '../Button'
@@ -23,12 +21,12 @@ const ContentWrapper = styled(AutoColumn)`
 interface StakingModalProps {
   isOpen: boolean
   onDismiss: () => void
-  stakingInfo: StablePoolInfo
+  userGaugeInfo: UserGaugeInfo
+  gaugeAddress: string
 }
 
-export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: StakingModalProps) {
-  const { address, connected } = useWeb3Context()
-  const mobi = useMobi()
+export default function ClaimRewardModal({ isOpen, onDismiss, userGaugeInfo, gaugeAddress }: StakingModalProps) {
+  const { connected } = useWeb3Context()
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
@@ -41,26 +39,13 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
     onDismiss()
   }
 
-  const stakingContract = useLiquidityGaugeContract(stakingInfo.gaugeAddress)
   const minter = useMobiMinterContract()
 
-  const [pendingMobi, setEarnedMobi] = useState<TokenAmount>()
-
-  const blockNumber = useBlockNumber()
-
-  useEffect(() => {
-    const updateMobi = async () => {
-      const bigInt = await stakingContract?.claimable_tokens(address)
-      setEarnedMobi(new TokenAmount(mobi, bigInt.toString()))
-    }
-    connected && updateMobi()
-  }, [stakingContract, setEarnedMobi, address, mobi, connected])
-
-  async function onClaimReward() {
-    if (stakingContract && stakingInfo?.stakedAmount) {
+  const onClaimReward = useCallback(async () => {
+    if (minter) {
       setAttempting(true)
       await minter
-        .mint(stakingInfo.gaugeAddress, { gasLimit: 350000 })
+        .mint(gaugeAddress, { gasLimit: 350000 })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
             summary: `Claim accumulated MOBI rewards`,
@@ -72,14 +57,11 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
           console.log(error)
         })
     }
-  }
+  }, [addTransaction, gaugeAddress, minter])
 
   let error: string | undefined
   if (!connected) {
     error = 'Connect Wallet'
-  }
-  if (!stakingInfo?.stakedAmount) {
-    error = error ?? 'Enter an amount'
   }
 
   return (
@@ -90,23 +72,16 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
             <TYPE.mediumHeader>Claim</TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOnDismiss} />
           </RowBetween>
-          {pendingMobi && (
-            <AutoColumn justify="center" gap="md">
-              <TYPE.body fontWeight={600} fontSize={36}>
-                {pendingMobi.toSignificant(6)} MOBI
-              </TYPE.body>
-              {/* {stakingInfo?.dualRewards && (
-                <TYPE.body fontWeight={600} fontSize={36}>
-                  {stakingInfo?.earnedAmount?.toSignificant(6)} {stakingInfo?.rewardToken?.symbol}
-                </TYPE.body>
-              )} */}
-              <TYPE.body>Unclaimed rewards</TYPE.body>
-            </AutoColumn>
-          )}
+          <AutoColumn justify="center" gap="md">
+            <TYPE.body fontWeight={600} fontSize={36}>
+              {userGaugeInfo.claimableMobi.toSignificant(6)} MOBI
+            </TYPE.body>
+            <TYPE.body>Unclaimed rewards</TYPE.body>
+          </AutoColumn>
           <TYPE.subHeader style={{ textAlign: 'center' }}>
             When you claim without withdrawing your liquidity remains in the mining pool.
           </TYPE.subHeader>
-          <ButtonError disabled={!!error} error={!!error && !!stakingInfo?.stakedAmount} onClick={onClaimReward}>
+          <ButtonError disabled={!!error} error={!!error} onClick={onClaimReward}>
             {error ?? 'Claim'}
           </ButtonError>
         </ContentWrapper>
@@ -114,7 +89,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
       {attempting && !hash && (
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
-            <TYPE.body fontSize={20}>Claiming {pendingMobi.toSignificant(6)} MOBI</TYPE.body>
+            <TYPE.body fontSize={20}>Claiming {userGaugeInfo.claimableMobi.toSignificant(6)} MOBI</TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}

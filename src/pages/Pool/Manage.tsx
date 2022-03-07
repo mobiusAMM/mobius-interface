@@ -1,4 +1,5 @@
 import CurrencyPoolLogo from 'components/CurrencyPoolLogo'
+import ClaimRewardModal from 'components/earn/ClaimRewardModal'
 import StakingModal from 'components/earn/StakingModal'
 import { useMobi } from 'hooks/Tokens'
 import JSBI from 'jsbi'
@@ -256,16 +257,18 @@ export default function Manage({
           gaugeAddress={display.gauge.address}
           mobiRate={mobiRate}
         />
+        <ClaimRewardModal
+          isOpen={showClaimRewardModal}
+          onDismiss={() => setShowClaimRewardModal(false)}
+          gaugeAddress={display.gauge.address}
+          userGaugeInfo={userGaugeInfo}
+        />
         {/* <UnstakingModal
           isOpen={showUnstakingModal}
           onDismiss={() => setShowUnstakingModal(false)}
           stakingInfo={stakingInfo}
         />
-        <ClaimRewardModal
-          isOpen={showClaimRewardModal}
-          onDismiss={() => setShowClaimRewardModal(false)}
-          stakingInfo={stakingInfo}
-        />
+       
         <ExternalRewardsModal
           isOpen={showExternalRewardModal}
           onDismiss={() => setShowExternalRewardModal(false)}
