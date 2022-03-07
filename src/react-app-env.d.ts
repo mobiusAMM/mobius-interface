@@ -19,14 +19,14 @@ interface Window {
   setShowLedgerModal: (b: boolean) => Promise<void>
 }
 
-declare module 'content-hash' {
-  declare function decode(x: string): string
-  declare function getCodec(x: string): string
-}
+// declare module 'content-hash' {
+//   declare function decode(x: string): string
+//   declare function getCodec(x: string): string
+// }
 
-declare module 'multihashes' {
-  declare function decode(buff: Uint8Array): { code: number; name: string; length: number; digest: Uint8Array }
-  declare function toB58String(hash: Uint8Array): string
-}
+// declare module 'multihashes' {
+//   declare function decode(buff: Uint8Array): { code: number; name: string; length: number; digest: Uint8Array }
+//   declare function toB58String(hash: Uint8Array): string
+// }
 
 declare module '@ensdomains/ensjs'

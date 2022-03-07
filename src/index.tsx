@@ -1,8 +1,6 @@
 import './i18n'
 
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client'
-import * as Sentry from '@sentry/react'
-import { Integrations } from '@sentry/tracing'
 import React, { StrictMode } from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
@@ -24,24 +22,6 @@ import ThemeProvider, { FixedGlobalStyle, ThemedGlobalStyle } from './theme'
 
 if (window.celo) {
   window.celo.autoRefreshOnNetworkChange = false
-}
-
-if (process.env.REACT_APP_SENTRY_DSN) {
-  const sentryCfg = {
-    environment: `${process.env.REACT_APP_VERCEL_ENV ?? 'unknown'}`,
-    release: `${process.env.REACT_APP_VERCEL_GIT_COMMIT_REF?.replace(/\//g, '--') ?? 'unknown'}-${
-      process.env.REACT_APP_VERCEL_GIT_COMMIT_SHA ?? 'unknown'
-    }`,
-  }
-  Sentry.init({
-    dsn: process.env.REACT_APP_SENTRY_DSN,
-    integrations: [new Integrations.BrowserTracing()],
-    tracesSampleRate: 0.2,
-    ...sentryCfg,
-  })
-  console.log(`Initializing Sentry environment at release ${sentryCfg.release} in environment ${sentryCfg.environment}`)
-} else {
-  console.warn(`REACT_APP_SENTRY_DSN not found. Sentry will not be loaded.`)
 }
 
 const client = new ApolloClient({

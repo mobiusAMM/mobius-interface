@@ -1,20 +1,18 @@
 import { CeloTokenContract, ContractKit, newKit, newKitFromWeb3 } from '@celo/contractkit'
-import { Connector, Network, WalletTypes } from '@celo-tools/use-contractkit'
 
 type Web3Type = Parameters<typeof newKitFromWeb3>[0]
 
 /**
  * Connects to the Celo Extension Wallet. Taken from use-contractkit.
  */
-export class CeloExtensionWalletConnector implements Connector {
+export class CeloExtensionWalletConnector {
   public initialised = false
-  public type = WalletTypes.CeloExtensionWallet
   public kit: ContractKit
   public account: string | null = null
   private onNetworkChangeCallback?: (chainId: number) => void
 
-  constructor(network: Network, public feeCurrency: CeloTokenContract) {
-    this.kit = newKit(network.rpcUrl)
+  constructor(public feeCurrency: CeloTokenContract) {
+    this.kit = newKit('https://forno.celo.org')
   }
 
   async initialise(): Promise<this> {
