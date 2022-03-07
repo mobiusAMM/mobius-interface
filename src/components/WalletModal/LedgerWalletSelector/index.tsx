@@ -69,7 +69,11 @@ export const LedgerWalletSelector: React.FC<Props> = ({ handleSelectIndex }: Pro
           ) : (
             <OptionsGrid>
               {addresses.map((address, i) => (
-                <LedgerAddress key={address} address={address} tryActivation={() => handleSelectIndex(i)} />
+                <LedgerAddress
+                  key={address}
+                  address={address}
+                  tryActivation={() => handleSelectIndex(page * ADDRESSES_PER_PAGE + i)}
+                />
               ))}
               <InfoCard
                 onClick={() => {
