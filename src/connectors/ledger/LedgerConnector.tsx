@@ -58,7 +58,6 @@ export class LedgerKit {
 
 export class LedgerConnector extends AbstractConnector {
   private kit: LedgerKit | null = null
-  private index: number | null = null
   private eventController: EventController = new EventController()
   private show = false
 
@@ -69,13 +68,10 @@ export class LedgerConnector extends AbstractConnector {
   public async activate(connectedKit?: { kit: LedgerKit; index: number }): Promise<ConnectorUpdate> {
     if (connectedKit) {
       this.kit = connectedKit.kit
-      this.index = connectedKit.index
-    }
-    if (this.kit && this.index !== null) {
       return {
         provider: this.kit.kit.web3.currentProvider,
         chainId: NETWORK_CHAIN_ID,
-        account: this.kit.wallet.getAccounts()[this.index],
+        account: this.kit.wallet.getAccounts()[0],
       }
     }
     const idxs = [0, 1, 2, 3, 4]
