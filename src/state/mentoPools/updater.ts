@@ -1,4 +1,3 @@
-import { invariant } from '@apollo/client/utilities/globals'
 import { newKit } from '@celo/contractkit'
 import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
 import { IMentoExchange } from 'constants/mento'
@@ -7,6 +6,7 @@ import { Exchange } from 'generated'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useBlockNumber } from 'state/application/hooks'
+import invariant from 'tiny-invariant'
 
 import { CHAIN, weiScale } from '../../constants'
 import { MENTO_POOL_INFO } from '../../constants/mento'
