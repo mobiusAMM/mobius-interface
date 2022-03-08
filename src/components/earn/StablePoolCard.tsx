@@ -272,7 +272,12 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) =>
         </RowFixed>
 
         <RowFixed>
-          <StyledNavLink style={{ fontSize: 15, textAlign: 'right' }} color={poolColor} to={'/stake'} className="bapr">
+          <StyledNavLink
+            style={{ fontSize: 15, textAlign: 'right' }}
+            color={poolColor ?? ''}
+            to={'/stake'}
+            className="bapr"
+          >
             up to {apy.denominator.toString() !== '0' ? `${boostedApr.toFixed(1, { groupSeparator: ',' })}%` : ' -'} w/
             boost
           </StyledNavLink>
