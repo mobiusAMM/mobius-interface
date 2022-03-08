@@ -278,18 +278,6 @@ export const PUSDC1 = makeTokens(
   'https://bit.ly/3CwGimW'
 )
 
-export const CBTC1 = makeTokens(
-  {
-    [ChainId.Mainnet]: '0xD629eb00dEced2a080B7EC630eF6aC117e614f1b',
-    [ChainId.Alfajores]: '0xD629eb00dEced2a080B7EC630eF6aC117e614f1b',
-    [ChainId.Baklava]: '0xD629eb00dEced2a080B7EC630eF6aC117e614f1b',
-  },
-  18,
-  'cBTC',
-  'Wrapped Bitcoin',
-  'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cBTC.png'
-)
-
 export const WBTC1 = makeTokens(
   {
     [ChainId.Mainnet]: '0xBe50a3013A1c94768A1ABb78c3cB79AB28fc1aCE',
@@ -300,18 +288,6 @@ export const WBTC1 = makeTokens(
   'wBTCxV1',
   'Wrapped Bitcoin (Optics Bridge)',
   'https://etherscan.io/token/images/wbtc_28.png?v=1'
-)
-
-export const CETH1 = makeTokens(
-  {
-    [ChainId.Mainnet]: '0x2DEf4285787d58a2f811AF24755A8150622f4361',
-    [ChainId.Alfajores]: '0x2DEf4285787d58a2f811AF24755A8150622f4361',
-    [ChainId.Baklava]: '0x2DEf4285787d58a2f811AF24755A8150622f4361',
-  },
-  18,
-  'cETH',
-  'Wrapped Ethereum',
-  'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cETH.svg'
 )
 
 export const WETH1 = makeTokens(
@@ -338,7 +314,7 @@ export const USDTM = makeTokens(
   'https://bit.ly/3AMrCyD'
 )
 
-export const USDTC = makeTokens(
+export const USDCM = makeTokens(
   {
     [ChainId.Mainnet]: '0x93DB49bE12B864019dA9Cb147ba75cDC0506190e',
     [ChainId.Alfajores]: '0x93DB49bE12B864019dA9Cb147ba75cDC0506190e',

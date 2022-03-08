@@ -34,7 +34,7 @@ export default function Updater(): null {
 
   useEffect(() => {
     if (!provider || typeof blockNumber !== 'number' || filtersNeedFetch.length === 0) return
-
+    console.log('log update')
     dispatch(fetchingLogs({ chainId: CHAIN, filters: filtersNeedFetch, blockNumber }))
     filtersNeedFetch.forEach((filter) => {
       provider

@@ -53,6 +53,7 @@ export function PriceData(): null {
   const { data, loading, error } = useQuery(mobiPriceQuery, { client: ubeswapClient })
   useEffect(() => {
     if (!loading && !error && data) {
+      console.log('price update')
       fetchPegPrices(dispatch)
       dispatch(addPrice({ token: mobi.address.toLowerCase(), price: data.token.derivedCUSD }))
     }
@@ -104,6 +105,7 @@ export default function Updater(): null {
 
   useEffect(() => {
     if (!debouncedState.chainId || !debouncedState.blockNumber || !windowVisible) return
+    console.log('block update')
     dispatch(updateBlockNumber({ chainId: debouncedState.chainId, blockNumber: debouncedState.blockNumber }))
   }, [windowVisible, dispatch, debouncedState.blockNumber, debouncedState.chainId])
 

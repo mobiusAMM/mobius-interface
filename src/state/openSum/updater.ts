@@ -26,7 +26,7 @@ export function UpdateOpenSum(): null {
     ConstantSumInterface,
     'getBalances'
   )
-
+  console.log('migrate update')
   useMemo(() => {
     const balances = balancesMany?.map(
       ({ result }) => result?.[0].map((n) => BigIntToJSBI(n as BigInt, '0')) ?? [ZERO, ZERO]

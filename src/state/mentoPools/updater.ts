@@ -32,6 +32,7 @@ export function UpdateMento() {
         const balances = (await contract.getBuyAndSellBuckets(false)).map((x) => JSBI.BigInt(x))
         invariant(balances.length === 2, 'mento balances')
         const swapFee = JSBI.BigInt(await contract.spread())
+        console.log('mento update')
         dispatch(
           updateMento({
             mento: {

@@ -62,6 +62,7 @@ export function GaugeUpdater() {
   )
 
   useEffect(() => {
+    console.log('gauge update')
     connected &&
       dispatch(
         updateGaugesUser({

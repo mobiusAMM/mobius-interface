@@ -62,6 +62,7 @@ export function UpdatePools() {
     try {
       if (error) console.log(error)
       const volume = loading ? null : index(data.swaps)
+      console.log('pools update')
       dispatch(
         updatePools({
           pools: stablePools.map((displayPool, i) => {

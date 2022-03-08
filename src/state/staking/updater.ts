@@ -46,6 +46,7 @@ export default function StakingUpdater() {
     (roundDate(Date.now()).valueOf() / 1000 - SECONDS_IN_WEEK).toFixed(0),
   ])
   useEffect(() => {
+    console.log('staking update')
     connected &&
       dispatch(
         updateStakingUser({

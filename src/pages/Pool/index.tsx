@@ -4,7 +4,7 @@ import { Chain, DisplayPool, IExchangeInfo, StablePools, Volume } from 'constant
 import { useValueOfAllPools } from 'hooks/useStablePools'
 import JSBI from 'jsbi'
 import { TokenAmount } from 'lib/token-utils'
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { isMobile } from 'react-device-detect'
 import { useMobiPrice } from 'state/application/hooks'
 import { GaugeInfo, useAllGaugesInfo, useAllUserGaugesInfo, UserGaugeInfo } from 'state/gauges/hooks'
@@ -84,16 +84,6 @@ export default function Pool() {
   const exchanges = usePools()
   const lpBalances = useAllLpBalances()
   const volumes = usePoolsVolume()
-  const meta: Meta[] = StablePools[CHAIN].map((el, i) => {
-    return {
-      display: el,
-      userGauge: userGauges[i],
-      gauge: gauges[i],
-      lpBalance: lpBalances[i],
-      exchangeInfo: exchanges[i],
-      volume: volumes[i],
-    }
-  })
 
   const [selection, setSelection] = React.useState<SelectChain>(SpecialChain.All)
   const [showDeprecated, setShowDeprecated] = React.useState(false)
@@ -101,23 +91,43 @@ export default function Pool() {
   const tvl = useValueOfAllPools()
   const mobiprice = useMobiPrice()
 
-  const sortCallback = (pool1: Meta, pool2: Meta) => {
+  const meta: Meta[] = useMemo(
+    () =>
+      StablePools[CHAIN].map((el, i) => {
+        return {
+          display: el,
+          userGauge: userGauges[i],
+          gauge: gauges[i],
+          lpBalance: lpBalances[i],
+          exchangeInfo: exchanges[i],
+          volume: volumes[i],
+        }
+      }),
+    [exchanges, gauges, lpBalances, userGauges, volumes]
+  )
+
+  const sortCallback = useCallback((pool1: Meta, pool2: Meta) => {
     const isStaking1 =
       pool1.lpBalance.greaterThan(0) || (pool1.userGauge && JSBI.greaterThan(pool1.userGauge.balance, JSBI.BigInt(0)))
     const isStaking2 =
       pool2.lpBalance.greaterThan(0) || (pool2.userGauge && JSBI.greaterThan(pool2.userGauge?.balance, JSBI.BigInt(0)))
     if (isStaking1 && !isStaking2) return 1
     return -1
-  }
+  }, [])
 
-  const sortedFilterdPools = meta
-    .sort(sortCallback)
-    .filter(
-      (pool) =>
-        selection === SpecialChain.All ||
-        selection === pool.display.chain ||
-        (selection === SpecialChain.Other && OtherChains.has(pool.display.chain))
-    )
+  const sortedFilterdPools = useMemo(
+    () =>
+      meta
+        .sort(sortCallback)
+        .filter(
+          (pool) =>
+            selection === SpecialChain.All ||
+            selection === pool.display.chain ||
+            (selection === SpecialChain.Other && OtherChains.has(pool.display.chain))
+        ),
+    [meta, selection, sortCallback]
+  )
+  console.log('pools page')
   return (
     <PageWrapper gap="lg" justify="center" style={{ marginTop: isMobile ? '-1rem' : '3rem' }}>
       <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px', justifyContent: 'center', alignItems: 'center' }}>

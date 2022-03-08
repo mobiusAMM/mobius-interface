@@ -140,7 +140,7 @@ export default function Updater(): null {
     if (cancellations.current?.blockNumber !== latestBlockNumber) {
       cancellations.current?.cancellations?.forEach((c) => c())
     }
-
+    console.log('multicall update')
     dispatch(
       fetchingMulticallResults({
         calls,

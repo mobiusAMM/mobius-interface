@@ -28,6 +28,7 @@ export default function UpdateClaim(): null {
         JSBI.subtract(initialLocked, JSBI.BigInt(await vesting?.['lockedOf'](address))),
         unclaimed
       )
+      console.log('claim update')
       dispatch(
         update({
           type,

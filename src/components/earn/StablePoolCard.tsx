@@ -7,7 +7,7 @@ import { calculateVirtualPrice } from 'lib/calculator'
 import { Fraction, TokenAmount } from 'lib/token-utils'
 import { Meta } from 'pages/Pool'
 import { darken } from 'polished'
-import React, { useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { useHistory } from 'react-router'
 import { NavLink } from 'react-router-dom'
@@ -155,50 +155,81 @@ export const StablePoolCard: React.FC<Props> = ({ meta, stakingInfo }: Props) =>
   const mobi = useMobi()
   const mobiPrice = useMobiPrice()
 
-  const virtualPrice = calculateVirtualPrice(meta.exchangeInfo)
-
-  const totalDeposited =
-    virtualPrice?.multiply(meta.exchangeInfo.lpTotalSupply) ?? new TokenAmount(meta.display.pool.lpToken, 0)
-
-  const userDeposited = new TokenAmount(
-    meta.display.pool.lpToken,
-    virtualPrice?.multiply(meta.lpBalance.asFraction.add(meta.userGauge?.balance ?? 0)).quotient ?? 0
-  )
-
   const pegPrice = usePegPrice(meta.display.peg.priceQuery)
-
-  const totalDepositedValue = pegPrice ? totalDeposited.multiply(pegPrice) : new Fraction(0)
-
-  const mobiRate = new TokenAmount(mobi, meta.gauge?.weight.multiply(stakingInfo.mobiRate).quotient ?? 0)
-  const mobiRateValue = mobiPrice.multiply(mobiRate).multiply(BIG_INT_SECONDS_IN_YEAR)
 
   const externalRewardValue = useValueOfExternalRewards(meta.display.gauge).multiply(BIG_INT_SECONDS_IN_YEAR)
 
-  // TODO: investigate if this is the right method
-  const { apr, dpr, apy } = calcRates(mobiRateValue.add(externalRewardValue), totalDepositedValue)
-  const { apr: boostedApr } = calcRates(mobiRateValue.add(externalRewardValue), totalDepositedValue)
-
-  const balances = meta.exchangeInfo.reserves
-
   const poolColor = usePoolColor(meta.display)
 
-  const display = (str: string): string => {
-    const peg = meta.display.peg
-    return (peg.position === 'before' ? peg.symbol : '').concat(str).concat(peg.position === 'after' ? peg.symbol : '')
-  }
+  const virtualPrice = calculateVirtualPrice(meta.exchangeInfo)
 
-  const totalDisplay = (amount: TokenAmount | Fraction): string => {
-    const decimals = meta.display.peg.decimals
-    if (amount.lessThan(10 ** (2 - decimals))) return display(amount.toFixed(decimals + 1, { groupSeparator: ',' }))
-    else if (amount.lessThan(10 ** 6) || openManage) return display(amount.toFixed(decimals, { groupSeparator: ',' }))
-    else
-      return display(
-        amount
-          .divide(10 ** 6)
-          .toFixed(2, { groupSeparator: ',' })
-          .concat('M')
-      )
-  }
+  const { totalDeposited, userDeposited, mobiRate, apr, dpr, apy, boostedApr } = useMemo(() => {
+    const totalDeposited =
+      virtualPrice?.multiply(meta.exchangeInfo.lpTotalSupply) ?? new TokenAmount(meta.display.pool.lpToken, 0)
+
+    const userDeposited = new TokenAmount(
+      meta.display.pool.lpToken,
+      virtualPrice?.multiply(meta.lpBalance.asFraction.add(meta.userGauge?.balance ?? 0)).quotient ?? 0
+    )
+
+    const totalDepositedValue = pegPrice ? totalDeposited.multiply(pegPrice) : new Fraction(0)
+
+    const mobiRate = new TokenAmount(mobi, meta.gauge?.weight.multiply(stakingInfo.mobiRate).quotient ?? 0)
+    const mobiRateValue = mobiPrice.multiply(mobiRate).multiply(BIG_INT_SECONDS_IN_YEAR)
+
+    // TODO: investigate if this is the right method
+    const { apr, dpr, apy } = calcRates(mobiRateValue.add(externalRewardValue), totalDepositedValue)
+    const { apr: boostedApr } = calcRates(mobiRateValue.add(externalRewardValue), totalDepositedValue)
+
+    return {
+      totalDeposited,
+      userDeposited,
+      mobiRate,
+      apr,
+      dpr,
+      apy,
+      boostedApr,
+    }
+  }, [
+    externalRewardValue,
+    meta.display.pool.lpToken,
+    meta.exchangeInfo.lpTotalSupply,
+    meta.gauge?.weight,
+    meta.lpBalance.asFraction,
+    meta.userGauge?.balance,
+    mobi,
+    mobiPrice,
+    pegPrice,
+    stakingInfo.mobiRate,
+    virtualPrice,
+  ])
+
+  const balances = meta.exchangeInfo.reserves
+  const display = useCallback(
+    (str: string): string => {
+      const peg = meta.display.peg
+      return (peg.position === 'before' ? peg.symbol : '')
+        .concat(str)
+        .concat(peg.position === 'after' ? peg.symbol : '')
+    },
+    [meta.display.peg]
+  )
+
+  const totalDisplay = useCallback(
+    (amount: TokenAmount | Fraction): string => {
+      const decimals = meta.display.peg.decimals
+      if (amount.lessThan(10 ** (2 - decimals))) return display(amount.toFixed(decimals + 1, { groupSeparator: ',' }))
+      else if (amount.lessThan(10 ** 6) || openManage) return display(amount.toFixed(decimals, { groupSeparator: ',' }))
+      else
+        return display(
+          amount
+            .divide(10 ** 6)
+            .toFixed(2, { groupSeparator: ',' })
+            .concat('M')
+        )
+    },
+    [display, meta.display.peg.decimals, openManage]
+  )
 
   return (
     <Wrapper showBackground={true} background={null} onClick={() => setOpenManage(!openManage)}>
