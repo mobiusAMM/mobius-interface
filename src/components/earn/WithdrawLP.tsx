@@ -43,7 +43,7 @@ export default function WithdrawLP({ poolInfo, setHash, setAttempting }: Withdra
       setAttempting(true)
       const expected = expectedTokens.map((amount) => BigInt(amount.raw.toString()))
       await stakingContract
-        .removeLiquidity(selectedAmount.raw.toString(), expected, deadline)
+        .removeLiquidity(selectedAmount.raw.toString(), expected, deadline, { gasLimit: 1000000 })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
             summary: `Withdraw Liquidity from ${poolInfo.name}`,
