@@ -203,7 +203,6 @@ export default function AccountDetails({
   toggleWalletModal,
   pendingTransactions,
   confirmedTransactions,
-  ENSName,
 }: AccountDetailsProps) {
   const { address, disconnect, connected } = useWeb3Context()
   const theme = useContext(ThemeContext)
@@ -236,7 +235,10 @@ export default function AccountDetails({
                 <div>
                   <WalletAction
                     style={{ fontSize: '.825rem', fontWeight: 400, marginRight: '8px' }}
-                    onClick={disconnect}
+                    onClick={() => {
+                      disconnect()
+                      toggleWalletModal()
+                    }}
                   >
                     Disconnect
                   </WalletAction>

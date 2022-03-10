@@ -2,7 +2,7 @@ import { getAddress } from '@ethersproject/address'
 import { BigNumber } from '@ethersproject/bignumber'
 import { AddressZero } from '@ethersproject/constants'
 import { Contract } from '@ethersproject/contracts'
-import { JsonRpcProvider, JsonRpcSigner } from '@ethersproject/providers'
+import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
 import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
 import { Exchange, Swap } from 'generated/index'
 
@@ -48,17 +48,17 @@ export function calculateSlippageAmount(value: TokenAmount, slippage: number): [
 }
 
 // account is not optional
-export function getSigner(provider: JsonRpcProvider): JsonRpcSigner {
+export function getSigner(provider: Web3Provider): JsonRpcSigner {
   return provider.getSigner()
 }
 
 // account is optional
-export function getProviderOrSigner(provider: JsonRpcProvider, connected: boolean): JsonRpcProvider | JsonRpcSigner {
+export function getProviderOrSigner(provider: Web3Provider, connected: boolean): Web3Provider | JsonRpcSigner {
   return connected ? getSigner(provider) : provider
 }
 
 // account is optional
-export function getContract(address: string, ABI: any, provider: JsonRpcProvider, connected: boolean): Contract {
+export function getContract(address: string, ABI: any, provider: Web3Provider, connected: boolean): Contract {
   if (!isAddress(address) || address === AddressZero) {
     throw Error(`Invalid 'address' parameter '${address}'.`)
   }
@@ -69,10 +69,10 @@ export function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
 }
 
-export function getStableSwapContract(address: string, provider: JsonRpcProvider, connected: boolean): Swap {
+export function getStableSwapContract(address: string, provider: Web3Provider, connected: boolean): Swap {
   return getContract(address, SWAP.abi, provider, connected) as Swap
 }
 
-export function getMentoContract(address: string, provider: JsonRpcProvider, connected: boolean): Exchange {
+export function getMentoContract(address: string, provider: Web3Provider, connected: boolean): Exchange {
   return getContract(address, EXCHANGE, provider, connected) as Exchange
 }

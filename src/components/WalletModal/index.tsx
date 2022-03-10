@@ -24,7 +24,6 @@ export default function WalletModal({
   ENSName?: string
 }) {
   const { address } = useWeb3Context()
-  // TODO(igm): get the errors
   const walletModalOpen = useModalOpen(ApplicationModal.WALLET)
   const closeModals = useCloseModals()
 
