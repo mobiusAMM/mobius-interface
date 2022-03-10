@@ -32,7 +32,7 @@ const initialState: ApplicationState = {
   openModal: null,
   tokenPrices: {},
   ubeswapClient: new ApolloClient({
-    uri: 'https://api.thegraph.com/subgraphs/name/ubeswap/ubeswap',
+    uri: 'https://api.thegraph.com/subgraphs/name/ubeswap/ubeswap-backup',
     cache: new InMemoryCache(),
   }),
 }
