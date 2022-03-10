@@ -1,4 +1,4 @@
-import { CeloContract, newKit, StableToken } from '@celo/contractkit'
+import { CeloContract, StableToken } from '@celo/contractkit'
 import { JSBI } from '@ubeswap/sdk'
 import { Exchange } from 'generated'
 import { useEffect } from 'react'
@@ -8,18 +8,17 @@ import { useBlockNumber } from 'state/application/hooks'
 import { CHAIN } from '../../constants'
 import { MENTO_POOL_INFO } from '../../constants/StablePools'
 import { useWeb3Context } from '../../hooks'
-import { UseMentoContract } from '../../hooks/useContract'
+import { useMentoContract } from '../../hooks/useContract'
 import { AppDispatch } from '../index'
 import { initPool } from './actions'
 import { MentoConstants } from './reducer'
 
 export function UpdateMento(): null {
-  const kit = newKit('https://forno.celo.org')
-  const { provider } = useWeb3Context()
+  const { provider, kit } = useWeb3Context()
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()
   const pools: MentoConstants[] = MENTO_POOL_INFO[CHAIN]
-  const mentoContract = UseMentoContract('0x12364a15F52b822F12dd858FAeEdC49F472fbA57')
+  const mentoContract = useMentoContract('0x12364a15F52b822F12dd858FAeEdC49F472fbA57')
 
   useEffect(() => {
     const updatePool = async (poolInfo: MentoConstants, contract: Exchange | undefined) => {

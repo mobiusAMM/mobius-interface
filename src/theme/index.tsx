@@ -99,7 +99,6 @@ export function colors(darkMode: boolean): Colors {
     polygon: '#BF97FF',
     ethereum: '#2E3338',
     solana: '#9DB6FF',
-    white: '#FFFFFF',
 
     // dont wanna forget these blue yet
     // blue4: darkMode ? '#153d6f70' : '#C4D9F8',
@@ -212,25 +211,20 @@ html, input, textarea, button {
   font-family: 'Avenir', Nunito, 'Inter';
   font-display: fallback;
 }
-
 html,
 body {
   margin: 0;
   padding: 0;
 }
-
  a {
    color: ${colors(false).blue1}; 
  }
-
 * {
   box-sizing: border-box;
 }
-
 button {
   user-select: none;
 }
-
 html {
   font-size: 16px;
   font-variant: none;

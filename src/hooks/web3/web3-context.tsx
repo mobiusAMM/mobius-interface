@@ -1,252 +1,55 @@
-import { CeloContract } from '@celo/contractkit'
-import { JsonRpcProvider, StaticJsonRpcProvider, Web3Provider } from '@ethersproject/providers'
-import WalletConnectProvider from '@walletconnect/web3-provider'
-import { CeloExtensionWalletConnector } from 'connectors/CeloExtensionWalletConnector'
-import { LedgerConnector, LedgerKit } from 'connectors/ledger/LedgerConnector'
-import React, { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
-import Web3Modal from 'web3modal'
+import { ContractKit } from '@celo/contractkit'
+import { Connector, useContractKit, useProvider } from '@celo-tools/use-contractkit'
+import { Web3Provider } from '@ethersproject/providers'
+import { useMemo } from 'react'
 
-import Celo from '../../assets/svg/celo-logo.svg'
-import Ledger from '../../assets/svg/ledger.svg'
 import { CHAIN } from '../../constants'
 
-const LEDGER_ID = 'custom-ledger'
-const CEW_ID = 'custom-cew'
-
 type onChainProvider = {
-  connect: () => Promise<Web3Provider>
+  connect: () => Promise<Connector>
   disconnect: () => void
-  checkWrongNetwork: () => Promise<boolean>
-  provider: JsonRpcProvider
+  kit: ContractKit
+  provider: Web3Provider
   address: string
   connected: boolean
-  web3Modal: Web3Modal
   chainID: number
-  web3?: any
   providerChainID: number
-  hasCachedProvider: () => boolean
 }
 
 export type Web3ContextData = {
   onChainProvider: onChainProvider
 } | null
 
-const Web3Context = React.createContext<Web3ContextData>(null)
-
 export const useWeb3Context = () => {
-  const web3Context = useContext(Web3Context)
-  if (!web3Context) {
-    throw new Error(
-      'useWeb3Context() can only be used inside of <Web3ContextProvider />, ' + 'please declare it at a higher level.'
-    )
+  const chainID = CHAIN
+  const providerChainID = CHAIN
+
+  let connected = false
+  let address = ''
+
+  const uck = useContractKit()
+  const provider = useProvider()
+
+  if (uck.address) {
+    connected = true
+    address = uck.address
   }
-  const { onChainProvider } = web3Context
-  return useMemo(() => {
-    return { ...onChainProvider }
-  }, [onChainProvider])
+  return useMemo(
+    () => ({
+      connect: uck.connect,
+      disconnect: uck.destroy,
+      kit: uck.kit,
+      provider,
+      connected,
+      address,
+      chainID,
+      providerChainID,
+    }),
+    [address, chainID, connected, provider, providerChainID, uck.connect, uck.destroy, uck.kit]
+  )
 }
 
 export const useAddress = () => {
   const { address } = useWeb3Context()
   return address
-}
-
-//TODO make dynamic for alfajores
-const switchRequest = () => {
-  return window.ethereum?.request({
-    method: 'wallet_switchEthereumChain',
-    params: [{ chainId: '0xA4EC' }],
-  })
-}
-
-const addChainRequest = () => {
-  return window.ethereum?.request({
-    method: 'wallet_addEthereumChain',
-    params: [
-      {
-        chainId: '0xA4EC',
-        chainName: 'Celo Mainnet',
-        rpcUrls: ['https://forno.celo.org'],
-        blockExplorerUrls: ['https://explorer.celo.org'],
-        nativeCurrency: {
-          name: 'CELO',
-          symbol: 'CELO',
-          decimals: 18,
-        },
-      },
-    ],
-  })
-}
-
-export const switchNetwork = async () => {
-  if (window.ethereum) {
-    try {
-      await switchRequest()
-    } catch (error: any) {
-      if (error.code === 4902) {
-        try {
-          await addChainRequest()
-          await switchRequest()
-        } catch (addError) {
-          console.log(error)
-        }
-      }
-      console.log(error)
-    }
-  }
-}
-
-export const Web3ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [connected, setConnected] = useState(false)
-  const [chainID] = useState(CHAIN)
-  const [providerChainID, setProviderChainID] = useState(CHAIN)
-  const [address, setAddress] = useState('')
-
-  // TODO: make dynamic
-  const uri = 'https://forno.celo.org'
-  const [provider, setProvider] = useState<JsonRpcProvider>(new StaticJsonRpcProvider(uri))
-
-  const [web3Modal] = useState<Web3Modal>(
-    new Web3Modal({
-      cacheProvider: true,
-      providerOptions: {
-        walletconnect: {
-          package: WalletConnectProvider,
-          options: {
-            rpc: {
-              [42220]: uri,
-            },
-          },
-        },
-        [LEDGER_ID]: {
-          display: {
-            logo: Ledger,
-            name: 'Celo Ledger',
-            description: 'Connect to your Celo Ledger Wallet',
-          },
-          package: LedgerConnector,
-          connector: async (p) => {
-            const re: LedgerConnector = new p()
-            re.loadModal()
-            const index = await re.enable()
-            console.log(index)
-            const ledgerKit = await LedgerKit.init(CHAIN, [index])
-            return re.activate(ledgerKit)
-          },
-        },
-        //TODO: fix if on wrong chain
-        [CEW_ID]: {
-          display: {
-            logo: Celo,
-            name: 'Celo Extension Wallet',
-            description: 'Connect to your Celo Extension Wallet',
-          },
-          package: CeloExtensionWalletConnector,
-          connector: async (p) => {
-            const re: CeloExtensionWalletConnector = new p(CeloContract.GoldToken)
-            await re.initialise()
-            return re.kit.web3.currentProvider
-          },
-        },
-      },
-    })
-  )
-
-  const hasCachedProvider = (): boolean => {
-    if (!web3Modal) return false
-    if (!web3Modal.cachedProvider) return false
-    return true
-  }
-
-  const _initListeners = useCallback(
-    (rawProvider: JsonRpcProvider) => {
-      if (!rawProvider.on) {
-        return
-      }
-
-      rawProvider.on('accountsChanged', () => setTimeout(() => window.location.reload(), 1))
-
-      rawProvider.on('chainChanged', async (chain: number) => {
-        changeNetwork(chain)
-      })
-
-      rawProvider.on('network', (_newNetwork, oldNetwork) => {
-        if (!oldNetwork) return
-        window.location.reload()
-      })
-    },
-    [provider]
-  )
-
-  const changeNetwork = async (otherChainID: number) => {
-    const network = Number(otherChainID)
-
-    setProviderChainID(network)
-  }
-
-  const connect = useCallback(async () => {
-    if (web3Modal.cachedProvider === LEDGER_ID) {
-      web3Modal.clearCachedProvider()
-    }
-    const rawProvider = await web3Modal.connect()
-
-    _initListeners(rawProvider)
-
-    const connectedProvider = new Web3Provider(rawProvider, 'any')
-
-    const chainId = await connectedProvider.getNetwork().then((network) => Number(network.chainId))
-    const connectedAddress = await connectedProvider.getSigner()?.getAddress()
-
-    setAddress(connectedAddress)
-
-    setProviderChainID(chainId)
-
-    if (chainId === CHAIN) {
-      setProvider(connectedProvider)
-    } else {
-      //TODO: is it possible to connect wallet after?
-      await switchNetwork()
-      window.location.reload()
-    }
-
-    setConnected(true)
-
-    return connectedProvider
-  }, [web3Modal, _initListeners])
-
-  const checkWrongNetwork = async (): Promise<boolean> => {
-    if (providerChainID !== CHAIN) {
-      await switchNetwork()
-      window.location.reload()
-      await connect()
-      return true
-    }
-    return false
-  }
-
-  const disconnect = useCallback(async () => {
-    web3Modal.clearCachedProvider()
-    setConnected(false)
-
-    setTimeout(() => {
-      window.location.reload()
-    }, 1)
-  }, [web3Modal])
-
-  const onChainProvider = useMemo(
-    () => ({
-      connect,
-      disconnect,
-      hasCachedProvider,
-      provider,
-      connected,
-      address,
-      chainID,
-      web3Modal,
-      providerChainID,
-      checkWrongNetwork,
-    }),
-    [connect, disconnect, hasCachedProvider, provider, connected, address, chainID, web3Modal, providerChainID]
-  )
-  return <Web3Context.Provider value={{ onChainProvider }}>{children}</Web3Context.Provider>
 }

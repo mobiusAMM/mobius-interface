@@ -1,5 +1,5 @@
+import { useContractKit } from '@celo-tools/use-contractkit'
 import { Fraction } from '@ubeswap/sdk'
-import { useWeb3Context } from 'hooks'
 import JSBI from 'jsbi'
 import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -34,7 +34,7 @@ export function useCloseModals(): () => void {
 }
 
 export function useWalletModalToggle(): () => void {
-  const { connect, address } = useWeb3Context()
+  const { connect, address } = useContractKit()
   const toggle = useToggleModal(ApplicationModal.WALLET)
   return address === null ? connect : toggle
 }

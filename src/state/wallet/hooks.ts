@@ -2,11 +2,9 @@ import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import { useEffect, useMemo, useState } from 'react'
 import { useBlockNumber } from 'state/application/hooks'
 
-import { CHAIN } from '../../constants'
 import ERC20_INTERFACE from '../../constants/abis/erc20'
-import { MOBI } from '../../constants/tokens'
 import { useWeb3Context } from '../../hooks'
-import { useAllTokens } from '../../hooks/Tokens'
+import { useAllTokens, useMobi } from '../../hooks/Tokens'
 import { useTokenContract } from '../../hooks/useContract'
 import { isAddress } from '../../utils'
 import { useMultipleContractSingleData } from '../multicall/hooks'
@@ -129,15 +127,15 @@ export function useAllTokenBalances(): { [tokenAddress: string]: TokenAmount | u
   return balances ?? {}
 }
 
-// get the total owned
+// get the total owned, unclaimed, and unharvested UBE for account
 export function useAggregateUbeBalance(): TokenAmount | undefined {
   const { address, connected } = useWeb3Context()
 
-  const ube = MOBI[CHAIN]
+  const mobi = useMobi()
 
-  const ubeBalance: TokenAmount | undefined = useTokenBalance(connected ? address : undefined, ube)
+  const ubeBalance: TokenAmount | undefined = useTokenBalance(connected ? address : undefined, mobi)
 
-  if (!ube) return undefined
+  if (!mobi) return undefined
 
   return ubeBalance
 }
