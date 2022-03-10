@@ -20,7 +20,7 @@ const fetchEthBtcPrices = async (dispatch: any) => {
 // 0x17700282592d6917f6a73d0bf8accf4d578c131e
 
 const ubeswapClient = new ApolloClient({
-  uri: 'https://api.thegraph.com/subgraphs/name/ubeswap/ubeswap',
+  uri: 'https://api.thegraph.com/subgraphs/name/ubeswap/ubeswap-backup',
   cache: new InMemoryCache(),
 })
 const priceQuery = gql`
