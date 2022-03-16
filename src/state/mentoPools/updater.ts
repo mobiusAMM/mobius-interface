@@ -16,7 +16,7 @@ import { updateMento } from './actions'
 import { stableToToken } from './hooks'
 
 export function UpdateMento() {
-  const { provider, kit } = useWeb3Context()
+  const { kit } = useWeb3Context()
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()
   const mentoPools = MENTO_POOL_INFO[CHAIN]
@@ -49,7 +49,7 @@ export function UpdateMento() {
       const address = await kit.registry.addressFor(pool.contract)
       updatePool(pool, mentoContract?.attach(address) ?? null)
     })
-  }, [blockNumber, provider, dispatch, kit.contracts, mentoContract, kit.registry, mentoPools])
+  }, [blockNumber, dispatch, kit.contracts, mentoContract, kit.registry, mentoPools])
 
   return null
 }
