@@ -47,7 +47,7 @@ function useContract(address: string | undefined, ABI: any, withSignerIfPossible
   const { provider, connected } = useWeb3Context()
 
   return useMemo(() => {
-    if (!address || !ABI || !provider) return null
+    if (!address || !ABI) return null
     try {
       return getContract(address, ABI, provider, connected && withSignerIfPossible)
     } catch (error) {
