@@ -166,7 +166,7 @@ export function useSwapCallback(
 
         const contract = disconnectedContract.connect(provider.getSigner())
         return contract[methodName](...args, {
-          gasLimit: gasEstimate,
+          gasLimit: gasEstimate.add('100000'),
         })
           .then((response: ContractTransaction) => {
             const inputSymbol = trade.input.token.symbol

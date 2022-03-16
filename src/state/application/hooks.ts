@@ -35,9 +35,9 @@ export function useCloseModals(): () => void {
 }
 
 export function useWalletModalToggle(): () => void {
-  const { connect, address } = useWeb3Context()
+  const { connect, connected } = useWeb3Context()
   const toggle = useToggleModal(ApplicationModal.WALLET)
-  return address === null ? connect : toggle
+  return !connected ? connect : toggle
 }
 
 export function useToggleSettingsMenu(): () => void {

@@ -195,7 +195,7 @@ export default function Updater(): null {
         return cancel
       }),
     }
-  }, [latestBlockNumber])
+  }, [dispatch, latestBlockNumber, multicallContract, serializedOutdatedCallKeys])
 
   return null
 }

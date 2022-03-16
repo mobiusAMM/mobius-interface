@@ -1,5 +1,3 @@
-import { newKit } from '@celo/contractkit'
-import { IMentoExchange } from 'constants/mento'
 import { CELO } from 'constants/tokens'
 import { Exchange } from 'generated'
 import JSBI from 'jsbi'
@@ -10,7 +8,7 @@ import { useBlockNumber } from 'state/application/hooks'
 import invariant from 'tiny-invariant'
 
 import { CHAIN, weiScale } from '../../constants'
-import { MENTO_POOL_INFO } from '../../constants/mento'
+import { IMentoExchange, MENTO_POOL_INFO } from '../../constants/mento'
 import { useWeb3Context } from '../../hooks'
 import { useMentoContract } from '../../hooks/useContract'
 import { AppDispatch } from '../index'
@@ -18,8 +16,7 @@ import { updateMento } from './actions'
 import { stableToToken } from './hooks'
 
 export function UpdateMento() {
-  const kit = newKit('https://forno.celo.org')
-  const { provider } = useWeb3Context()
+  const { provider, kit } = useWeb3Context()
   const blockNumber = useBlockNumber()
   const dispatch = useDispatch<AppDispatch>()
   const mentoPools = MENTO_POOL_INFO[CHAIN]

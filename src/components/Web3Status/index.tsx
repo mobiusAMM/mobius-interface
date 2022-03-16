@@ -2,11 +2,9 @@ import { useWeb3Context } from 'hooks'
 import useENS from 'hooks/useENS'
 import { darken, lighten } from 'polished'
 import React, { useMemo } from 'react'
-import { Activity } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import styled, { css } from 'styled-components'
 
-import { CHAIN } from '../../constants'
 import { useWalletModalToggle } from '../../state/application/hooks'
 import { isTransactionRecent, useAllTransactions } from '../../state/transactions/hooks'
 import { TransactionDetails } from '../../state/transactions/reducer'
@@ -27,16 +25,6 @@ const Web3StatusGeneric = styled(ButtonSecondary)`
   user-select: none;
   :focus {
     outline: none;
-  }
-`
-const Web3StatusError = styled(Web3StatusGeneric)`
-  background-color: ${({ theme }) => theme.red1};
-  border: 1px solid ${({ theme }) => theme.red1};
-  color: ${({ theme }) => theme.white};
-  font-weight: 500;
-  :hover,
-  :focus {
-    background-color: ${({ theme }) => darken(0.1, theme.red1)};
   }
 `
 
@@ -89,13 +77,6 @@ const Text = styled.p`
   font-weight: 500;
 `
 
-const NetworkIcon = styled(Activity)`
-  margin-left: 0.25rem;
-  margin-right: 0.5rem;
-  width: 16px;
-  height: 16px;
-`
-
 // we want the latest one to come first, so return negative if a is after b
 function newTransactionsFirst(a: TransactionDetails, b: TransactionDetails) {
   return b.addedTime - a.addedTime
@@ -107,7 +88,7 @@ const StatusIcon: React.FC = () => {
 
 function Web3StatusInner() {
   const { t } = useTranslation()
-  const { connect, address, connected, providerChainID, checkWrongNetwork } = useWeb3Context()
+  const { connect, address, connected } = useWeb3Context()
   const { name } = useENS(address)
 
   const allTransactions = useAllTransactions()
@@ -121,41 +102,26 @@ function Web3StatusInner() {
 
   const hasPendingTransactions = !!pending.length
   const toggleWalletModal = useWalletModalToggle()
-  if (connected && providerChainID !== CHAIN) {
-    return (
-      <Web3StatusError onClick={() => checkWrongNetwork()}>
-        <NetworkIcon />
-        <Text>Wrong Network</Text>
-      </Web3StatusError>
-    )
-  }
+
   if (connected) {
-    if (providerChainID !== CHAIN) {
-      return (
-        <Web3StatusError onClick={() => checkWrongNetwork()}>
-          <NetworkIcon />
-          <Text>Wrong Network</Text>
-        </Web3StatusError>
-      )
-    } else {
-      return (
-        <Web3StatusConnected id="web3-status-connected" onClick={toggleWalletModal} pending={hasPendingTransactions}>
-          {hasPendingTransactions ? (
-            <RowBetween>
-              <Text>{pending?.length} Pending</Text> <Loader stroke="white" />
-            </RowBetween>
-          ) : (
-            <>
-              <Text>{name ? name : shortenAddress(address)}</Text>
-            </>
-          )}
-          {!hasPendingTransactions && <StatusIcon />}
-        </Web3StatusConnected>
-      )
-    }
+    return (
+      <Web3StatusConnected id="web3-status-connected" onClick={toggleWalletModal} pending={hasPendingTransactions}>
+        {hasPendingTransactions ? (
+          <RowBetween>
+            <Text>{pending?.length} Pending</Text> <Loader stroke="white" />
+          </RowBetween>
+        ) : (
+          <>
+            <Text>{name ? name : shortenAddress(address)}</Text>
+          </>
+        )}
+        {!hasPendingTransactions && <StatusIcon />}
+      </Web3StatusConnected>
+    )
+    // }
   } else {
     return (
-      <Web3StatusConnect id="connect-wallet" onClick={() => connect().catch(console.warn)}>
+      <Web3StatusConnect id="connect-wallet" onClick={async () => await connect()}>
         <Text>{t('Connect to a wallet')}</Text>
       </Web3StatusConnect>
     )
@@ -172,13 +138,6 @@ export default function Web3Status() {
 
   const pending = sortedRecentTransactions.filter((tx) => !tx.receipt).map((tx) => tx.hash)
   const confirmed = sortedRecentTransactions.filter((tx) => tx.receipt).map((tx) => tx.hash)
-  // const { summary } = useAccountSummary(account ?? undefined)
-
-  // useEffect(() => {
-  //   Sentry.setUser({ id: account ?? undefined })
-  //   Sentry.setTag('connector', walletType)
-  //   Sentry.setTag('network', NETWORK_CHAIN_NAME)
-  // }, [walletType, account])
 
   return (
     <>

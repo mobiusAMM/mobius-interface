@@ -211,25 +211,20 @@ html, input, textarea, button {
   font-family: 'Avenir', Nunito, 'Inter';
   font-display: fallback;
 }
-
 html,
 body {
   margin: 0;
   padding: 0;
 }
-
  a {
    color: ${colors(false).blue1}; 
  }
-
 * {
   box-sizing: border-box;
 }
-
 button {
   user-select: none;
 }
-
 html {
   font-size: 16px;
   font-variant: none;
