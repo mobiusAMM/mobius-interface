@@ -39,5 +39,5 @@ jobs:
         with:
           deploy_key: ${{ secrets.DIST_DEPLOY_KEY }}
           external_repository: mobiusAMM/mobius_interface_dist
-          publish_branch: staging
+          publish_branch: master
           publish_dir: ./build/
