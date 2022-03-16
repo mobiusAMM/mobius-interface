@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useCurrentPool, usePools } from 'state/mobiusPools/hooks'
 import invariant from 'tiny-invariant'
 
+import { BIPS_BASE } from '../../constants'
 import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { isAddress } from '../../utils'
@@ -212,7 +213,7 @@ export function useMobiusTradeInfo(): {
 
   const tradeData = calcInputOutput(inputCurrency, outputCurrency, parsedAmount, pool)
 
-  const basisPrice = calculateSwapPrice(pool)
+  const basisPrice = indexFrom === 1 ? calculateSwapPrice(pool) : calculateSwapPrice(pool).invert()
   const input = tradeData[0]
   const output = tradeData[1]
   const fee = tradeData[2]
@@ -232,7 +233,10 @@ export function useMobiusTradeInfo(): {
   }
 
   const executionPrice = new Price(inputCurrency, outputCurrency, input?.raw, output?.raw)
-  const priceImpactFraction = basisPrice.subtract(executionPrice).divide(basisPrice)
+  const priceImpactFraction = basisPrice
+    .subtract(executionPrice)
+    .divide(basisPrice)
+    .subtract(pool.fees.trade.divide(BIPS_BASE).multiply('100'))
   const priceImpact = new Percent(priceImpactFraction.numerator, priceImpactFraction.denominator)
 
   const v2Trade: MobiusTrade | undefined =
