@@ -1,8 +1,6 @@
 import { Interface } from '@ethersproject/abi'
 import { IGauge, StablePools } from 'constants/pools'
 import { useWeb3Context } from 'hooks'
-import JSBI from 'jsbi'
-import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from 'state'
 import { useBlockNumber } from 'state/application/hooks'
@@ -11,7 +9,6 @@ import { useMultipleContractSingleData, useSingleContractMultipleData } from 'st
 import { CHAIN } from '../../constants'
 import GAUGE_V3 from '../../constants/abis/LiquidityGaugeV3.json'
 import { useGaugeControllerContract } from '../../hooks/useContract'
-import { updateGauges, updateGaugesUser } from './actions'
 
 const gaugeInterface = new Interface(GAUGE_V3.abi)
 
@@ -61,58 +58,58 @@ export function GaugeUpdater() {
     gaugeAddresses.map((a) => [connected ? address : a, a])
   )
 
-  useEffect(() => {
-    console.log('gauge update')
-    connected &&
-      dispatch(
-        updateGaugesUser({
-          userGaugeState: StablePools[CHAIN].map((displayPool, i) => {
-            return displayPool.gauge === null
-              ? null
-              : {
-                  balance: JSBI.BigInt(balance[i].result?.[0] ?? '0'),
-                  claimableMobi: JSBI.BigInt(claimableMobi[i].result?.[0] ?? '0'),
-                  lastVote: parseInt(lastVote[i].result?.[0].toString() ?? '0'),
-                  powerAllocated: parseInt(slopes[i].result?.[1] ?? '0'),
-                  effectiveBalance: JSBI.BigInt(effectiveBalances[i].result?.[0] ?? '0'),
-                }
-          }),
-        })
-      )
-    dispatch(
-      updateGauges({
-        gaugeState: StablePools[CHAIN].map((display, i) => {
-          return display.gauge === null
-            ? null
-            : {
-                isKilled: isKilled[0].result?.[0] === true,
-                lastClaim: parseInt(lastClaims?.[i]?.result?.[0].toString() ?? '0'),
-                weight: JSBI.BigInt(weights[i].result?.[0] ?? 0),
-                futureWeight: JSBI.BigInt(futureWeights[i].result?.[0] ?? 0),
-                totalSupply: JSBI.BigInt(totalSupply[i].result?.[0] ?? 0),
-                workingSupply: JSBI.BigInt(workingSupply[i].result?.[0] ?? 0),
-                totalEffectiveBalance: JSBI.BigInt(totalEffectiveBalances[i].result?.[0] ?? 0),
-              }
-        }),
-      })
-    )
-  }, [
-    connected,
-    dispatch,
-    blockNumber,
-    balance,
-    claimableMobi,
-    lastVote,
-    slopes,
-    isKilled,
-    lastClaims,
-    totalSupply,
-    workingSupply,
-    weights,
-    futureWeights,
-    effectiveBalances,
-    totalEffectiveBalances,
-  ])
+  // useEffect(() => {
+  //   console.log('gauge update')
+  //   connected &&
+  //     dispatch(
+  //       updateGaugesUser({
+  //         userGaugeState: StablePools[CHAIN].map((displayPool, i) => {
+  //           return displayPool.gauge === null
+  //             ? null
+  //             : {
+  //                 balance: JSBI.BigInt(balance[i].result?.[0] ?? '0'),
+  //                 claimableMobi: JSBI.BigInt(claimableMobi[i].result?.[0] ?? '0'),
+  //                 lastVote: parseInt(lastVote[i].result?.[0].toString() ?? '0'),
+  //                 powerAllocated: parseInt(slopes[i].result?.[1] ?? '0'),
+  //                 effectiveBalance: JSBI.BigInt(effectiveBalances[i].result?.[0] ?? '0'),
+  //               }
+  //         }),
+  //       })
+  //     )
+  //   dispatch(
+  //     updateGauges({
+  //       gaugeState: StablePools[CHAIN].map((display, i) => {
+  //         return display.gauge === null
+  //           ? null
+  //           : {
+  //               isKilled: isKilled[0].result?.[0] === true,
+  //               lastClaim: parseInt(lastClaims?.[i]?.result?.[0].toString() ?? '0'),
+  //               weight: JSBI.BigInt(weights[i].result?.[0] ?? 0),
+  //               futureWeight: JSBI.BigInt(futureWeights[i].result?.[0] ?? 0),
+  //               totalSupply: JSBI.BigInt(totalSupply[i].result?.[0] ?? 0),
+  //               workingSupply: JSBI.BigInt(workingSupply[i].result?.[0] ?? 0),
+  //               totalEffectiveBalance: JSBI.BigInt(totalEffectiveBalances[i].result?.[0] ?? 0),
+  //             }
+  //       }),
+  //     })
+  //   )
+  // }, [
+  //   connected,
+  //   dispatch,
+  //   blockNumber,
+  //   balance,
+  //   claimableMobi,
+  //   lastVote,
+  //   slopes,
+  //   isKilled,
+  //   lastClaims,
+  //   totalSupply,
+  //   workingSupply,
+  //   weights,
+  //   futureWeights,
+  //   effectiveBalances,
+  //   totalEffectiveBalances,
+  // ])
 
   return null
 }
