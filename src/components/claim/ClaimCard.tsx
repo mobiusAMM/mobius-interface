@@ -1,12 +1,12 @@
 import { TransactionResponse } from '@ethersproject/providers'
 import { VestingAddresses } from 'constants/StablePools'
-import { useWeb3Context } from 'hooks'
 import { darken } from 'polished'
 import React from 'react'
 import { VestType } from 'state/claim/reducer'
 import styled from 'styled-components'
 import { humanFriendlyWei } from 'utils/eth'
 
+import { CHAIN } from '../../constants'
 import { useVestingContract } from '../../hooks/useContract'
 import { ClaimInfo } from '../../state/claim/hooks'
 import { useTransactionAdder } from '../../state/transactions/hooks'
@@ -129,8 +129,7 @@ export const ClaimCard: React.FC<Props> = ({ info, type }: Props) => {
   const backgroundColorEnd = '#212429'
   const backgroundGradient = null //generateGradient(tokens.slice())
   const { allocatedAmount, claimedAmount, unclaimedAmount } = info
-  const { chainId } = useWeb3Context()
-  const vestAddress = VestingAddresses[type][chainId]
+  const vestAddress = VestingAddresses[type][CHAIN]
   const claimContract = useVestingContract(vestAddress)
   const addTransaction = useTransactionAdder()
 
