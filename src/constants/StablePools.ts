@@ -174,7 +174,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       displayDecimals: 0,
       gaugeAddress: '0x107F94409746E8c8E6eFF139A100D17D9ca7FdfE',
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
-      additionalRewardRate: [weeklyEmissionToSeconds(2268)], // ['14776041660000000'], //['18468900000000000'], // ['7302827380000000']
+      additionalRewardRate: [weeklyEmissionToSeconds(1630)], // ['14776041660000000'], //['18468900000000000'], // ['7302827380000000']
       displayChain: Chain.Terra,
       coin: Coins.USD,
     },
@@ -226,7 +226,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       displayDecimals: 0,
       gaugeAddress: '0xc96AeeaFF32129da934149F6134Aa7bf291a754E',
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
-      additionalRewardRate: [weeklyEmissionToSeconds(11088)], // ['29552083330000000'], // ['36940104160000000'], // ['7302827380000000']
+      additionalRewardRate: [weeklyEmissionToSeconds(7966)], // ['29552083330000000'], // ['36940104160000000'], // ['7302827380000000']
       displayChain: Chain.Ethereum,
       coin: Coins.USD,
     },
@@ -278,7 +278,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       displayDecimals: 0,
       gaugeAddress: '0xE1f9D952EecC07cfEFa69df9fBB0cEF260957119',
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
-      additionalRewardRate: [weeklyEmissionToSeconds(3780)], // ['14776041660000000'], //['18468900000000000'], // ['7302827380000000']
+      additionalRewardRate: [weeklyEmissionToSeconds(2715)], // ['14776041660000000'], //['18468900000000000'], // ['7302827380000000']
       displayChain: Chain.Ethereum,
       coin: Coins.USD,
     },
@@ -434,7 +434,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       displayDecimals: 0,
       gaugeAddress: '0x0A125D473cd3b1968e728DDF7d424c928C09222A',
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
-      additionalRewardRate: [weeklyEmissionToSeconds(2520)], // ['7388020830000000'], //['11080000000000000'], // ['2190848200000000'],
+      additionalRewardRate: [weeklyEmissionToSeconds(1811)], // ['7388020830000000'], //['11080000000000000'], // ['2190848200000000'],
       displayChain: Chain.Polygon,
       coin: Coins.USD,
     },
@@ -804,7 +804,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       displayDecimals: 0,
       gaugeAddress: '0x27D9Bfa5F864862BeDC23cFab7e00b6b94488CC6',
       additionalRewards: ['0x471EcE3750Da237f93B8E339c536989b8978a438'],
-      additionalRewardRate: [weeklyEmissionToSeconds(3780)],
+      additionalRewardRate: [weeklyEmissionToSeconds(2715)],
       displayChain: Chain.Solana,
       coin: Coins.USD,
     },
