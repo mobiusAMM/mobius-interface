@@ -137,7 +137,7 @@ export default function CalcBoost({ stakingInfo }: PositionsProps) {
   const { address, connected } = useWeb3Context()
   const { positions = [] } = stakingInfo
   const loading = positions.length === 0
-  const greaterThanZero = positions.filter(({ baseBalance }) => baseBalance.greaterThan('0'))
+  const greaterThanZero = positions.filter(({ disabled, baseBalance }) => !disabled && baseBalance.greaterThan('0'))
   const [openModal, setOpenModal] = useState(false)
   const mobi = useMobi()
   const vemobi = useVeMobi()
@@ -163,7 +163,7 @@ export default function CalcBoost({ stakingInfo }: PositionsProps) {
 
   const stake =
     staking.positions && pool
-      ? staking.positions.filter((s) => s.address.toLowerCase() === pool.gaugeAddress?.toLowerCase())[0]
+      ? staking.positions.filter((s) => !s.disabled && s.address.toLowerCase() === pool.gaugeAddress?.toLowerCase())[0]
       : undefined
 
   if (!vemobi) return null

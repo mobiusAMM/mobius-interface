@@ -30,6 +30,7 @@ export type GaugeSummary = {
   lastVote: Date
   futureWeight: Percent
   powerAllocated: number
+  disabled?: boolean
 }
 
 export type MobiStakingInfo = {
@@ -90,6 +91,7 @@ export function useMobiStakingInfo(): MobiStakingInfo {
     return baseInfo
   }
   const positions = pools.map((pool) => ({
+    disbabled: pool.disabled,
     pool: pool.name,
     poolAddress: pool.address,
     address: pool.gaugeAddress ?? '',
