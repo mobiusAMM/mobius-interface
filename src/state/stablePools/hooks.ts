@@ -133,8 +133,10 @@ export const getPoolInfo = (pool: StableSwapPool): StablePoolInfo | Record<strin
         coin: pool.coin,
         isDisabled: pool.disabled,
         isKilled: pool.isKilled,
-        weeklyVolume: pool.volume ? tryParseAmount(pool.volume.week.toFixed(6), pool.lpToken) : undefined,
-        totalVolume: pool.volume ? tryParseAmount(pool.volume.total?.toFixed(6), pool.lpToken) : undefined,
+        weeklyVolume:
+          pool.volume && pool.volume.week ? tryParseAmount(pool.volume.week.toFixed(6), pool.lpToken) : undefined,
+        totalVolume:
+          pool.volume && pool.volume.total ? tryParseAmount(pool.volume.total?.toFixed(6), pool.lpToken) : undefined,
         poolLoading: pool.loadingPool,
         gaugeLoading: pool.loadingGauge,
       }

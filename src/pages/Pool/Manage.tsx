@@ -105,7 +105,6 @@ export default function Manage({
   const { connect, connected, address } = useWeb3Context()
   const mobi = useMobi()
   const externalRewards = useExternalRewards({ address: poolName })
-  console.log(externalRewards, poolName, 101)
 
   // get currencies and pair
 
