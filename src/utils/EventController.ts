@@ -34,7 +34,6 @@ export class EventController {
   }
 
   public trigger(event: string, result?: any): void {
-    console.log(event)
     const eventCallbacks: IEventCallback[] = this._eventCallbacks.filter(
       (eventCallback: IEventCallback) => eventCallback.event === event
     )
