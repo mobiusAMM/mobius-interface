@@ -1,4 +1,3 @@
-import { DappKitResponseStatus } from '@celo/utils'
 import { ErrorBoundary } from '@sentry/react'
 import WarningModal from 'components/WarningModal'
 import React, { Suspense, useState } from 'react'
@@ -61,31 +60,12 @@ const Marginer = styled.div`
   margin-top: 5rem;
 `
 
-const localStorageKey = 'valoraRedirect'
-
 export default function App() {
   const location = useLocation()
   // const { network, updateNetwork } = useContractKit()
   // const chainId = network.chainId as unknown as ChainId
   const [showWarning, setShowWarning] = useState(true)
   // const wrongNetwork = !location.pathname.includes('optics') && chainId !== NETWORK_CHAIN_ID
-  React.useEffect(() => {
-    // Close window if search params from Valora redirect are present (handles Valora connection issue)
-    if (typeof window !== 'undefined') {
-      const url = window.location.href
-      const whereQuery = url.indexOf('?')
-      if (whereQuery !== -1) {
-        const query = url.slice(whereQuery)
-        const params = new URLSearchParams(query)
-        if (params.get('status') === DappKitResponseStatus.SUCCESS) {
-          localStorage.setItem(localStorageKey, window.location.href)
-        }
-      }
-    }
-    // if (wrongNetwork) {
-    //   updateNetwork(NETWORK)
-    // }
-  }, [location])
 
   return (
     <Suspense fallback={null}>
