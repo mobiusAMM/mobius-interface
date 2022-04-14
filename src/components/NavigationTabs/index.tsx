@@ -51,6 +51,7 @@ const StyledArrowLeft = styled(ArrowLeft)`
   color: ${({ theme }) => theme.text1};
 `
 
+// TODO: does this do anything
 export function SwapPoolTabs({ active }: { active: 'swap' | 'mento' | 'pool' | 'send' }) {
   const { t } = useTranslation()
   return (

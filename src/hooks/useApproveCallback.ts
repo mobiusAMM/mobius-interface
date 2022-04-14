@@ -1,13 +1,10 @@
 import { MaxUint256 } from '@ethersproject/constants'
-import { TokenAmount } from '@ubeswap/sdk'
+import { TokenAmount } from 'lib/token-utils'
 import { useCallback, useMemo } from 'react'
-import { MobiusTrade } from 'state/swap/hooks'
 import { useUserMinApprove } from 'state/user/hooks'
 
 import { useTokenAllowance } from '../data/Allowances'
-import { Field } from '../state/swap/actions'
 import { useHasPendingApproval } from '../state/transactions/hooks'
-import { computeSlippageAdjustedAmounts } from '../utils/prices'
 import { useTokenContract } from './useContract'
 import { useDoTransaction } from './useDoTransaction'
 import { useWeb3Context } from './web3'
@@ -79,26 +76,17 @@ export function useApproveCallback(
     if (minApprove) {
       await doTransaction(tokenContract, 'approve', {
         args: [spender, amountToApprove.raw.toString()],
-        summary: `Approve ${amountToApprove.toSignificant(6)} ${amountToApprove.currency.symbol}`,
+        summary: `Approve ${amountToApprove.toSignificant(6)} ${amountToApprove.token.symbol}`,
         approval: { tokenAddress: token.address, spender: spender },
       })
     } else {
       await doTransaction(tokenContract, 'approve', {
         args: [spender, MaxUint256],
-        summary: `Approve ${amountToApprove.currency.symbol}`,
+        summary: `Approve ${amountToApprove.token.symbol}`,
         approval: { tokenAddress: token.address, spender: spender },
       })
     }
   }, [approvalState, token, tokenContractDisconnected, amountToApprove, spender, provider, minApprove, doTransaction])
 
   return [approvalState, approve]
-}
-
-// wraps useApproveCallback in the context of a swap
-export function useApproveCallbackFromTrade(trade?: MobiusTrade, allowedSlippage = 0) {
-  const amountToApprove = useMemo(
-    () => (trade ? computeSlippageAdjustedAmounts(trade, allowedSlippage)[Field.INPUT] : undefined),
-    [trade, allowedSlippage]
-  )
-  return useApproveCallback(amountToApprove, trade?.pool.address)
 }

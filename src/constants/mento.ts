@@ -1,5 +1,5 @@
 import { CeloContract, StableToken } from '@celo/contractkit'
-import { ChainId, Percent, TokenAmount } from '@ubeswap/sdk'
+import { ChainId, Percent, TokenAmount } from 'lib/token-utils'
 
 /**
  * Static definition of a Mento exchange.
@@ -20,7 +20,7 @@ export interface IMentoExchangeInfo {
 }
 
 export const MENTO_POOL_INFO: { [K in ChainId]: IMentoExchange[] } = {
-  [ChainId.MAINNET]: [
+  [ChainId.Mainnet]: [
     {
       stable: StableToken.cUSD,
       contract: CeloContract.Exchange,
@@ -34,6 +34,6 @@ export const MENTO_POOL_INFO: { [K in ChainId]: IMentoExchange[] } = {
       contract: CeloContract.ExchangeBRL,
     },
   ],
-  [ChainId.ALFAJORES]: [],
-  [ChainId.BAKLAVA]: [],
+  [ChainId.Alfajores]: [],
+  [ChainId.Baklava]: [],
 }

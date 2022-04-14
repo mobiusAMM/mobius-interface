@@ -6,7 +6,6 @@ import {
   addPrice,
   addPrices,
   ApplicationModal,
-  btcEthPrice,
   PopupContent,
   removePopup,
   setOpenModal,
@@ -14,6 +13,7 @@ import {
 } from './actions'
 
 type PopupList = Array<{ key: string; show: boolean; content: PopupContent; removeAfterMs: number | null }>
+
 export type TokenPrices = {
   [address: string]: string
 }
@@ -22,8 +22,6 @@ export interface ApplicationState {
   readonly blockNumber: { readonly [chainId: number]: number }
   readonly popupList: PopupList
   readonly openModal: ApplicationModal | null
-  readonly btcPrice: string
-  readonly ethPrice: string
   readonly tokenPrices: TokenPrices
   readonly ubeswapClient: ApolloClient<NormalizedCacheObject>
 }
@@ -32,11 +30,9 @@ const initialState: ApplicationState = {
   blockNumber: {},
   popupList: [],
   openModal: null,
-  btcPrice: '41000',
-  ethPrice: '2700',
   tokenPrices: {},
   ubeswapClient: new ApolloClient({
-    uri: 'https://api.thegraph.com/subgraphs/name/ubeswap/ubeswap',
+    uri: 'https://api.thegraph.com/subgraphs/name/ubeswap/ubeswap-backup',
     cache: new InMemoryCache(),
   }),
 }
@@ -53,10 +49,6 @@ export default createReducer(initialState, (builder) =>
     })
     .addCase(setOpenModal, (state, action) => {
       state.openModal = action.payload
-    })
-    .addCase(btcEthPrice, (state, { payload: { ethPrice, btcPrice } }) => {
-      state.ethPrice = ethPrice
-      state.btcPrice = btcPrice
     })
     .addCase(addPopup, (state, { payload: { content, key, removeAfterMs = 15000 } }) => {
       state.popupList = (key ? state.popupList.filter((popup) => popup.key !== key) : state.popupList).concat([
@@ -82,6 +74,9 @@ export default createReducer(initialState, (builder) =>
       }
     })
     .addCase(addPrices, (state, { payload: { prices } }) => {
-      state.tokenPrices = prices
+      state.tokenPrices = {
+        ...state.tokenPrices,
+        ...prices,
+      }
     })
 )

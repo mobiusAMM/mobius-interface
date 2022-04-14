@@ -1,17 +1,31 @@
-import { Token } from '@ubeswap/sdk'
 import { MENTO_POOL_INFO } from 'constants/mento'
+import { IExchange, StablePools } from 'constants/pools'
+import { Token } from 'lib/token-utils'
 import { stableToToken } from 'state/mentoPools/hooks'
 import { dedupeTokens } from 'utils/tokens'
 
 import { CHAIN } from '../constants'
-import { MOBI_TOKEN, STATIC_POOL_INFO } from '../constants/StablePools'
-import { CELO, ExternalRewards, VEMOBI } from '../constants/tokens'
+import { CELO, ExternalRewards, MOBI, VEMOBI } from '../constants/tokens'
 import { isAddress } from '../utils'
 
+function inPool(token: Token, pool: IExchange): boolean {
+  return pool.tokens.map((t) => t.address === token.address && t.chainId === token.chainId).includes(true)
+}
+
+export function useTokensTradeable(mento: boolean, tokenIn: Token | null | undefined): Token[] {
+  if (!tokenIn) return []
+  const pools = mento
+    ? tokenIn === CELO[CHAIN]
+      ? MENTO_POOL_INFO[CHAIN].map((m) => stableToToken(m.stable))
+      : [CELO[CHAIN]]
+    : StablePools[CHAIN].filter((display) => inPool(tokenIn, display.pool))
+        .flatMap((display) => display.pool.tokens)
+        .filter((token) => token !== tokenIn)
+  return dedupeTokens(pools)
+}
+
 export function useSwappableTokens(mento: boolean): Token[] {
-  return dedupeTokens(
-    mento ? getMentoTokens() : STATIC_POOL_INFO[CHAIN].filter((pool) => !pool.disabled).flatMap(({ tokens }) => tokens)
-  )
+  return dedupeTokens(mento ? getMentoTokens() : StablePools[CHAIN].flatMap((display) => display.pool.tokens))
 }
 
 export function getMentoTokens(): Token[] {
@@ -19,7 +33,7 @@ export function getMentoTokens(): Token[] {
 }
 
 export function getAllTokens(): Token[] | null {
-  const StableTokensWithDup = STATIC_POOL_INFO[CHAIN].flatMap((pools) => pools.tokens)
+  const StableTokensWithDup = StablePools[CHAIN].flatMap((display) => display.pool.tokens)
   const MentoTokensWithDup = getMentoTokens()
   return dedupeTokens(MentoTokensWithDup.concat(StableTokensWithDup).concat(ExternalRewards[CHAIN]))
 }
@@ -40,10 +54,10 @@ export function useCurrency(currencyId: string | undefined): Token | null {
   return token
 }
 
-export function useMobi(): Token | undefined {
-  return MOBI_TOKEN[CHAIN]
+export function useMobi(): Token {
+  return MOBI[CHAIN]
 }
 
-export function useVeMobi(): Token | undefined {
+export function useVeMobi(): Token {
   return VEMOBI[CHAIN]
 }

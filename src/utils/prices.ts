@@ -1,4 +1,5 @@
-import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
+import JSBI from 'jsbi'
+import { Percent, TokenAmount } from 'lib/token-utils'
 import { MentoTrade } from 'state/mento/hooks'
 import { MobiusTrade } from 'state/swap/hooks'
 
@@ -24,8 +25,8 @@ export function computeSlippageAdjustedAmounts(
   const maxInput = JSBI.add(inputRaw, JSBI.divide(JSBI.multiply(inputRaw, pct.numerator), pct.denominator))
   const minOutput = JSBI.subtract(outputRaw, JSBI.divide(JSBI.multiply(outputRaw, pct.numerator), pct.denominator))
   return {
-    [Field.INPUT]: new TokenAmount(trade?.input.currency, maxInput),
-    [Field.OUTPUT]: new TokenAmount(trade?.output.currency, minOutput),
+    [Field.INPUT]: new TokenAmount(trade?.input.token, maxInput),
+    [Field.OUTPUT]: new TokenAmount(trade?.output.token, minOutput),
   }
 }
 
@@ -42,8 +43,6 @@ export function formatExecutionPrice(trade?: MobiusTrade | MentoTrade, inverted?
     return ''
   }
   return inverted
-    ? `${trade.executionPrice.invert().toSignificant(6)} ${trade.input.currency.symbol} / ${
-        trade.output.currency.symbol
-      }`
-    : `${trade.executionPrice.toSignificant(6)} ${trade.output.currency.symbol} / ${trade.input.currency.symbol}`
+    ? `${trade.executionPrice.invert().toSignificant(6)} ${trade.input.token.symbol} / ${trade.output.token.symbol}`
+    : `${trade.executionPrice.toSignificant(6)} ${trade.output.token.symbol} / ${trade.input.token.symbol}`
 }

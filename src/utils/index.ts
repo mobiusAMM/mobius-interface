@@ -3,8 +3,9 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { AddressZero } from '@ethersproject/constants'
 import { Contract } from '@ethersproject/contracts'
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
-import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
 import { Exchange, Swap } from 'generated/index'
+import JSBI from 'jsbi'
+import { Percent } from 'lib/token-utils'
 
 import EXCHANGE from '../constants/abis/Exchange.json'
 import SWAP from '../constants/abis/Swap.json'
@@ -35,16 +36,6 @@ export function calculateGasMargin(value: BigNumber): BigNumber {
 // converts a basis points value to a sdk percent
 export function basisPointsToPercent(num: number): Percent {
   return new Percent(JSBI.BigInt(num), JSBI.BigInt(10000))
-}
-
-export function calculateSlippageAmount(value: TokenAmount, slippage: number): [JSBI, JSBI] {
-  if (slippage < 0 || slippage > 10000) {
-    throw Error(`Unexpected slippage value: ${slippage}`)
-  }
-  return [
-    JSBI.divide(JSBI.multiply(value.raw, JSBI.BigInt(10000 - slippage)), JSBI.BigInt(10000)),
-    JSBI.divide(JSBI.multiply(value.raw, JSBI.BigInt(10000 + slippage)), JSBI.BigInt(10000)),
-  ]
 }
 
 // account is not optional

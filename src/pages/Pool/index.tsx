@@ -1,22 +1,23 @@
-import { ErrorBoundary } from '@sentry/react'
-import { cUSD, JSBI, TokenAmount } from '@ubeswap/sdk'
 import QuestionHelper from 'components/QuestionHelper'
 import { RowFixed } from 'components/Row'
-import { Chain, Coins, PRICE } from 'constants/StablePools'
-import { useMobi } from 'hooks/Tokens'
-import React from 'react'
+import { Chain, DisplayPool, IExchangeInfo, StablePools, Volume } from 'constants/pools'
+import { useValueOfAllPools } from 'hooks/useStablePools'
+import JSBI from 'jsbi'
+import { TokenAmount } from 'lib/token-utils'
+import React, { useCallback, useMemo } from 'react'
 import { isMobile } from 'react-device-detect'
+import { useMobiPrice } from 'state/application/hooks'
+import { GaugeInfo, useAllGaugesInfo, useAllUserGaugesInfo, UserGaugeInfo } from 'state/gauges/hooks'
+import { useAllLpBalances, usePools, usePoolsVolume } from 'state/mobiusPools/hooks'
+import { useStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
-import { useCUSDPrice } from 'utils/useCUSDPrice'
 
 import { AutoColumn } from '../../components/Column'
 import { StablePoolCard } from '../../components/earn/StablePoolCard'
 import { CardNoise, CardSection, DataCard } from '../../components/earn/styled'
-import Loader from '../../components/Loader'
 import { Row, RowBetween } from '../../components/Row'
 import { InfoWrapper } from '../../components/swap/styleds'
 import { CHAIN } from '../../constants'
-import { StablePoolInfo, useStablePoolInfo } from '../../state/stablePools/hooks'
 import { Sel, TYPE } from '../../theme'
 
 const PageWrapper = styled(AutoColumn)`
@@ -58,58 +59,86 @@ const HeaderLinks = styled(Row)`
   align-items: center;
 `
 
+enum SpecialChain {
+  Other = 'other',
+  All = 'all',
+}
+
+type SelectChain = SpecialChain | Chain
+
 const OtherChains = new Set<Chain>([Chain.Avax, Chain.Polygon, Chain.Celo])
 
+export type Meta = {
+  display: DisplayPool
+  userGauge: UserGaugeInfo | null
+  gauge: GaugeInfo | null
+  lpBalance: TokenAmount
+  exchangeInfo: IExchangeInfo
+  volume: Volume
+}
+
 export default function Pool() {
-  const stablePools = useStablePoolInfo()
-  const [selection, setSelection] = React.useState<Chain>(Chain.All)
+  const userGauges = useAllUserGaugesInfo()
+  const gauges = useAllGaugesInfo()
+  const stakingInfo = useStakingInfo()
+  const exchanges = usePools()
+  const lpBalances = useAllLpBalances()
+  const volumes = usePoolsVolume()
+
+  const [selection, setSelection] = React.useState<SelectChain>(SpecialChain.All)
   const [showDeprecated, setShowDeprecated] = React.useState(false)
-  const tvl = stablePools
-    .filter((pool) => pool && pool.virtualPrice)
-    .reduce((accum, poolInfo) => {
-      const price =
-        poolInfo.coin === Coins.Bitcoin
-          ? JSBI.BigInt(PRICE[Coins.Bitcoin])
-          : poolInfo.coin === Coins.Ether
-          ? JSBI.BigInt(PRICE[Coins.Ether])
-          : JSBI.BigInt(PRICE[Coins.USD])
-      const lpPrice = JSBI.divide(
-        JSBI.multiply(price, poolInfo.virtualPrice),
-        JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt('18'))
-      )
-      const priceDeposited = JSBI.multiply(poolInfo?.totalDeposited?.raw ?? JSBI.BigInt('0'), lpPrice)
-      return JSBI.add(accum, priceDeposited)
-    }, JSBI.BigInt('0'))
-  const tvlAsTokenAmount = new TokenAmount(cUSD[CHAIN], tvl)
-  const mobiprice = useCUSDPrice(useMobi())
-  const sortCallback = (pool1: StablePoolInfo, pool2: StablePoolInfo) => {
-    if (!pool1 || !pool2) return true
-    const isStaking1 = pool1.amountDeposited?.greaterThan(JSBI.BigInt('0')) || pool1.stakedAmount?.greaterThan('0')
-    const isStaking2 = pool2.amountDeposited?.greaterThan(JSBI.BigInt('0')) || pool2.stakedAmount?.greaterThan('0')
-    if (isStaking1 && !isStaking2) return false
-    return true
-  }
 
-  const sortedFilterdPools = stablePools
-    ?.sort(sortCallback)
-    .filter(
-      (pool) =>
-        selection === Chain.All ||
-        selection === pool.displayChain ||
-        (selection === Chain.Other && OtherChains.has(pool.displayChain))
-    )
+  const tvl = useValueOfAllPools()
+  const mobiprice = useMobiPrice()
 
+  const meta: Meta[] = useMemo(
+    () =>
+      StablePools[CHAIN].map((el, i) => {
+        return {
+          display: el,
+          userGauge: userGauges[i],
+          gauge: gauges[i],
+          lpBalance: lpBalances[i],
+          exchangeInfo: exchanges[i],
+          volume: volumes[i],
+        }
+      }),
+    [exchanges, gauges, lpBalances, userGauges, volumes]
+  )
+
+  const sortCallback = useCallback((pool1: Meta, pool2: Meta) => {
+    const isStaking1 =
+      pool1.lpBalance.greaterThan(0) || (pool1.userGauge && JSBI.greaterThan(pool1.userGauge.balance, JSBI.BigInt(0)))
+    const isStaking2 =
+      pool2.lpBalance.greaterThan(0) || (pool2.userGauge && JSBI.greaterThan(pool2.userGauge?.balance, JSBI.BigInt(0)))
+    if (isStaking1 && !isStaking2) return 1
+    return -1
+  }, [])
+
+  const sortedFilterdPools = useMemo(
+    () =>
+      meta
+        .sort(sortCallback)
+        .filter(
+          (pool) =>
+            selection === SpecialChain.All ||
+            selection === pool.display.chain ||
+            (selection === SpecialChain.Other && OtherChains.has(pool.display.chain))
+        ),
+    [meta, selection, sortCallback]
+  )
+  console.log('pools page')
   return (
     <PageWrapper gap="lg" justify="center" style={{ marginTop: isMobile ? '-1rem' : '3rem' }}>
       <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px', justifyContent: 'center', alignItems: 'center' }}>
-        <TYPE.tvlHeader>TVL: ${tvlAsTokenAmount.toFixed(0, { groupSeparator: ',' })}</TYPE.tvlHeader>
+        <TYPE.tvlHeader>TVL: ${tvl.toFixed(0, { groupSeparator: ',' })}</TYPE.tvlHeader>
       </AutoColumn>
       <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px', justifyContent: 'center', alignItems: 'center' }}>
         {mobiprice && <TYPE.price opacity={'.8'}>Latest MOBI Price: ${mobiprice.toFixed(3)}</TYPE.price>}
       </AutoColumn>
       <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px' }}>
         <HeaderLinks>
-          <Sel onClick={() => setSelection(Chain.All)} selected={selection === Chain.All}>
+          <Sel onClick={() => setSelection(SpecialChain.All)} selected={selection === SpecialChain.All}>
             ALL
           </Sel>
           <Sel onClick={() => setSelection(Chain.Ethereum)} selected={selection === Chain.Ethereum}>
@@ -121,7 +150,7 @@ export default function Pool() {
           <Sel onClick={() => setSelection(Chain.Terra)} selected={selection === Chain.Terra}>
             TERRA
           </Sel>
-          <Sel onClick={() => setSelection(Chain.Other)} selected={selection === Chain.Other}>
+          <Sel onClick={() => setSelection(SpecialChain.Other)} selected={selection === SpecialChain.Other}>
             OTHER
           </Sel>
         </HeaderLinks>
@@ -146,17 +175,11 @@ export default function Pool() {
           </VoteCard>
         </InfoWrapper>
         <PoolSection>
-          {stablePools && stablePools?.length === 0 ? (
-            <Loader style={{ margin: 'auto' }} />
-          ) : (
-            sortedFilterdPools
-              .filter((pool) => !pool.isKilled && !pool.disabled)
-              .map((pool) => (
-                <ErrorBoundary key={pool.poolAddress || '000'}>
-                  <StablePoolCard poolInfo={pool} />
-                </ErrorBoundary>
-              ))
-          )}
+          {sortedFilterdPools
+            .filter((pool) => !pool.gauge?.isKilled)
+            .map((pool) => (
+              <StablePoolCard meta={pool} stakingInfo={stakingInfo} key={pool.display.pool.address} />
+            ))}
         </PoolSection>
         <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px', justifyContent: 'center' }}>
           <RowFixed>
@@ -179,12 +202,8 @@ export default function Pool() {
         <PoolSection>
           {showDeprecated &&
             sortedFilterdPools
-              .filter((pool) => pool.isKilled || pool.disabled)
-              .map((pool) => (
-                <ErrorBoundary key={pool.poolAddress || '000'}>
-                  <StablePoolCard poolInfo={pool} />
-                </ErrorBoundary>
-              ))}
+              .filter((pool) => pool.gauge?.isKilled)
+              .map((pool) => <StablePoolCard meta={pool} stakingInfo={stakingInfo} key={pool.display.pool.address} />)}
         </PoolSection>
       </AutoColumn>
     </PageWrapper>

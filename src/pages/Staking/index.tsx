@@ -1,28 +1,19 @@
-import { TokenAmount } from '@ubeswap/sdk'
 import { useMobi } from 'hooks/Tokens'
+import { TokenAmount } from 'lib/token-utils'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
-import { useMobiStakingInfo } from 'state/staking/hooks'
+import { useAllGaugesInfo, useAllUserGaugesInfo, UserGaugeInfo } from 'state/gauges/hooks'
+import { useStakingInfo, useUserStakingInfo } from 'state/staking/hooks'
 import styled from 'styled-components'
 
 import { Row } from '../../components/Row'
 import CalcBoost from './CalcBoost'
-import { getAllUnclaimedMobi } from './ClaimAllMobiModal'
 import GaugeWeights from './GaugeWeights'
+import Stake from './Lock/Stake'
 import Positions from './Positions'
-import Stake from './Stake'
 import StatsHeader from './StatsHeader'
 import VeMobiRewards from './VeMobiRewards'
 import Vote from './Vote'
-
-const TextContainer = styled.div`
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  margin-left: auto;
-  margin-right: auto;
-  justify-content: center;
-`
 
 const PositionsContainer = styled.div`
   width: 100%;
@@ -45,15 +36,6 @@ const OuterContainer = styled.div`
   align-items: center;
   justify-content: center;
   flex-direction: column;
-`
-
-const Divider = styled.div`
-  height: 1px;
-  width: 100%;
-  background: ${({ theme }) => theme.text1};
-  margin-top: 1rem;
-  margin-bottom: 2rem;
-  opacity: 0.2;
 `
 
 const HeaderLinks = styled(Row)`
@@ -94,16 +76,25 @@ enum View {
   Rewards = 4,
 }
 
-export default function Staking() {
-  const stakingInfo = useMobiStakingInfo()
+export const useAllClaimableMobi = (userGauges: (UserGaugeInfo | null)[]): TokenAmount => {
   const mobi = useMobi()
-  const unclaimedMobi = new TokenAmount(mobi, getAllUnclaimedMobi(stakingInfo.positions ?? []))
+  return userGauges.reduce(
+    (accum, userGauge) => (userGauge ? accum.add(userGauge.claimableMobi) : accum),
+    new TokenAmount(mobi, '0')
+  )
+}
+
+export default function Staking() {
+  const userGauges = useAllUserGaugesInfo()
+  const gauges = useAllGaugesInfo()
+  const stakingInfo = useStakingInfo()
+  const userStakingInfo = useUserStakingInfo()
 
   const [view, setView] = React.useState<View>(View.Lock)
 
   return (
     <OuterContainer>
-      <StatsHeader stakingInfo={stakingInfo} />
+      <StatsHeader stakingInfo={stakingInfo} userStakingInfo={userStakingInfo} userGauges={userGauges} />
       <div style={{ alignItems: 'center', marginBottom: '1rem', marginTop: '1rem', display: 'flex', width: '100%' }}>
         <HeaderLinks>
           <Sel onClick={() => setView(View.Lock)} selected={view === View.Lock}>
@@ -122,17 +113,27 @@ export default function Staking() {
       </div>
       {view === View.Lock ? (
         <PositionsContainer>
-          <Stake stakingInfo={stakingInfo} />
-          <CalcBoost stakingInfo={stakingInfo} unclaimedMobi={unclaimedMobi} />
-          <Positions stakingInfo={stakingInfo} unclaimedMobi={unclaimedMobi} />
+          <Stake userStakingInfo={userStakingInfo} stakingInfo={stakingInfo} userGauges={userGauges} gauges={gauges} />
+          <CalcBoost
+            userStakingInfo={userStakingInfo}
+            stakingInfo={stakingInfo}
+            userGauges={userGauges}
+            gauges={gauges}
+          />
+          <Positions
+            stakingInfo={stakingInfo}
+            userStakingInfo={userStakingInfo}
+            gauges={gauges}
+            userGauges={userGauges}
+          />
         </PositionsContainer>
       ) : view === View.Vote ? (
         <PositionsContainer>
-          <Vote summaries={stakingInfo.positions ?? []} lockDate={stakingInfo.lockEnd ?? new Date()} />
+          <Vote gauges={gauges} userGauges={userGauges} userStaking={userStakingInfo} />
         </PositionsContainer>
       ) : view === View.Analyze ? (
         <PositionsContainer>
-          <GaugeWeights summaries={stakingInfo.positions ?? []} />
+          <GaugeWeights gauges={gauges} />
         </PositionsContainer>
       ) : (
         <PositionsContainer>

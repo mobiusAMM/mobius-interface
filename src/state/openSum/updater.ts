@@ -1,15 +1,16 @@
 import { Interface } from '@ethersproject/abi'
-import { JSBI } from '@ubeswap/sdk'
 import { ConstantSum, ConstantSumInfo } from 'constants/ConstantSum'
-import { useMemo } from 'react'
+import JSBI from 'jsbi'
 import { useDispatch } from 'react-redux'
 import { useMultipleContractSingleData } from 'state/multicall/hooks'
 
 import { CHAIN } from '../../constants'
 import CONSTANT_SUM from '../../constants/abis/ConstantSum.json'
 import { AppDispatch } from '../index'
-import { BigIntToJSBI } from '../stablePools/updater'
-import { updateBalances } from './actions'
+
+export const BigIntToJSBI = (num: BigInt | undefined, fallBack = '0') => {
+  return JSBI.BigInt(num?.toString() ?? fallBack)
+}
 
 const ConstantSumInterface = new Interface(CONSTANT_SUM.abi)
 const ZERO = JSBI.BigInt('0')
@@ -23,13 +24,13 @@ export function UpdateOpenSum(): null {
     ConstantSumInterface,
     'getBalances'
   )
-
-  useMemo(() => {
-    const balances = balancesMany?.map(
-      ({ result }) => result?.[0].map((n) => BigIntToJSBI(n as BigInt, '0')) ?? [ZERO, ZERO]
-    )
-    dispatch(updateBalances({ balances }))
-  }, [dispatch, balancesMany])
+  console.log('migrate update')
+  // useMemo(() => {
+  //   const balances = balancesMany?.map(
+  //     ({ result }) => result?.[0].map((n) => BigIntToJSBI(n as BigInt, '0')) ?? [ZERO, ZERO]
+  //   )
+  //   dispatch(updateBalances({ balances }))
+  // }, [dispatch, balancesMany])
 
   return null
 }

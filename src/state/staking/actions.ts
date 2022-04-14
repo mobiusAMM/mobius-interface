@@ -1,6 +1,6 @@
 import { createAction } from '@reduxjs/toolkit'
 
-import { StakingState } from './reducer'
+import { IStakingState, IUserStakingState } from './reducer'
 
-export const updateStaking = createAction<{ stakingInfo: StakingState }>('staking/update')
-export const updateSNX = createAction<{ rewardRate: JSBI; leftToClaim: JSBI }>('staking/updateSNX')
+export const updateStaking = createAction<{ stakingState: IStakingState }>('staking/update')
+export const updateStakingUser = createAction<{ userStakingState: IUserStakingState }>('staking/updateUser')

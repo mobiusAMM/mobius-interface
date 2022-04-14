@@ -1,6 +1,7 @@
-import { useContractKit } from '@celo-tools/use-contractkit'
-import { Fraction } from '@ubeswap/sdk'
-import JSBI from 'jsbi'
+import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
+import { useWeb3Context } from 'hooks'
+import { useMobi } from 'hooks/Tokens'
+import { Fraction } from 'lib/token-utils'
 import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -34,33 +35,21 @@ export function useCloseModals(): () => void {
 }
 
 export function useWalletModalToggle(): () => void {
-  const { connect, address } = useContractKit()
+  const { connect, connected } = useWeb3Context()
   const toggle = useToggleModal(ApplicationModal.WALLET)
-  return address === null ? connect : toggle
+  return !connected ? connect : toggle
 }
 
 export function useToggleSettingsMenu(): () => void {
   return useToggleModal(ApplicationModal.SETTINGS)
 }
 
-export function useShowClaimPopup(): boolean {
-  return useModalOpen(ApplicationModal.CLAIM_POPUP)
-}
-
-export function useToggleShowClaimPopup(): () => void {
-  return useToggleModal(ApplicationModal.CLAIM_POPUP)
-}
-
-export function useToggleSelfClaimModal(): () => void {
-  return useToggleModal(ApplicationModal.SELF_CLAIM)
-}
-
-export function useToggleDelegateModal(): () => void {
-  return useToggleModal(ApplicationModal.DELEGATE)
-}
-
 export function useToggleVoteModal(): () => void {
   return useToggleModal(ApplicationModal.VOTE)
+}
+
+export function useUbeswapClient(): ApolloClient<NormalizedCacheObject> {
+  return useSelector<AppState, ApolloClient<NormalizedCacheObject>>((state) => state.application.ubeswapClient)
 }
 
 // returns a function that allows adding a popup
@@ -92,32 +81,31 @@ export function useActivePopups(): AppState['application']['popupList'] {
   return useMemo(() => list.filter((item) => item.show), [list])
 }
 
-export function useEthBtcPrice(address: string): JSBI {
-  const prices = useSelector((state: AppState) => ({
-    ethPrice: state.application.ethPrice,
-    btcPrice: state.application.btcPrice,
-  }))
-  return address === '0x19260b9b573569dDB105780176547875fE9fedA3' ||
-    address === '0xBe50a3013A1c94768A1ABb78c3cB79AB28fc1aCE'
-    ? JSBI.BigInt(prices.btcPrice)
-    : address === '0xE0F2cc70E52f05eDb383313393d88Df2937DA55a' ||
-      address === '0xE919F65739c26a42616b7b8eedC6b5524d1e3aC4'
-    ? JSBI.BigInt(prices.ethPrice)
-    : JSBI.BigInt('1')
+export function useTokenPrice(address: string | undefined): Fraction | undefined {
+  const prices = useTokenPrices()
+  if (!address) return undefined
+
+  return priceStringToFraction(prices[address])
 }
 
-export function useTokenPrice(address: string | undefined): Fraction | undefined {
-  const priceString = useSelector((state: AppState) => {
-    return state.application.tokenPrices[address?.toLowerCase()]
-  })
-  return priceStringToFraction(priceString)
+export function usePegPrice(query: string | null): Fraction | undefined {
+  const prices = useTokenPrices()
+  if (query === null) return new Fraction(1)
+
+  return priceStringToFraction(prices[query])
+}
+
+export function useMobiPrice(): Fraction {
+  const mobi = useMobi()
+  const prices = useTokenPrices()
+  return priceStringToFraction(prices[mobi.address.toLowerCase()]) ?? new Fraction('0')
 }
 
 export function priceStringToFraction(priceString: string | undefined): Fraction | undefined {
   if (!priceString) return undefined
   const price = parseFloat(priceString) * 10 ** 4
-  const asFraction = new Fraction(price.toFixed(0), '10000')
-  return asFraction ?? undefined
+  const asFraction = new Fraction(price.toFixed(0), 10000)
+  return asFraction
 }
 
 export function useTokenPrices() {

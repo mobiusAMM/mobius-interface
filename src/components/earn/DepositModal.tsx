@@ -1,16 +1,18 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { JSBI, TokenAmount } from '@ubeswap/sdk'
 import CurrencyLogo from 'components/CurrencyLogo'
-import React, { useState } from 'react'
+import { useWarning } from 'hooks/useWarning'
+import { calculateEstimatedMintAmount, calculateVirtualPrice } from 'lib/calculator'
+import { Fraction, TokenAmount } from 'lib/token-utils'
+import { Meta } from 'pages/Pool'
+import React, { useMemo, useState } from 'react'
 import { tryParseAmount } from 'state/swap/hooks'
 import styled from 'styled-components'
 
-import { weiScale } from '../../constants'
+import { BIPS_BASE, weiScale } from '../../constants'
 import { useWeb3Context } from '../../hooks'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
 import { useStableSwapContract } from '../../hooks/useContract'
 import useTransactionDeadline from '../../hooks/useTransactionDeadline'
-import { StablePoolInfo, useExpectedLpTokens, useWarning } from '../../state/stablePools/hooks'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { CloseIcon, ExternalLink, TYPE } from '../../theme'
@@ -36,62 +38,59 @@ const ApprovalButton = styled(ButtonPrimary)`
 interface DepositModalProps {
   isOpen: boolean
   onDismiss: () => void
-  poolInfo: StablePoolInfo
+  meta: Meta
 }
 
-export default function DepositModal({ isOpen, onDismiss, poolInfo }: DepositModalProps) {
-  const { address, connected } = useWeb3Context()
+export default function DepositModal({ isOpen, onDismiss, meta }: DepositModalProps) {
+  const { connected } = useWeb3Context()
+  const warning = useWarning(meta.display.warningType)
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
-  const { tokens, peggedTo, pegComesAfter, totalDeposited } = poolInfo
-  const warning = useWarning(poolInfo.poolAddress ?? undefined)
   const [hash, setHash] = useState<string | undefined>()
   const [attempting, setAttempting] = useState(false)
   const [approving, setApproving] = useState(false)
-  const [input, setInput] = useState<(string | undefined)[]>(new Array(tokens.length).fill(undefined))
+  const [input, setInput] = useState<string[]>(new Array(meta.display.pool.tokens.length).fill(''))
   const [warningAcknowledged, setWarningAcknowledged] = useState<boolean>(!warning)
-  const isFirstDeposit = totalDeposited.equalTo('0')
+
+  const isFirstDeposit = meta.exchangeInfo.lpTotalSupply.equalTo(0)
   const forceEqualDeposit = isFirstDeposit || warning?.modification === 'require-equal-deposit'
   const [useEqualAmount, setUseEqualAmount] = useState<boolean>(forceEqualDeposit)
   const deadline = useTransactionDeadline()
 
-  const sumAmount = tokens
-    .map((t, i) =>
-      JSBI.multiply(
-        tryParseAmount(input[i], t)?.raw ?? JSBI.BigInt(0),
-        JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18 - t.decimals))
-      )
+  const inputTokens = useMemo(() => {
+    return input.map(
+      (el, i) => tryParseAmount(el, meta.display.pool.tokens[i]) ?? new TokenAmount(meta.display.pool.tokens[i], 0)
     )
-    .reduce((acc, cur) => JSBI.add(acc, cur), JSBI.BigInt(0))
+  }, [input, meta.display.pool.tokens])
 
-  const [expectedLPTokens, selectedAmounts] = useExpectedLpTokens(poolInfo, tokens, input)
-  const valueOfLP = new TokenAmount(
-    poolInfo.lpToken,
-    JSBI.divide(
-      JSBI.multiply(expectedLPTokens.raw, poolInfo.virtualPrice),
-      JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt('18'))
-    )
-  )
+  const sumAmount = inputTokens.reduce((acc, cur) => acc.add(cur), new Fraction(0))
 
-  const diff = JSBI.greaterThan(valueOfLP.raw, sumAmount)
-    ? JSBI.subtract(valueOfLP.raw, sumAmount)
-    : JSBI.subtract(sumAmount, valueOfLP.raw)
+  const expectedAmounts = calculateEstimatedMintAmount(meta.exchangeInfo, inputTokens[0].raw, inputTokens[1].raw)
 
-  const perDiff = JSBI.equal(sumAmount, JSBI.BigInt(0))
-    ? JSBI.BigInt(0)
-    : JSBI.divide(JSBI.multiply(diff, weiScale), sumAmount)
+  const virtualPrice = calculateVirtualPrice(meta.exchangeInfo)
+  const adjustedExpectedAmount = expectedAmounts.mintAmount.multiply(virtualPrice ?? 1)
 
-  const decimalPlacesForLP = expectedLPTokens?.greaterThan('1') ? 2 : expectedLPTokens?.greaterThan('0') ? 10 : 2
+  const diff = sumAmount.greaterThan(adjustedExpectedAmount)
+    ? sumAmount.subtract(adjustedExpectedAmount)
+    : adjustedExpectedAmount.subtract(sumAmount)
 
-  const withSlippage = JSBI.subtract(expectedLPTokens.raw, JSBI.divide(expectedLPTokens.raw, JSBI.BigInt('10')))
+  const perDiff = sumAmount.equalTo(0) ? new Fraction(0) : diff.divide(sumAmount).multiply(BIPS_BASE)
+
+  const decimalPlacesForLP = expectedAmounts.mintAmount.greaterThan(1)
+    ? 2
+    : expectedAmounts.mintAmount.greaterThan(0)
+    ? 10
+    : 2
+
+  const expectAmountWithSlippage = expectedAmounts.mintAmount.multiply(98).divide(100).multiply(weiScale)
   const approvals = [
-    useApproveCallback(selectedAmounts[0], poolInfo.poolAddress),
-    useApproveCallback(selectedAmounts[1], poolInfo.poolAddress),
+    useApproveCallback(inputTokens[0], meta.display.pool.address),
+    useApproveCallback(inputTokens[1], meta.display.pool.address),
   ]
   const toApprove = approvals
-    .map(([approvalState], i) => {
-      if (approvalState !== ApprovalState.APPROVED) return i
-      else return null
+    .map(([approvalState]) => {
+      if (approvalState !== ApprovalState.APPROVED) return true
+      else return false
     })
     .filter((x) => x !== null)
   function wrappedOndismiss() {
@@ -100,17 +99,18 @@ export default function DepositModal({ isOpen, onDismiss, poolInfo }: DepositMod
     onDismiss()
   }
 
-  const stakingContract = useStableSwapContract(poolInfo.poolAddress)
+  const stakingContract = useStableSwapContract(meta.display.pool.address)
   async function onDeposit() {
-    const allValid = selectedAmounts.reduce((accum, cur) => accum && !!cur && !!cur.raw, true)
-    if (stakingContract && poolInfo?.stakedAmount && allValid) {
+    if (stakingContract && deadline) {
       setAttempting(true)
-      const tokenAmounts = selectedAmounts.map((amount) => BigInt(amount.raw.toString()))
+      console.log(1)
+      const tokenAmounts = inputTokens.map((el) => el.raw.toString())
+      console.log(2, tokenAmounts)
       await stakingContract
-        .addLiquidity(tokenAmounts, withSlippage.toString(), deadline, { gasLimit: 10000000 })
+        .addLiquidity(tokenAmounts, expectAmountWithSlippage.quotient.toString(), deadline, { gasLimit: 10000000 })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
-            summary: `Deposit Liquidity into ${poolInfo.name}`,
+            summary: `Deposit Liquidity into ${meta.display.name}`,
           })
           setHash(response.hash)
         })
@@ -125,8 +125,10 @@ export default function DepositModal({ isOpen, onDismiss, poolInfo }: DepositMod
   if (!connected) {
     error = 'Connect Wallet'
   }
-  if (!poolInfo?.stakedAmount) {
-    error = error ?? 'Enter an amount'
+
+  const display = (str: string): string => {
+    const peg = meta.display.peg
+    return (peg.position === 'before' ? peg.symbol : '').concat(str).concat(peg.position === 'after' ? peg.symbol : '')
   }
 
   return (
@@ -146,7 +148,7 @@ export default function DepositModal({ isOpen, onDismiss, poolInfo }: DepositMod
           ) : (
             <>
               <RowBetween>
-                <TYPE.largeHeader>Deposit to {poolInfo.name}</TYPE.largeHeader>
+                <TYPE.largeHeader>Deposit to {meta.display.name}</TYPE.largeHeader>
                 <CloseIcon onClick={wrappedOndismiss} />
               </RowBetween>
               {forceEqualDeposit && (
@@ -169,21 +171,20 @@ export default function DepositModal({ isOpen, onDismiss, poolInfo }: DepositMod
                   toggle={() => !forceEqualDeposit && setUseEqualAmount(!useEqualAmount)}
                 />
               </RowBetween>
-              {poolInfo.tokens.map((token, i) => (
-                <div key={`deposit-row-${token.symbol}-${i}-${poolInfo.name}`}>
+              {meta.display.pool.tokens.map((token, i) => (
+                <div key={`deposit-row-${token.symbol}-${i}-${meta.display.name}`}>
                   <CurrencyRow
-                    tokenAmount={selectedAmounts[i]}
+                    tokenAmount={inputTokens[i]}
                     input={input[i]}
                     setInput={(val: string) => {
                       if (useEqualAmount) {
-                        setInput(new Array(tokens.length).fill(val))
+                        setInput(new Array(meta.display.pool.tokens.length).fill(val))
                       } else {
                         setInput([...input.slice(0, i), val, ...input.slice(i + 1)])
                       }
                     }}
-                    // setUsingInsufficientFunds={setInsufficientFunds}
                   />
-                  {i !== selectedAmounts.length - 1 && (
+                  {i !== inputTokens.length - 1 && (
                     <TYPE.largeHeader style={{ marginTop: '1rem', width: '100%', textAlign: 'center' }}>
                       +
                     </TYPE.largeHeader>
@@ -191,41 +192,44 @@ export default function DepositModal({ isOpen, onDismiss, poolInfo }: DepositMod
                 </div>
               ))}
               <TYPE.mediumHeader style={{ textAlign: 'center' }}>
-                Expected Lp Tokens Received: {expectedLPTokens.toFixed(decimalPlacesForLP)}
+                Expected Lp Tokens Received: {expectedAmounts.mintAmount.toFixed(decimalPlacesForLP)}
               </TYPE.mediumHeader>
               {!isFirstDeposit && (
                 <TYPE.mediumHeader
                   style={{
                     textAlign: 'center',
-                    color: JSBI.greaterThan(perDiff, JSBI.divide(weiScale, JSBI.BigInt(100))) ? 'red' : 'black',
-                    fontSize: JSBI.greaterThan(perDiff, JSBI.divide(weiScale, JSBI.BigInt(100))) ? 30 : 20,
-                    fontWeight: JSBI.greaterThan(perDiff, JSBI.divide(weiScale, JSBI.BigInt(100))) ? 800 : 500,
+                    color: perDiff.greaterThan(500) ? 'red' : 'black',
+                    fontSize: perDiff.greaterThan(500) ? 30 : 20,
+                    fontWeight: perDiff.greaterThan(500) ? 800 : 500,
                   }}
                 >
-                  Equivalent to: {pegComesAfter ? '' : peggedTo}
-                  {valueOfLP.toFixed(4)} {pegComesAfter ? poolInfo.peggedTo : ''}
+                  Equivalent to: {display(adjustedExpectedAmount.toFixed(4))}
                 </TYPE.mediumHeader>
               )}
-              {toApprove.length > 0 && expectedLPTokens.greaterThan('0') && (
+              {toApprove.includes(true) && expectedAmounts.mintAmount.greaterThan('0') && (
                 <div style={{ display: 'flex' }}>
-                  {toApprove.map((i) => (
-                    <ApprovalButton
-                      key={`Approval-modal-${i}`}
-                      disabled={approving}
-                      onClick={async () => {
-                        setApproving(true)
-                        await approvals[i][1]()
-                        await new Promise((resolve) => setTimeout(resolve, 20000))
-                        setApproving(false)
-                      }}
-                    >
-                      Approve {tokens[i].symbol}
-                    </ApprovalButton>
-                  ))}
+                  {toApprove.map(
+                    (el, i) =>
+                      el && (
+                        <ApprovalButton
+                          key={`Approval-modal-${i}`}
+                          disabled={approving}
+                          onClick={async () => {
+                            setApproving(true)
+                            await approvals[i][1]()
+                            // TODO: see if we can remove this time
+                            await new Promise((resolve) => setTimeout(resolve, 20000))
+                            setApproving(false)
+                          }}
+                        >
+                          Approve {meta.display.pool.tokens[i].symbol}
+                        </ApprovalButton>
+                      )
+                  )}
                 </div>
               )}
-              {toApprove.length === 0 && (
-                <ButtonError disabled={!!error} error={!!error && !!poolInfo?.stakedAmount} onClick={onDeposit}>
+              {!toApprove.includes(true) && expectedAmounts.mintAmount.greaterThan('0') && (
+                <ButtonError disabled={!!error} error={!!error} onClick={onDeposit}>
                   {error ?? 'Deposit'}
                 </ButtonError>
               )}
@@ -237,7 +241,7 @@ export default function DepositModal({ isOpen, onDismiss, poolInfo }: DepositMod
         <LoadingView onDismiss={wrappedOndismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.body fontSize={20}>Depositing</TYPE.body>
-            <TYPE.body fontSize={20}>Claiming {expectedLPTokens.toSignificant(4)} LP Tokens</TYPE.body>
+            <TYPE.body fontSize={20}>Claiming {expectedAmounts.mintAmount.toSignificant(4)} LP Tokens</TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
@@ -257,18 +261,13 @@ type CurrencyRowProps = {
   tokenAmount: TokenAmount
   setInput: (amount: string) => void
   input: string
-  setUsingInsufficientFunds: (isInsufficient: boolean) => void
 }
 
-const InputRowLeft = styled.div``
-
-const TokenInfo = styled.div``
-
-const InputRow = styled.div<{ selected: boolean }>`
+const InputRow = styled.div`
   ${({ theme }) => theme.flexRowNoWrap};
   align-items: center;
   justify-content: space-between;
-  padding: ${({ selected }) => (selected ? '0.75rem 0.5rem 0.75rem 1rem' : '0.75rem 0.75rem 0.75rem 1rem')};
+  padding: 0.75rem 0.75rem 0.75rem 1rem;
 `
 
 const InputDiv = styled.div`
@@ -282,22 +281,6 @@ const Aligner = styled.span`
   justify-content: space-between;
 `
 
-const InputPanel = styled.div<{ hideInput?: boolean }>`
-  ${({ theme }) => theme.flexColumnNoWrap}
-  position: relative;
-  border-radius: ${({ hideInput }) => (hideInput ? '8px' : '20px')};
-  background-color: ${({ theme }) => theme.bg1};
-  z-index: 1;
-  width: 100%;
-`
-
-const Container = styled.div<{ hideInput: boolean }>`
-  border-radius: ${({ hideInput }) => (hideInput ? '8px' : '20px')};
-  border: 1px solid ${({ theme }) => theme.bg2};
-  background-color: ${({ theme }) => theme.bg1};
-  padding: 0.5rem;
-`
-
 const StyledTokenName = styled.span<{ active?: boolean }>`
   ${({ active }) => (active ? '  margin: 0 0.25rem 0 0.75rem;' : '  margin: 0 0.25rem 0 0.25rem;')}
   font-size:  ${({ active }) => (active ? '20px' : '16px')};
@@ -307,15 +290,10 @@ const BalanceText = styled(TYPE.subHeader)`
   cursor: pointer;
 `
 
-const CurrencyRow = ({ tokenAmount, setInput, input, setUsingInsufficientFunds }: CurrencyRowProps) => {
+const CurrencyRow = ({ tokenAmount, setInput, input }: CurrencyRowProps) => {
   const { address, connected } = useWeb3Context()
-  const currency = tokenAmount.currency
+  const currency = tokenAmount.token
   const tokenBalance = useTokenBalance(connected ? address : undefined, currency ?? undefined)
-  const TEN = JSBI.BigInt('10')
-  const ZERO_TOK = new TokenAmount(currency, JSBI.BigInt('0'))
-
-  const scaledDown = (num: JSBI) => JSBI.divide(num, JSBI.exponentiate(TEN, JSBI.BigInt(currency.decimals)))
-  const scaleUp = (num: JSBI) => JSBI.multiply(num, JSBI.exponentiate(TEN, JSBI.BigInt(currency.decimals)))
 
   const decimalPlacesForBalance = tokenBalance?.greaterThan(
     '1' //JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt(tokenBalance.token.decimals - 2)).toString()
@@ -341,7 +319,6 @@ const CurrencyRow = ({ tokenAmount, setInput, input, setUsingInsufficientFunds }
       </div>
       <InputDiv>
         <NumericalInput
-          white={true}
           className="token-amount-input"
           value={input}
           onUserInput={(val) => {
@@ -365,12 +342,4 @@ const CurrencyRow = ({ tokenAmount, setInput, input, setUsingInsufficientFunds }
       {mainRow}
     </div>
   )
-}
-
-const insertDecimal = (tokenAmount: TokenAmount) => {
-  const { token } = tokenAmount
-  const amount = tokenAmount.divide(
-    new TokenAmount(token, JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt(token.decimals)))
-  )
-  return amount.toFixed(2)
 }

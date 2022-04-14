@@ -14,7 +14,6 @@ import {
   XYPlot,
   YAxis,
 } from 'react-vis'
-import { useIsDarkMode } from 'state/user/hooks'
 import styled from 'styled-components'
 import { TYPE } from 'theme'
 
@@ -48,7 +47,6 @@ export default function VolumeChart({ data, labels, width, xLabelFormat }: Volum
   const [area, setArea] = useState<HighlightArea | undefined | null>()
   const [hovered, setHovered] = useState<number>()
   const [hoverValue, setHoverValue] = useState<LineSeriesPoint>()
-  const isDarkMode = useIsDarkMode()
   const theme = useTheme()
   return (
     <Container>
@@ -66,8 +64,8 @@ export default function VolumeChart({ data, labels, width, xLabelFormat }: Volum
             <TYPE.body key={`legend-${s}`}>{s}</TYPE.body>
           ))}
           orientation="horizontal"
-          onItemMouseEnter={(item, index, event) => setHovered(index)}
-          onItemMouseLeave={(item, index, event) => setHovered(undefined)}
+          onItemMouseEnter={(_, index) => setHovered(index)}
+          onItemMouseLeave={() => setHovered(undefined)}
         />
         <YAxis
           hideLine
@@ -104,14 +102,22 @@ export default function VolumeChart({ data, labels, width, xLabelFormat }: Volum
             data={entry}
             opacity={hovered && hovered !== i ? 0.33 : 1}
             stack={true}
-            onNearestXY={(point, info) => setHoverValue({ ...point, label: labels[i] })}
-            //   onValueMouseOut={() => setHoverValue(undefined)}
+            onNearestXY={(point) => setHoverValue({ ...point, label: labels[i] })}
           />
         ))}
         <Highlight
           onBrushEnd={(newArea) => setArea(newArea)}
           onDrag={(newArea) => {
-            newArea &&
+            !!area &&
+              !!newArea &&
+              area.top &&
+              area.bottom &&
+              newArea.top &&
+              newArea.bottom &&
+              area.right &&
+              area.left &&
+              newArea.right &&
+              newArea.left &&
               setArea({
                 bottom: area.bottom + (newArea.top - newArea.bottom),
                 left: area.left - (newArea.right - newArea.left),

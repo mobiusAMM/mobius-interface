@@ -1,6 +1,6 @@
 import { Contract } from '@ethersproject/contracts'
 import { GOVERNANCE_ADDRESS } from 'constants/governance'
-import { GAUGE_CONTROLLER as GAUGE_CONTROLLER_ADDRESS, MOBIUS_MINTER_ADDRESS } from 'constants/StablePools'
+import { GAUGE_CONTROLLER as GAUGE_CONTROLLER_ADDRESS, MOBIUS_MINTER_ADDRESS } from 'constants/staking'
 import { VEMOBI } from 'constants/tokens'
 import { useMemo } from 'react'
 

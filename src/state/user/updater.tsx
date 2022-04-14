@@ -14,6 +14,7 @@ export default function Updater(): null {
     }
 
     const match = window?.matchMedia('(prefers-color-scheme: dark)')
+    console.log('user update')
     dispatch(updateMatchesDarkMode({ matchesDarkMode: match.matches }))
 
     if (match?.addListener) {

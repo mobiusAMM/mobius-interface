@@ -1,8 +1,7 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { JSBI, TokenAmount } from '@ubeswap/sdk'
-import { useMobi } from 'hooks/Tokens'
+import { IGauge } from 'constants/pools'
 import React, { useState } from 'react'
-import { GaugeSummary } from 'state/staking/hooks'
+import { UserGaugeInfo } from 'state/gauges/hooks'
 import styled from 'styled-components'
 
 import { ButtonError } from '../../components/Button'
@@ -14,6 +13,7 @@ import { useWeb3Context } from '../../hooks'
 import { useMobiMinterContract } from '../../hooks/useContract'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { CloseIcon, TYPE } from '../../theme'
+import { useAllClaimableMobi } from './'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -23,15 +23,13 @@ const ContentWrapper = styled(AutoColumn)`
 interface StakingModalProps {
   isOpen: boolean
   onDismiss: () => void
-  summaries: GaugeSummary[]
+  userGauges: UserGaugeInfo[]
+  gauges: IGauge[]
 }
 
-export const getAllUnclaimedMobi = (summaries: GaugeSummary[]): JSBI =>
-  summaries.reduce((accum, { unclaimedMobi }) => JSBI.add(accum, unclaimedMobi.raw), JSBI.BigInt(0))
-
-export default function ClaimAllMobiModal({ isOpen, onDismiss, summaries }: StakingModalProps) {
+export default function ClaimAllMobiModal({ isOpen, onDismiss, userGauges, gauges }: StakingModalProps) {
   const { connected } = useWeb3Context()
-  const mobi = useMobi()
+  const claimableMobi = useAllClaimableMobi(userGauges)
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
@@ -46,9 +44,8 @@ export default function ClaimAllMobiModal({ isOpen, onDismiss, summaries }: Stak
 
   const minter = useMobiMinterContract()
 
-  const pendingMobi = new TokenAmount(mobi, getAllUnclaimedMobi(summaries))
   const gaugeAddresses = [...Array(8).keys()].map((i) =>
-    i < summaries.length ? summaries[i].address : '0x0000000000000000000000000000000000000000'
+    i < gauges.length ? gauges[i].address : '0x0000000000000000000000000000000000000000'
   )
 
   async function onClaimReward() {
@@ -82,14 +79,12 @@ export default function ClaimAllMobiModal({ isOpen, onDismiss, summaries }: Stak
             <TYPE.mediumHeader>Claim</TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOnDismiss} />
           </RowBetween>
-          {pendingMobi && (
-            <AutoColumn justify="center" gap="md">
-              <TYPE.body fontWeight={600} fontSize={36}>
-                {pendingMobi.toSignificant(6)} MOBI
-              </TYPE.body>
-              <TYPE.body>{`Across ${summaries.length} farms`}</TYPE.body>
-            </AutoColumn>
-          )}
+          <AutoColumn justify="center" gap="md">
+            <TYPE.body fontWeight={600} fontSize={36}>
+              {claimableMobi.toSignificant(6)} MOBI
+            </TYPE.body>
+            <TYPE.body>{`Across ${gauges.length} farms`}</TYPE.body>
+          </AutoColumn>
           <ButtonError disabled={!!error} error={!!error} onClick={onClaimReward}>
             {error ?? 'Claim'}
           </ButtonError>
@@ -98,7 +93,7 @@ export default function ClaimAllMobiModal({ isOpen, onDismiss, summaries }: Stak
       {attempting && !hash && (
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
-            <TYPE.body fontSize={20}>Claiming {pendingMobi.toSignificant(6)} MOBI</TYPE.body>
+            <TYPE.body fontSize={20}>Claiming {claimableMobi.toSignificant(6)} MOBI</TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}

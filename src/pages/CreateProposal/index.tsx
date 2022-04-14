@@ -1,12 +1,12 @@
 import { defaultAbiCoder } from '@ethersproject/abi'
 import { getAddress, isAddress } from '@ethersproject/address'
-import { Token, TokenAmount } from '@ubeswap/sdk'
 import { ButtonError } from 'components/Button'
 import { BlueCard } from 'components/Card'
 import { AutoColumn } from 'components/Column'
-import { GAUGE_CONTROLLER, GAUGE_PROXY } from 'constants/StablePools'
+import { GAUGE_CONTROLLER, GAUGE_PROXY } from 'constants/staking'
 import { useWeb3Context } from 'hooks'
 import JSBI from 'jsbi'
+import { Token, TokenAmount } from 'lib/token-utils'
 import AppBody from 'pages/AppBody'
 import { Wrapper } from 'pages/Pool/styleds'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -49,7 +49,7 @@ const CreateProposalButton = ({
   const formattedProposalThreshold = proposalThreshold
     ? JSBI.divide(
         proposalThreshold.quotient,
-        JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(proposalThreshold.currency.decimals))
+        JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(proposalThreshold.token.decimals))
       ).toLocaleString()
     : undefined
   return (

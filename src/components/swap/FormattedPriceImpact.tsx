@@ -1,4 +1,4 @@
-import { Percent } from '@ubeswap/sdk'
+import { Percent } from 'lib/token-utils'
 import React from 'react'
 
 import { ONE_BIPS } from '../../constants'

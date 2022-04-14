@@ -1,11 +1,12 @@
-import { TokenAmount } from '@ubeswap/sdk'
 import { describeTrade } from 'components/swap/routing/describeTrade'
 import { useTradeCallback } from 'components/swap/routing/useTradeCallback'
+import { TokenAmount } from 'lib/token-utils'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { ArrowDown } from 'react-feather'
 import ReactGA from 'react-ga'
 import { Text } from 'rebass'
+import { poolInfoToExchange } from 'state/mobiusPools/hooks'
 import { ThemeContext } from 'styled-components'
 import invariant from 'tiny-invariant'
 
@@ -46,14 +47,7 @@ export default function Swap() {
 
   // swap state
   const { independentField, typedValue } = useSwapState()
-  const {
-    v2Trade,
-    currencyBalances,
-    parsedAmount,
-    currencies,
-    inputError: swapInputError,
-    priceImpact,
-  } = useMobiusTradeInfo()
+  const { v2Trade, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useMobiusTradeInfo()
 
   const trade = v2Trade
 
@@ -100,7 +94,10 @@ export default function Swap() {
   }
 
   // check whether the user has approved the router on the input token
-  const [approval, approveCallback] = useApproveCallback(trade?.input, trade?.pool.address)
+  const [approval, approveCallback] = useApproveCallback(
+    trade?.input,
+    trade?.pool ? poolInfoToExchange(trade?.pool).address : undefined
+  )
 
   // check if user has gone through approval process, used to show two step buttons, reset on token change
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false)
@@ -128,7 +125,7 @@ export default function Swap() {
         ReactGA.event({
           category: 'Swap',
           action: 'Swap',
-          label: [trade?.input?.currency?.symbol, trade?.output?.currency?.symbol].join('/'),
+          label: [trade?.input?.token.symbol, trade?.output?.token.symbol].join('/'),
         })
       })
       .catch((error) => {
@@ -146,7 +143,7 @@ export default function Swap() {
   const [showInverted, setShowInverted] = useState<boolean>(false)
 
   // warnings on slippage
-  const priceImpactSeverity = warningSeverity(priceImpact)
+  const priceImpactSeverity = warningSeverity(v2Trade?.priceImpact)
 
   // show approve flow when: no error on inputs, not approved or pending, or approved in current session
   // never show if price impact is above threshold in non expert mode
@@ -176,9 +173,13 @@ export default function Swap() {
     [onCurrencySelection]
   )
 
-  const handleMaxInput = useCallback(() => {
-    maxAmountInput && onUserInput(Field.INPUT, maxAmountInput.toExact())
-  }, [maxAmountInput, onUserInput])
+  const handleMaxInput = useCallback(
+    (amount?: TokenAmount) => {
+      ;(amount && onUserInput(Field.INPUT, amount.toExact())) ||
+        (maxAmountInput && onUserInput(Field.INPUT, maxAmountInput.toExact()))
+    },
+    [maxAmountInput, onUserInput]
+  )
 
   const handleOutputSelect = useCallback(
     (outputCurrency) => onCurrencySelection(Field.OUTPUT, outputCurrency),

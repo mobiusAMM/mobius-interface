@@ -1,4 +1,4 @@
-import { TokenAmount } from '@ubeswap/sdk'
+import { TokenAmount } from 'lib/token-utils'
 
 /**
  * Given some token amount, return the max that can be spent of it

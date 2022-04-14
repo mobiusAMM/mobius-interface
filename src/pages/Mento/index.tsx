@@ -1,6 +1,7 @@
-import { JSBI, TokenAmount } from '@ubeswap/sdk'
 import { describeTrade } from 'components/swap/routing/describeTrade'
 import { useMentoTradeCallback } from 'components/swap/routing/useMentoTradeCallback'
+import JSBI from 'jsbi'
+import { TokenAmount } from 'lib/token-utils'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { ArrowDown } from 'react-feather'
@@ -137,7 +138,7 @@ export default function Mento() {
         ReactGA.event({
           category: 'Swap',
           action: 'Swap',
-          label: [trade?.input?.currency?.symbol, trade?.output?.currency?.symbol].join('/'),
+          label: [trade?.input?.token?.symbol, trade?.output?.token?.symbol].join('/'),
         })
       })
       .catch((error) => {
@@ -186,9 +187,13 @@ export default function Mento() {
     [onCurrencySelection]
   )
 
-  const handleMaxInput = useCallback(() => {
-    maxAmountInput && onUserInput(Field.INPUT, maxAmountInput.toExact())
-  }, [maxAmountInput, onUserInput])
+  const handleMaxInput = useCallback(
+    (amount?: TokenAmount) => {
+      ;(amount && onUserInput(Field.INPUT, amount.toExact())) ||
+        (maxAmountInput && onUserInput(Field.INPUT, maxAmountInput.toExact()))
+    },
+    [maxAmountInput, onUserInput]
+  )
 
   const handleOutputSelect = useCallback(
     (outputCurrency) => onCurrencySelection(Field.OUTPUT, outputCurrency),

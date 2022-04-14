@@ -1,4 +1,4 @@
-import { ChainId } from '@ubeswap/sdk'
+import { ChainId } from 'lib/token-utils'
 import React, { useContext } from 'react'
 import { AlertTriangle, ArrowUpCircle } from 'react-feather'
 import { Text } from 'rebass'

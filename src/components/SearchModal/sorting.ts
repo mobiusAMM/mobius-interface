@@ -1,4 +1,4 @@
-import { Token, TokenAmount } from '@ubeswap/sdk'
+import { Token, TokenAmount } from 'lib/token-utils'
 import { useMemo } from 'react'
 
 import { useAllTokenBalances } from '../../state/wallet/hooks'

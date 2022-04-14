@@ -1,4 +1,4 @@
-import { ChainId } from '@ubeswap/sdk'
+import { ChainId } from 'lib/token-utils'
 import React from 'react'
 import { isMobile } from 'react-device-detect'
 import { AlertTriangle, X } from 'react-feather'
@@ -25,9 +25,9 @@ export const StyledClose = styled(X)`
 `
 
 const appURL: { [id in ChainId]: string } = {
-  [ChainId.MAINNET]: 'mobius.money',
-  [ChainId.ALFAJORES]: 'app-alfajores.mobius.money',
-  [ChainId.BAKLAVA]: 'app-baklava.mobius.money',
+  [ChainId.Mainnet]: 'mobius.money',
+  [ChainId.Alfajores]: 'app-alfajores.mobius.money',
+  [ChainId.Baklava]: 'app-baklava.mobius.money',
 }
 
 export default function URLWarning() {

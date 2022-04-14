@@ -1,15 +1,17 @@
 import { parseUnits } from '@ethersproject/units'
-import { JSBI, Percent, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
+import { TradeType } from '@ubeswap/sdk'
 import { IMentoExchangeInfo } from 'constants/mento'
 import { CELO } from 'constants/tokens'
-import { useCallback } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import invariant from 'tiny-invariant'
+import JSBI from 'jsbi'
 import {
   calculateEstimatedSwapInputAmount,
   calculateEstimatedSwapOutputAmount,
   calculateSwapPrice,
-} from 'utils/mentoCalculator'
+} from 'lib/mentoCalculator'
+import { Percent, Price, Token, TokenAmount } from 'lib/token-utils'
+import { useCallback } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import invariant from 'tiny-invariant'
 
 import { BIPS_BASE, CHAIN } from '../../constants'
 import { useWeb3Context } from '../../hooks'
@@ -170,8 +172,8 @@ export function useMentoTradeInfo(): {
   const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
 
   const currencyBalances = {
-    [Field.INPUT]: relevantTokenBalances[0],
-    [Field.OUTPUT]: relevantTokenBalances[1],
+    [Field.INPUT]: relevantTokenBalances[inputCurrency?.address.toLowerCase() ?? ''],
+    [Field.OUTPUT]: relevantTokenBalances[outputCurrency?.address.toLowerCase() ?? ''],
   }
 
   const currencies: { [field in Field]?: Token } = {

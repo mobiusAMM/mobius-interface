@@ -1,14 +1,14 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { JSBI } from '@ubeswap/sdk'
-import { NETWORK_CHAIN_ID } from 'connectors'
 import { ConstantSum } from 'constants/ConstantSum'
-import { WrappedTokenInfo } from 'state/lists/hooks'
+import JSBI from 'jsbi'
+import { Token } from 'lib/token-utils'
 
+import { CHAIN } from '../../constants'
 import { updateBalances } from './actions'
 
 export type ConstantSumPool = {
   address: string
-  tokens: [WrappedTokenInfo, WrappedTokenInfo]
+  tokens: [Token, Token]
   balances?: JSBI[]
 }
 
@@ -17,7 +17,7 @@ export interface PoolState {
 }
 
 const initialState: PoolState = {
-  pools: ConstantSum[NETWORK_CHAIN_ID] ?? [],
+  pools: ConstantSum[CHAIN] ?? [],
 }
 
 export default createReducer<PoolState>(initialState, (builder) =>

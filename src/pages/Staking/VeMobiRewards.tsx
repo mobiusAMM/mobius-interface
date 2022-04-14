@@ -1,17 +1,20 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
-import { ButtonEmpty, ButtonPrimary } from 'components/Button'
+import { ButtonPrimary } from 'components/Button'
 import { AutoColumn } from 'components/Column'
 import Loader from 'components/Loader'
 import { RowBetween, RowFixed } from 'components/Row'
+import { ExternalStakingRewards } from 'constants/staking'
 import { useWeb3Context } from 'hooks'
 import { useFeeDistributor, useStakingContract } from 'hooks/useContract'
+import { useExternalStakingRewards, useUserExternalStakingRewards } from 'hooks/useExternalStakingRewards'
 import React, { useState } from 'react'
-import { useFeeInformation, useSNXRewardInfo } from 'state/staking/hooks'
+import { useFeeInfo } from 'state/staking/hooks'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import styled from 'styled-components'
 import { TYPE } from 'theme'
 
 import { CardNoise, CardSection, DataCard } from '../../components/earn/styled'
+import { CHAIN } from '../../constants'
 
 const VoteCard = styled(DataCard)`
   background: radial-gradient(90% 90% at 50% 5%, #3488ec 0%, #35d07f 100%);
@@ -110,16 +113,13 @@ const Divider = styled.div`
   opacity: 0.5;
 `
 
-const StyledButton = styled(ButtonEmpty)`
-  margin-left: auto;
-  margin-right: 0.5rem;
-`
-
 export default function VeMobiRewards() {
-  const { rewardToken, rewardRate, avgApr, userRewardRate, leftToClaim, snxAddress } = useSNXRewardInfo()
-  const { totalFeesThisWeek, totalFeesNextWeek } = useFeeInformation()
-  const tokenColor = '#ab9325' //useColor(rewardToken)
-  const { connected, address: account } = useWeb3Context()
+  const { rewardRate, avgApr } = useExternalStakingRewards()
+  const { userRewardRate, claimableRewards } = useUserExternalStakingRewards()
+  const { totalFeesThisWeek, totalFeesNextWeek } = useFeeInfo()
+  const snxAddress = ExternalStakingRewards[CHAIN]
+  const tokenColor = '#ab9325'
+  const { connected, address } = useWeb3Context()
   const stakingContract = useStakingContract(snxAddress)
   const addTransaction = useTransactionAdder()
   const [attempting, setAttempting] = useState(false)
@@ -147,9 +147,9 @@ export default function VeMobiRewards() {
   }
 
   async function claimFees() {
-    if (feeDistributorContract && account) {
+    if (feeDistributorContract && address) {
       setAttemptingFees(true)
-      await feeDistributorContract['claim(address)'](account)
+      await feeDistributorContract['claim(address)'](address)
         .then((response: TransactionResponse) => {
           addTransaction(response, {
             summary: `Claimed allocated Mobi fees`,
@@ -194,7 +194,7 @@ export default function VeMobiRewards() {
           <TopSection>
             <RowFixed style={{ gap: '6px' }}>
               <TYPE.black fontWeight={600} fontSize={[16, 24]}>
-                {`${rewardToken.symbol} Rewards`}
+                {`${rewardRate.token.symbol} Rewards`}
               </TYPE.black>
             </RowFixed>
             <RowFixed>
@@ -206,7 +206,7 @@ export default function VeMobiRewards() {
           <SecondSection>
             <RowFixed style={{ marginTop: 10 }}>
               <TYPE.darkGray fontWeight={450} fontSize={[15, 20]}>
-                {`${rewardToken.symbol} Rate: `}
+                {`${rewardRate.token.symbol} Rate: `}
               </TYPE.darkGray>
             </RowFixed>
 
@@ -215,7 +215,7 @@ export default function VeMobiRewards() {
               fontSize={[13, 16]}
               fontWeight={800}
               color={tokenColor}
-            >{`${rewardRate.toSignificant(4, { groupSeparator: ',' })} ${rewardToken.symbol} / WEEK`}</TYPE.black>
+            >{`${rewardRate.toSignificant(4, { groupSeparator: ',' })} ${rewardRate.token.symbol} / WEEK`}</TYPE.black>
           </SecondSection>
           <SecondSection>
             <RowFixed style={{ marginTop: 10 }}>
@@ -225,23 +225,22 @@ export default function VeMobiRewards() {
               </TYPE.darkGray>
             </RowFixed>
 
-            <TYPE.black textAlign="right" fontSize={[13, 16]} fontWeight={800} color={tokenColor}>
-              {userRewardRate
-                ? `${userRewardRate?.toSignificant(4, { groupSeparator: ',' })} ${rewardToken.symbol} / WEEK`
-                : '--'}
-            </TYPE.black>
+            <TYPE.black
+              textAlign="right"
+              fontSize={[13, 16]}
+              fontWeight={800}
+              color={tokenColor}
+            >{`${userRewardRate.toSignificant(4, { groupSeparator: ',' })} ${
+              rewardRate.token.symbol
+            } / WEEK`}</TYPE.black>
           </SecondSection>
           <Divider />
           <>
-            {/* <StyledButton padding="8px" borderRadius="8px" width="fit-content" onClick={onClaimReward}>
-              Claim
-            </StyledButton> */}
             <SecondSection>
               <TYPE.largeHeader>Available to Claim: </TYPE.largeHeader>
-
-              {leftToClaim ? (
-                <TYPE.largeHeader>{`${leftToClaim.toSignificant(4, { groupSeparator: ',' })} ${
-                  rewardToken.symbol
+              {claimableRewards ? (
+                <TYPE.largeHeader>{`${claimableRewards.toSignificant(4, { groupSeparator: ',' })} ${
+                  rewardRate.token.symbol
                 }`}</TYPE.largeHeader>
               ) : connected ? (
                 <Loader />
@@ -255,7 +254,7 @@ export default function VeMobiRewards() {
                 disabled={attempting && !hash}
                 style={{ fontWeight: 700, fontSize: 18, marginBottom: '1rem' }}
               >
-                {attempting && !hash ? `Claiming ${leftToClaim?.toFixed(2)} CELO...` : 'CLAIM'}
+                {attempting && !hash ? `Claiming ${claimableRewards?.toFixed(2)} CELO...` : 'CLAIM'}
               </ButtonPrimary>
             </SecondSection>
           </>

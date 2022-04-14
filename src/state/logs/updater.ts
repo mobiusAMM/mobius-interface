@@ -1,3 +1,4 @@
+import { GOVERNANCE_GENESIS } from 'constants/governance'
 import { useWeb3Context } from 'hooks'
 import { useEffect, useMemo } from 'react'
 
@@ -33,13 +34,13 @@ export default function Updater(): null {
 
   useEffect(() => {
     if (!provider || typeof blockNumber !== 'number' || filtersNeedFetch.length === 0) return
-
+    console.log('log update')
     dispatch(fetchingLogs({ chainId: CHAIN, filters: filtersNeedFetch, blockNumber }))
     filtersNeedFetch.forEach((filter) => {
       provider
         .getLogs({
           ...filter,
-          fromBlock: 0,
+          fromBlock: GOVERNANCE_GENESIS,
           toBlock: blockNumber,
         })
         .then((logs) => {

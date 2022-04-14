@@ -1,7 +1,6 @@
 import { ContractKit } from '@celo/contractkit'
 import { Connector, useContractKit, useProvider } from '@celo-tools/use-contractkit'
 import { Web3Provider } from '@ethersproject/providers'
-import { useMemo } from 'react'
 
 import { CHAIN } from '../../constants'
 
@@ -34,19 +33,16 @@ export const useWeb3Context = () => {
     connected = true
     address = uck.address
   }
-  return useMemo(
-    () => ({
-      connect: uck.connect,
-      disconnect: uck.destroy,
-      kit: uck.kit,
-      provider,
-      connected,
-      address,
-      chainID,
-      providerChainID,
-    }),
-    [address, chainID, connected, provider, providerChainID, uck.connect, uck.destroy, uck.kit]
-  )
+  return {
+    connect: uck.connect,
+    disconnect: uck.destroy,
+    kit: uck.kit,
+    provider,
+    connected,
+    address,
+    chainID,
+    providerChainID,
+  }
 }
 
 export const useAddress = () => {

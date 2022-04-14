@@ -1,4 +1,3 @@
-import { ErrorBoundary } from '@sentry/react'
 import React from 'react'
 import { useLocation } from 'react-router'
 import { useClaimInfo } from 'state/claim/hooks'
@@ -40,9 +39,7 @@ export default function Claim() {
       <UpdateClaim />
       <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px' }}>
         <PoolSection>
-          <ErrorBoundary key={'000'}>
-            <ClaimCard info={claim} type={type} />
-          </ErrorBoundary>
+          <ClaimCard info={claim} type={type} />
         </PoolSection>
       </AutoColumn>
     </PageWrapper>

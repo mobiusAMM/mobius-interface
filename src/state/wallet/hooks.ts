@@ -1,6 +1,7 @@
 import { invariant } from '@apollo/client/utilities/globals'
-import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
 import { getAllTokens } from 'hooks/Tokens'
+import JSBI from 'jsbi'
+import { Token, TokenAmount } from 'lib/token-utils'
 import { useEffect, useMemo, useState } from 'react'
 import { useBlockNumber } from 'state/application/hooks'
 
@@ -38,24 +39,23 @@ export function useTokenBalances(
     () => tokens?.filter((t?: Token): t is Token => isAddress(t?.address) !== false) ?? [],
     [tokens]
   )
-
   const validatedTokenAddresses = useMemo(() => validatedTokens.map((vt) => vt.address), [validatedTokens])
   const balances = useMultipleContractSingleData(validatedTokenAddresses, ERC20_INTERFACE, 'balanceOf', [address])
-
-  return useMemo(
+  const hold = useMemo(
     () =>
       address && validatedTokens.length > 0
         ? validatedTokens.reduce<{ [tokenAddress: string]: TokenAmount | undefined }>((memo, token, i) => {
             const value = balances?.[i]?.result?.[0]
             const amount = value ? JSBI.BigInt(value.toString()) : undefined
             if (amount) {
-              memo[token.address] = new TokenAmount(token, amount)
+              memo[token.address.toLowerCase()] = new TokenAmount(token, amount)
             }
             return memo
           }, {})
         : {},
     [address, validatedTokens, balances]
   )
+  return hold
 }
 
 // mimics useAllBalances

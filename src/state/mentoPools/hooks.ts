@@ -1,8 +1,8 @@
 import { invariant } from '@apollo/client/utilities/globals'
 import { StableToken } from '@celo/contractkit'
-import { Token } from '@ubeswap/sdk'
 import { IMentoExchangeInfo } from 'constants/mento'
 import { CEUR, CREAL, CUSD } from 'constants/tokens'
+import { Token } from 'lib/token-utils'
 import { useSelector } from 'react-redux'
 
 import { CHAIN } from '../../constants'

@@ -7,9 +7,10 @@ import React, { StrictMode } from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 import { HashRouter } from 'react-router-dom'
+import { GaugeUpdater } from 'state/gauges/updater'
 import { UpdateMento } from 'state/mentoPools/updater'
+import { UpdatePools } from 'state/mobiusPools/updater'
 import { UpdateOpenSum } from 'state/openSum/updater'
-import { BatchUpdateGauges, UpdateVariablePoolInfo } from 'state/stablePools/updater'
 import StakingUpdater from 'state/staking/updater'
 
 import mobiusIcon from './assets/svg/mobius.svg'
@@ -38,8 +39,10 @@ function Updaters() {
       <ApplicationUpdater />
       <TransactionUpdater />
       <MulticallUpdater />
-      <BatchUpdateGauges />
-      <UpdateVariablePoolInfo />
+      {/* <BatchUpdateGauges /> */}
+      <GaugeUpdater />
+      {/* <UpdateVariablePoolInfo /> */}
+      <UpdatePools />
       <StakingUpdater />
       <UpdateMento />
       <PriceData />

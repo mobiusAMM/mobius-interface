@@ -23,7 +23,6 @@ import Reset from './Reset'
 import RiskPage from './Risk'
 import Staking from './Staking'
 import Swap from './Swap'
-import { RedirectToSwap } from './Swap/redirects'
 import Vote from './Vote'
 import VotePage from './Vote/VotePage'
 
@@ -45,7 +44,7 @@ const BodyWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  ${({ giveSpace }) => giveSpace && `padding-top: 100px;`}
+  padding-top: 100px;
   align-items: center;
   flex: 1;
   overflow-y: auto;
@@ -81,6 +80,7 @@ export default function App() {
         if (params.get('status') === DappKitResponseStatus.SUCCESS) {
           localStorage.setItem(localStorageKey, window.location.href)
           const mobileOS = getMobileOperatingSystem()
+          // TODO: test the effect of this with h
           if (mobileOS === Mobile.ANDROID) {
             window.close()
           }
@@ -94,7 +94,7 @@ export default function App() {
 
   return (
     <Suspense fallback={null}>
-      <AppWrapper giveSpace={location.pathname !== '/'} id="app-wrapper">
+      <AppWrapper id="app-wrapper">
         {location.pathname !== '/' && (
           <>
             <URLWarning />
@@ -122,17 +122,15 @@ export default function App() {
               <Route exact strict path="/swap" component={Swap} />
               <Route exact path="/mint" component={Mento} />
               <Route exact strict path="/pool" component={Pool} />
-              <Route exact strict path="/swap/:outputCurrency" component={RedirectToSwap} />
               <Route exact strict path="/risk" component={RiskPage} />
               <Route path="/claim" component={Claim} />
-              <Route exact strict path="/farm/:poolName" component={Manage} />{' '}
+              <Route exact strict path="/farm/:gaugeAddress" component={Manage} />{' '}
               <Route exact strict path="/stake" component={Staking} />
               <Route exact strict path="/reset" component={Reset} />
               <Route exact strict path="/ape-mode" component={ApeViewer} />
               <Route exact strict path="/charts" component={Charts} />
               <Route exact strict path="/opensum" component={OpenSum} />
               <Route exact strict path="/init-burn" component={BurnPage} />
-              {/* <Route exact strict path="/optics" component={Optics} /> */}
             </Switch>
           </ErrorBoundary>
           {location.pathname !== '/' && <Marginer />}

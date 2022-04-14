@@ -1,58 +1,62 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { JSBI } from '@ubeswap/sdk'
+import JSBI from 'jsbi'
 
-import { updateSNX, updateStaking } from './actions'
+import { updateStaking, updateStakingUser } from './actions'
 
 export type VoteLock = {
   amount: JSBI
   end: number // UNIX time stamp
 }
 
-export type SnxRewardsInfo = {
-  address: string
-  rewardToken: string
-  tokenRate?: JSBI
-  leftToClaim?: JSBI
-}
-
-export type StakingState = {
-  claimableFees?: JSBI
-  feesThisWeek?: JSBI
-  feesNextWeek?: JSBI
-  votingPower: JSBI
-  totalVotingPower: JSBI
-  snx?: SnxRewardsInfo
-  locked?: VoteLock
-  voteWeightLeft?: JSBI
-  voteUserPower: JSBI
+export type IStakingState = {
   totalWeight: JSBI
   totalMobiLocked: JSBI
+  totalVotingPower: JSBI
+  externalRewardsRate: JSBI
+  feesThisWeek: JSBI
+  feesNextWeek: JSBI
+  mobiRate: JSBI
 }
 
-const SNX_STATIC: SnxRewardsInfo = {
-  address: '0x0812f6de916667C5aa820E757704c4ac69159529',
-  rewardToken: '0x471EcE3750Da237f93B8E339c536989b8978a438',
+export type IUserStakingState = {
+  voteUserPower: JSBI
+  votingPower: JSBI
+  claimableExternalRewards: JSBI
+  claimableFees: JSBI
+  lock: VoteLock
 }
 
-const initialState: StakingState = {
-  votingPower: JSBI.BigInt(0),
-  totalVotingPower: JSBI.BigInt(0),
-  voteWeightLeft: JSBI.BigInt(0),
-  voteUserPower: JSBI.BigInt(0),
+const initialStakingState: IStakingState = {
   totalWeight: JSBI.BigInt(0),
   totalMobiLocked: JSBI.BigInt(1),
-  snx: SNX_STATIC,
+  totalVotingPower: JSBI.BigInt(0),
+  externalRewardsRate: JSBI.BigInt(0),
+  feesThisWeek: JSBI.BigInt(0),
+  feesNextWeek: JSBI.BigInt(0),
+  mobiRate: JSBI.BigInt(0),
 }
 
-export default createReducer<StakingState>(initialState, (builder) => {
-  builder.addCase(updateStaking, (state, { payload: { stakingInfo } }) => ({
-    ...state,
-    ...stakingInfo,
-  }))
-  builder.addCase(updateSNX, (state, { payload }) => {
-    if (state.snx) {
-      state.snx.tokenRate = payload.rewardRate ?? state.snx.tokenRate
-      state.snx.leftToClaim = payload.leftToClaim ?? state.snx.leftToClaim
-    }
-  })
+const initialUserStakingState: IUserStakingState = {
+  voteUserPower: JSBI.BigInt(0),
+  votingPower: JSBI.BigInt(0),
+  claimableExternalRewards: JSBI.BigInt(0),
+  claimableFees: JSBI.BigInt(0),
+  lock: { amount: JSBI.BigInt(0), end: 0 },
+}
+
+const initialState: IStakingState & IUserStakingState = {
+  ...initialStakingState,
+  ...initialUserStakingState,
+}
+
+export default createReducer<IStakingState & IUserStakingState>(initialState, (builder) => {
+  builder
+    .addCase(updateStaking, (state, { payload: { stakingState } }) => ({
+      ...state,
+      ...stakingState,
+    }))
+    .addCase(updateStakingUser, (state, { payload: { userStakingState } }) => ({
+      ...state,
+      ...userStakingState,
+    }))
 })

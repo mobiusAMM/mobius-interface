@@ -2,16 +2,15 @@ import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
 import { load, save } from 'redux-localstorage-simple'
 
 import application from './application/reducer'
-import burn from './burn/reducer'
 import claim from './claim/reducer'
+import gauges from './gauges/reducer'
 import { updateVersion } from './global/actions'
 import logs from './logs/slice'
 import mento from './mento/reducer'
 import mentoPools from './mentoPools/reducer'
-import mint from './mint/reducer'
+import pools from './mobiusPools/reducer'
 import multicall from './multicall/reducer'
 import openSum from './openSum/reducer'
-import stablePools from './stablePools/reducer'
 import staking from './staking/reducer'
 import swap from './swap/reducer'
 import transactions from './transactions/reducer'
@@ -25,14 +24,13 @@ const store = configureStore({
     user,
     transactions,
     swap,
-    mint,
-    burn,
     multicall,
-    stablePools,
+    pools,
     mentoPools,
     mento,
     claim,
     staking,
+    gauges,
     logs,
     openSum,
   },

@@ -1,31 +1,45 @@
-import { ApolloClient, gql, InMemoryCache, useQuery } from '@apollo/client'
+import { gql, useQuery } from '@apollo/client'
 import axios from 'axios'
+import { StablePools } from 'constants/pools'
 import { useWeb3Context } from 'hooks'
-import { useCallback, useEffect, useState } from 'react'
+import { useMobi } from 'hooks/Tokens'
+import { Dispatch, useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 
 import { CHAIN } from '../../constants'
 import useDebounce from '../../hooks/useDebounce'
 import useIsWindowVisible from '../../hooks/useIsWindowVisible'
-import { addPrices, btcEthPrice, updateBlockNumber } from './actions'
+import { addPrice, addPrices, updateBlockNumber } from './actions'
+import { useUbeswapClient } from './hooks'
+import { TokenPrices } from './reducer'
 
-const fetchEthBtcPrices = async (dispatch: any) => {
-  const resp = await axios.get(
-    'https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=0x2260fac5e5542a773aa44fbcfedf7c193bc2c599%2C0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2&vs_currencies=usd'
-  )
-  const btcPrice: string = resp.data['0x2260fac5e5542a773aa44fbcfedf7c193bc2c599']?.['usd']
-  const ethPrice: string = resp.data['0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2']?.['usd']
-  dispatch(btcEthPrice({ btcPrice: parseInt(btcPrice).toFixed(0), ethPrice: parseInt(ethPrice).toFixed(0) }))
+const dedupe = (strings: string[]): string[] => {
+  const seen = new Set<string>()
+  return strings.filter((str) => {
+    if (seen.has(str)) {
+      return false
+    } else {
+      seen.add(str)
+      return true
+    }
+  })
 }
-// 0x17700282592d6917f6a73d0bf8accf4d578c131e
 
-const ubeswapClient = new ApolloClient({
-  uri: 'https://api.thegraph.com/subgraphs/name/ubeswap/ubeswap-backup',
-  cache: new InMemoryCache(),
-})
-const priceQuery = gql`
+const fetchPegPrices = async (dispatch: Dispatch<any>) => {
+  const pegQueries = dedupe(StablePools[CHAIN].map(({ peg }) => peg.priceQuery).filter((s) => s !== null) as string[])
+  const ids = pegQueries.reduce((acc, cur) => acc.concat(cur).concat('%2'), '')
+  const resp = await axios.get(
+    `https://api.coingecko.com/api/v3/simple/price?ids=${ids.slice(0, -2)}&vs_currencies=usd`
+  )
+  const prices: TokenPrices = pegQueries.reduce((acc, cur) => {
+    return { ...acc, [cur]: (resp.data[cur]?.['usd'] as number).toString() }
+  }, {})
+  dispatch(addPrices({ prices: prices }))
+}
+
+const mobiPriceQuery = gql`
   {
-    tokens(where: { derivedCUSD_gt: "0" }) {
+    token(id: "0x73a210637f6f6b7005512677ba6b3c96bb4aa44b") {
       id
       derivedCUSD
     }
@@ -34,15 +48,16 @@ const priceQuery = gql`
 
 export function PriceData(): null {
   const dispatch = useDispatch()
-  const { data, loading, error } = useQuery(priceQuery, { client: ubeswapClient })
+  const ubeswapClient = useUbeswapClient()
+  const mobi = useMobi()
+  const { data, loading, error } = useQuery(mobiPriceQuery, { client: ubeswapClient })
   useEffect(() => {
     if (!loading && !error && data) {
-      const prices: { [address: string]: string } = data.tokens.reduce((accum, cur) => {
-        return { ...accum, [cur.id.toLowerCase()]: cur.derivedCUSD }
-      }, {})
-      dispatch(addPrices({ prices }))
+      console.log('price update')
+      fetchPegPrices(dispatch)
+      dispatch(addPrice({ token: mobi.address.toLowerCase(), price: data.token.derivedCUSD }))
     }
-  }, [data, loading, dispatch, error])
+  }, [data, loading, dispatch, error, mobi.address])
   return null
 }
 
@@ -55,7 +70,6 @@ export default function Updater(): null {
     chainId: CHAIN,
     blockNumber: null,
   })
-  fetchEthBtcPrices(dispatch)
 
   const blockNumberCallback = useCallback(
     (blockNumber: number) => {
@@ -91,6 +105,7 @@ export default function Updater(): null {
 
   useEffect(() => {
     if (!debouncedState.chainId || !debouncedState.blockNumber || !windowVisible) return
+    console.log('block update')
     dispatch(updateBlockNumber({ chainId: debouncedState.chainId, blockNumber: debouncedState.blockNumber }))
   }, [windowVisible, dispatch, debouncedState.blockNumber, debouncedState.chainId])
 

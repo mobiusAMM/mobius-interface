@@ -1,13 +1,10 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { TokenAmount } from '@ubeswap/sdk'
-import { useMobi } from 'hooks/Tokens'
-import React, { useEffect, useState } from 'react'
-import { useBlockNumber } from 'state/application/hooks'
-import { StablePoolInfo, useExternalRewards } from 'state/stablePools/hooks'
+import { TokenAmount } from 'lib/token-utils'
+import React, { useCallback, useState } from 'react'
 import styled from 'styled-components'
 
 import { useWeb3Context } from '../../hooks'
-import { useLiquidityGaugeContract, useMobiMinterContract } from '../../hooks/useContract'
+import { useLiquidityGaugeContract } from '../../hooks/useContract'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { CloseIcon, TYPE } from '../../theme'
 import { ButtonError } from '../Button'
@@ -24,13 +21,12 @@ const ContentWrapper = styled(AutoColumn)`
 interface StakingModalProps {
   isOpen: boolean
   onDismiss: () => void
-  stakingInfo: StablePoolInfo
+  externalRewards: TokenAmount[] | undefined
+  gaugeAddress: string
 }
 
-export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }: StakingModalProps) {
+export default function ExternalRewardsModal({ isOpen, onDismiss, externalRewards, gaugeAddress }: StakingModalProps) {
   const { address, connected } = useWeb3Context()
-  const mobi = useMobi()
-  const externalRewards = useExternalRewards({ address: stakingInfo.poolAddress ?? '' })
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
   const [hash, setHash] = useState<string | undefined>()
@@ -42,23 +38,10 @@ export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }:
     onDismiss()
   }
 
-  const stakingContract = useLiquidityGaugeContract(stakingInfo.gaugeAddress)
-  const minter = useMobiMinterContract()
+  const stakingContract = useLiquidityGaugeContract(gaugeAddress)
 
-  const [pendingMobi, setEarnedMobi] = useState<TokenAmount>()
-
-  const blockNumber = useBlockNumber()
-
-  useEffect(() => {
-    const updateMobi = async () => {
-      const bigInt = await stakingContract?.claimable_tokens(address)
-      setEarnedMobi(new TokenAmount(mobi, bigInt.toString()))
-    }
-    connected && updateMobi()
-  }, [stakingContract, setEarnedMobi, connected, address, mobi])
-
-  async function onClaimReward() {
-    if (stakingContract && stakingInfo?.stakedAmount) {
+  const onClaimReward = useCallback(async () => {
+    if (stakingContract) {
       setAttempting(true)
       await stakingContract['claim_rewards(address)'](address, { gasLimit: 1000000 })
         .then((response: TransactionResponse) => {
@@ -72,14 +55,11 @@ export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }:
           console.log(error)
         })
     }
-  }
+  }, [addTransaction, address, stakingContract])
 
   let error: string | undefined
   if (!connected) {
     error = 'Connect Wallet'
-  }
-  if (!stakingInfo?.stakedAmount) {
-    error = error ?? 'Enter an amount'
   }
 
   return (
@@ -90,30 +70,20 @@ export default function ExternalRewardsModal({ isOpen, onDismiss, stakingInfo }:
             <TYPE.mediumHeader>Claim</TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOnDismiss} />
           </RowBetween>
-          {pendingMobi && (
-            <AutoColumn justify="center" gap="md">
-              {externalRewards &&
-                externalRewards.map((reward) => (
-                  <TYPE.body
-                    fontWeight={600}
-                    fontSize={36}
-                    key={`claim-reward-${stakingInfo.name}-${reward.token.symbol}`}
-                  >
-                    {reward.toSignificant(6)} {reward.token.symbol}
-                  </TYPE.body>
-                ))}
-              {/* {stakingInfo?.dualRewards && (
-                <TYPE.body fontWeight={600} fontSize={36}>
-                  {stakingInfo?.earnedAmount?.toSignificant(6)} {stakingInfo?.rewardToken?.symbol}
+
+          <AutoColumn justify="center" gap="md">
+            {externalRewards &&
+              externalRewards.map((reward) => (
+                <TYPE.body fontWeight={600} fontSize={36} key={`claim-reward-${gaugeAddress}-${reward.token.symbol}`}>
+                  {reward.toSignificant(6)} {reward.token.symbol}
                 </TYPE.body>
-              )} */}
-              <TYPE.body>Unclaimed rewards</TYPE.body>
-            </AutoColumn>
-          )}
+              ))}
+            <TYPE.body>Unclaimed rewards</TYPE.body>
+          </AutoColumn>
           <TYPE.subHeader style={{ textAlign: 'center' }}>
             When you claim without withdrawing your liquidity remains in the mining pool.
           </TYPE.subHeader>
-          <ButtonError disabled={!!error} error={!!error && !!stakingInfo?.stakedAmount} onClick={onClaimReward}>
+          <ButtonError disabled={!!error} error={!!error} onClick={onClaimReward}>
             {error ?? 'Claim'}
           </ButtonError>
         </ContentWrapper>

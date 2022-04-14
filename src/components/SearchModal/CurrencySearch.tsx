@@ -1,7 +1,8 @@
-import { cUSD, Token } from '@ubeswap/sdk'
+import { CUSD } from 'constants/tokens'
 import { useOnClickOutside } from 'hooks/useOnClickOutside'
 import useTheme from 'hooks/useTheme'
 import useToggle from 'hooks/useToggle'
+import { Token } from 'lib/token-utils'
 import React, { KeyboardEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ReactGA from 'react-ga'
 import { useTranslation } from 'react-i18next'
@@ -13,8 +14,7 @@ import { useOpticsV1Tokens, useOpticsV2Tokens } from 'state/openSum/hooks'
 import styled from 'styled-components'
 
 import { CHAIN } from '../../constants'
-import { useSwappableTokens } from '../../hooks/Tokens'
-import { useTokensTradeable } from '../../state/stake/hooks'
+import { useSwappableTokens, useTokensTradeable } from '../../hooks/Tokens'
 import { CloseIcon, TYPE } from '../../theme'
 import { isAddress } from '../../utils'
 import Column from '../Column'
@@ -149,7 +149,7 @@ export function CurrencySearch({
       if (e.key === 'Enter') {
         const s = searchQuery.toLowerCase().trim()
         if (s === 'cusd') {
-          handleCurrencySelect(cUSD[CHAIN])
+          handleCurrencySelect(CUSD[CHAIN])
         } else if (filteredSortedTokens.length > 0) {
           if (
             filteredSortedTokens[0].symbol?.toLowerCase() === searchQuery.trim().toLowerCase() ||

@@ -51,6 +51,7 @@ export const NEVER_RELOAD: ListenerOptions = {
 
 // the lowest level call for subscribing to contract data
 function useCallsData(calls: (Call | undefined)[], options?: ListenerOptions): CallResult[] {
+  const chainId = CHAIN
   const callResults = useSelector<AppState, AppState['multicall']['callResults']>(
     (state) => state.multicall.callResults
   )
@@ -70,11 +71,11 @@ function useCallsData(calls: (Call | undefined)[], options?: ListenerOptions): C
   // update listeners when there is an actual change that persists for at least 100ms
   useEffect(() => {
     const callKeys: string[] = JSON.parse(serializedCallKeys)
-    if (callKeys.length === 0) return undefined
+    if (!chainId || callKeys.length === 0) return undefined
     const calls = callKeys.map((key) => parseCallKey(key))
     dispatch(
       addMulticallListeners({
-        chainId: CHAIN,
+        chainId,
         calls,
         options,
       })
@@ -83,20 +84,20 @@ function useCallsData(calls: (Call | undefined)[], options?: ListenerOptions): C
     return () => {
       dispatch(
         removeMulticallListeners({
-          chainId: CHAIN,
+          chainId,
           calls,
           options,
         })
       )
     }
-  }, [dispatch, options, serializedCallKeys])
+  }, [chainId, dispatch, options, serializedCallKeys])
 
   return useMemo(
     () =>
       calls.map<CallResult>((call) => {
-        if (!call) return INVALID_RESULT
+        if (!chainId || !call) return INVALID_RESULT
 
-        const result = callResults[CHAIN]?.[toCallKey(call)]
+        const result = callResults[chainId]?.[toCallKey(call)]
         let data
         if (result?.data && result?.data !== '0x') {
           data = result.data
@@ -104,7 +105,7 @@ function useCallsData(calls: (Call | undefined)[], options?: ListenerOptions): C
 
         return { valid: true, data, blockNumber: result?.blockNumber }
       }),
-    [callResults, calls]
+    [callResults, calls, chainId]
   )
 }
 
@@ -251,33 +252,6 @@ export function useSingleCallResult(
 
   const result = useCallsData(calls, options)[0]
   const latestBlockNumber = useBlockNumber()
-
-  // if (methodName === 'calculateTokenAmount') {
-  //   console.log({
-  //     calls,
-  //     fragment,
-  //     result,
-  //     inputs,
-  //   })
-  // }
-  // useEffect(() => {
-  //   console.log({ calls })
-  // }, [calls])
-  // useEffect(() => {
-  //   console.log({ fragment })
-  // }, [fragment])
-  // useEffect(() => {
-  //   console.log({ result })
-  // }, [result])
-  // useEffect(() => {
-  //   console.log({ inputs })
-  // }, [inputs])
-  // useEffect(() => {
-  //   console.log({ methodName })
-  // }, [methodName])
-  // useEffect(() => {
-  //   console.log({ latestBlockNumber })
-  // }, [latestBlockNumber])
 
   return useMemo(() => {
     return toCallState(result, contract?.interface, fragment, latestBlockNumber)

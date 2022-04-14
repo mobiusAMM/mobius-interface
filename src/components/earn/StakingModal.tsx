@@ -1,21 +1,23 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { JSBI, Token, TokenAmount } from '@ubeswap/sdk'
+import CurrencyLogo from 'components/CurrencyLogo'
 import Loader from 'components/Loader'
+import NumericalInput from 'components/NumericalInput'
+import { useWeb3Context } from 'hooks'
 import { useMobi } from 'hooks/Tokens'
+import JSBI from 'jsbi'
+import { Token, TokenAmount } from 'lib/token-utils'
 import React, { useCallback, useState } from 'react'
-import { StablePoolInfo } from 'state/stablePools/hooks'
+import { tryParseAmount } from 'state/swap/hooks'
+import { useTokenBalance } from 'state/wallet/hooks'
 import styled from 'styled-components'
 
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
 import { useLiquidityGaugeContract } from '../../hooks/useContract'
 import useTransactionDeadline from '../../hooks/useTransactionDeadline'
-import { useDerivedStakeInfo } from '../../state/stake/hooks'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { CloseIcon, TYPE } from '../../theme'
-import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { ButtonConfirmed, ButtonError } from '../Button'
 import { AutoColumn } from '../Column'
-import CurrencyInputPanel from '../CurrencyInputPanel'
 import Modal from '../Modal'
 import { LoadingView, SubmittedView } from '../ModalViews'
 import ProgressCircles from '../ProgressSteps'
@@ -39,31 +41,45 @@ const ContentWrapper = styled(AutoColumn)`
 interface StakingModalProps {
   isOpen: boolean
   onDismiss: () => void
-  stakingInfo: StablePoolInfo
-  userLiquidityUnstaked: TokenAmount | undefined
+  userDeposited: TokenAmount
+  totalDeposited: TokenAmount
+  userLiquidityUnstaked: TokenAmount
+  gaugeAddress: string
+  mobiRate: TokenAmount
 }
 
 const calcNewRewardRate = (totalMobiRate: JSBI, totalStaked: JSBI, stakedByUser: JSBI, token: Token) =>
   new TokenAmount(token, JSBI.multiply(totalMobiRate, JSBI.divide(stakedByUser, totalStaked)))
 
-export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiquidityUnstaked }: StakingModalProps) {
+export default function StakingModal({
+  isOpen,
+  onDismiss,
+  userDeposited,
+  totalDeposited,
+  userLiquidityUnstaked,
+  gaugeAddress,
+  mobiRate,
+}: StakingModalProps) {
   const addTransaction = useTransactionAdder()
   const mobi = useMobi()
+  const { connected } = useWeb3Context()
 
   // track and parse user input
   const [typedValue, setTypedValue] = useState('')
-  const { parsedAmount, error } = useDerivedStakeInfo(typedValue, stakingInfo.lpToken, userLiquidityUnstaked)
-  const parsedAmountWrapped = parsedAmount
+
+  const inputAmount = tryParseAmount(typedValue, userDeposited.token)
+  // const { parsedAmount, error } = useDerivedStakeInfo(typedValue, stakingInfo.lpToken, userLiquidityUnstaked)
+  // const parsedAmountWrapped = parsedAmount
 
   let hypotheticalMobiRewardRate: TokenAmount = new TokenAmount(mobi, '0')
-  if (parsedAmountWrapped?.greaterThan('0')) {
-    if (stakingInfo.totalStakedAmount && stakingInfo.totalStakedAmount.equalTo('0')) {
-      hypotheticalMobiRewardRate = new TokenAmount(mobi, stakingInfo.mobiRate)
+  if (inputAmount?.greaterThan('0')) {
+    if (totalDeposited.equalTo('0')) {
+      hypotheticalMobiRewardRate = mobiRate
     } else {
       hypotheticalMobiRewardRate = calcNewRewardRate(
-        stakingInfo.mobiRate,
-        JSBI.add(stakingInfo.totalStakedAmount?.raw, parsedAmountWrapped.raw),
-        JSBI.add(stakingInfo.stakedAmount.raw, parsedAmountWrapped.raw),
+        mobiRate.raw,
+        JSBI.add(totalDeposited.raw, inputAmount.raw),
+        JSBI.add(userDeposited.raw, inputAmount.raw),
         mobi
       )
     }
@@ -80,16 +96,16 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
 
   // approval data for stake
   const deadline = useTransactionDeadline()
-  const [approval, approveCallback] = useApproveCallback(parsedAmount, stakingInfo.gaugeAddress)
+  const [approval, approveCallback] = useApproveCallback(inputAmount, gaugeAddress)
 
-  const stakingContract = useLiquidityGaugeContract(stakingInfo.gaugeAddress)
+  const stakingContract = useLiquidityGaugeContract(gaugeAddress)
   const depositFunction = stakingContract?.['deposit(uint256)']
 
-  async function onStake() {
+  const onStake = useCallback(async () => {
     setAttempting(true)
-    if (stakingContract && parsedAmount && deadline) {
+    if (stakingContract && inputAmount && deadline && depositFunction) {
       if (approval === ApprovalState.APPROVED) {
-        await depositFunction(parsedAmount.raw.toString(), { gasLimit: 10000000 }).then(
+        await depositFunction(inputAmount.raw.toString(), { gasLimit: 10000000 }).then(
           (response: TransactionResponse) => {
             addTransaction(response, {
               summary: `Stake deposited liquidity`,
@@ -102,25 +118,15 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
         throw new Error('Attempting to stake without approval or a signature. Please contact support.')
       }
     }
+  }, [addTransaction, approval, deadline, depositFunction, inputAmount, stakingContract])
+
+  let error: string | undefined
+  if (!connected) {
+    error = 'Connect Wallet'
   }
-
-  // wrapped onUserInput to clear signatures
-  const onUserInput = useCallback((typedValue: string) => {
-    setTypedValue(typedValue)
-  }, [])
-
-  // used for max input button
-  const maxAmountInput = maxAmountSpend(userLiquidityUnstaked)
-  const atMaxAmount = Boolean(maxAmountInput && parsedAmount?.equalTo(maxAmountInput))
-  const handleMax = useCallback(() => {
-    maxAmountInput && onUserInput(maxAmountInput.toExact())
-  }, [maxAmountInput, onUserInput])
 
   async function onAttemptToApprove() {
     if (!deadline) throw new Error('missing dependencies')
-    const liquidityAmount = parsedAmount
-    if (!liquidityAmount) throw new Error('missing liquidity amount')
-
     approveCallback()
   }
 
@@ -132,17 +138,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
             <TYPE.mediumHeader>Deposit</TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOnDismiss} />
           </RowBetween>
-          <CurrencyInputPanel
-            value={typedValue}
-            onUserInput={onUserInput}
-            onMax={handleMax}
-            showMaxButton={!atMaxAmount}
-            currency={stakingInfo.totalDeposited.token}
-            label={''}
-            disableCurrencySelect={true}
-            customBalanceText={'Available to deposit: '}
-            id="stake-liquidity-token"
-          />
+          <CurrencyRow tokenAmount={userLiquidityUnstaked} input={typedValue} setInput={setTypedValue} />
 
           <HypotheticalRewardRate dim={!hypotheticalMobiRewardRate.greaterThan('0')}>
             <div>
@@ -176,7 +172,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
             </ButtonConfirmed>
             <ButtonError
               disabled={!!error || approval !== ApprovalState.APPROVED}
-              error={!!error && !!parsedAmount}
+              error={!!error && !!inputAmount}
               onClick={onStake}
             >
               {error ?? 'Deposit'}
@@ -189,7 +185,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Depositing Liquidity</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>{parsedAmount?.toSignificant(4)} MOBI LP</TYPE.body>
+            <TYPE.body fontSize={20}>{inputAmount?.toSignificant(4)} MOBI LP</TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
@@ -197,10 +193,98 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>Deposited {parsedAmount?.toSignificant(4)} MOBI LP</TYPE.body>
+            <TYPE.body fontSize={20}>Deposited {inputAmount?.toSignificant(4)} MOBI LP</TYPE.body>
           </AutoColumn>
         </SubmittedView>
       )}
     </Modal>
+  )
+}
+
+type CurrencyRowProps = {
+  tokenAmount: TokenAmount
+  setInput: (amount: string) => void
+  input: string
+}
+
+const InputRow = styled.div`
+  ${({ theme }) => theme.flexRowNoWrap};
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.75rem 0.75rem 1rem;
+`
+
+const InputDiv = styled.div`
+  display: flex;
+  min-width: 40%;
+`
+
+const Aligner = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`
+
+const StyledTokenName = styled.span<{ active?: boolean }>`
+  ${({ active }) => (active ? '  margin: 0 0.25rem 0 0.75rem;' : '  margin: 0 0.25rem 0 0.25rem;')}
+  font-size:  ${({ active }) => (active ? '20px' : '16px')};
+  color: ${({ theme }) => theme.text1};
+`
+const BalanceText = styled(TYPE.subHeader)`
+  cursor: pointer;
+`
+
+const CurrencyRow = ({ tokenAmount, setInput, input }: CurrencyRowProps) => {
+  const { address, connected } = useWeb3Context()
+  const mobi = useMobi()
+  const currency = tokenAmount.token
+  const tokenBalance = useTokenBalance(connected ? address : undefined, currency ?? undefined)
+
+  const decimalPlacesForBalance = tokenBalance?.greaterThan(
+    '1' //JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt(tokenBalance.token.decimals - 2)).toString()
+  )
+    ? 2
+    : tokenBalance?.greaterThan('0')
+    ? 6
+    : 2
+
+  const mainRow = (
+    <InputRow>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Aligner>
+          <CurrencyLogo currency={mobi} size={'34px'} />
+          <StyledTokenName className="token-symbol-container" active={Boolean(currency && currency.symbol)}>
+            {(currency && currency.symbol && currency.symbol.length > 20
+              ? currency.symbol.slice(0, 4) +
+                '...' +
+                currency.symbol.slice(currency.symbol.length - 5, currency.symbol.length)
+              : currency?.symbol) || ''}
+          </StyledTokenName>
+        </Aligner>
+      </div>
+      <InputDiv>
+        <NumericalInput
+          className="token-amount-input"
+          value={input}
+          onUserInput={(val) => {
+            setInput(val)
+          }}
+        />
+      </InputDiv>
+    </InputRow>
+  )
+  const balanceRow = (
+    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <BalanceText onClick={() => setInput(tokenBalance?.toFixed(5) ?? '')}>
+        Balance: {tokenBalance?.toFixed(decimalPlacesForBalance) ?? 'Loading...'}
+      </BalanceText>
+    </div>
+  )
+
+  return (
+    <div>
+      {balanceRow}
+      {mainRow}
+    </div>
   )
 }

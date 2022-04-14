@@ -200,16 +200,6 @@ export const TrashIcon = styled(Trash)`
   }
 `
 
-const rotateImg = keyframes`
-  0% {
-    transform: perspective(1000px) rotateY(0deg);
-  }
-
-  100% {
-    transform: perspective(1000px) rotateY(360deg);
-  }
-`
-
 export const UbeTokenAnimated = styled.img`
   padding: 2rem 0 1rem 0;
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.15));

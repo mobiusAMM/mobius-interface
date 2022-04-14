@@ -1,16 +1,19 @@
 import { parseUnits } from '@ethersproject/units'
-import { JSBI, Percent, Price, Token, TokenAmount, TradeType } from '@ubeswap/sdk'
+import { TradeType } from '@ubeswap/sdk'
+import { IExchangeInfo } from 'constants/pools'
+import JSBI from 'jsbi'
+import { calculateEstimatedSwapOutputAmount, calculateSwapPrice } from 'lib/calculator'
+import { Percent, Price, Token, TokenAmount } from 'lib/token-utils'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { StableSwapPool } from 'state/stablePools/reducer'
+import { useCurrentPool, usePools } from 'state/mobiusPools/hooks'
 import invariant from 'tiny-invariant'
-import { PairStableSwap } from 'utils/StablePairMath'
 
+import { BIPS_BASE } from '../../constants'
 import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { isAddress } from '../../utils'
 import { AppDispatch, AppState } from '../index'
-import { useCurrentPool, usePairUtil, usePools } from '../stablePools/hooks'
 import { useTokenBalances } from '../wallet/hooks'
 import { Field, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 
@@ -84,7 +87,7 @@ export function tryParseAmount(value?: string, currency?: Token): TokenAmount | 
 export type MobiusTrade = {
   input: TokenAmount
   output: TokenAmount
-  pool: StableSwapPool
+  pool: IExchangeInfo
   indexFrom: number
   indexTo: number
   executionPrice: Price
@@ -96,24 +99,18 @@ export type MobiusTrade = {
 function calcInputOutput(
   input: Token | undefined,
   output: Token | undefined,
-  isExactIn: boolean,
   parsedAmount: TokenAmount | undefined,
-  math: PairStableSwap,
-  poolInfo: StableSwapPool
+  poolInfo: IExchangeInfo
 ): readonly [TokenAmount | undefined, TokenAmount | undefined, TokenAmount | undefined] {
   if ((!input && !output) || !parsedAmount) {
     return [undefined, undefined, undefined]
   }
-  const { tokens } = poolInfo
   if (!output) {
     return [parsedAmount, undefined, undefined]
   }
   if (!input) {
     return [undefined, parsedAmount, undefined]
   }
-
-  const indexFrom = tokens.map(({ address }) => address).indexOf(input.address)
-  const indexTo = tokens.map(({ address }) => address).indexOf(output.address)
 
   const details: [TokenAmount | undefined, TokenAmount | undefined, TokenAmount | undefined] = [
     undefined,
@@ -122,10 +119,12 @@ function calcInputOutput(
   ]
 
   invariant(parsedAmount)
+
   details[0] = parsedAmount
-  const [expectedOut, fee] = math.outputAmount(indexFrom, indexTo, parsedAmount.raw)
-  details[1] = new TokenAmount(output, expectedOut)
-  details[2] = new TokenAmount(input, fee)
+  const { fee, outputAmount } = calculateEstimatedSwapOutputAmount(poolInfo, parsedAmount)
+  details[1] = outputAmount
+  details[2] = fee
+
   return details
 }
 
@@ -139,7 +138,6 @@ export function useMobiusTradeInfo(): {
   const { address, connected } = useWeb3Context()
 
   const {
-    independentField,
     typedValue,
     [Field.INPUT]: { currencyId: inputCurrencyId },
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
@@ -149,8 +147,7 @@ export function useMobiusTradeInfo(): {
 
   const pools = usePools()
   const poolsLoading = pools.length === 0
-  const [pool] = useCurrentPool(inputCurrency?.address ?? '', outputCurrency?.address ?? '')
-  const mathUtil = usePairUtil(pool)
+  const pool = useCurrentPool(inputCurrency?.address ?? '', outputCurrency?.address ?? '')
 
   const to: string | null = connected ? address : null
   const relevantTokenBalances = useTokenBalances(connected ? address : undefined, [
@@ -158,8 +155,7 @@ export function useMobiusTradeInfo(): {
     outputCurrency ?? undefined,
   ])
 
-  const isExactIn: boolean = independentField === Field.INPUT
-  const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
+  const parsedAmount = tryParseAmount(typedValue, inputCurrency ?? undefined)
 
   const currencyBalances = {
     [Field.INPUT]: relevantTokenBalances[0],
@@ -179,11 +175,11 @@ export function useMobiusTradeInfo(): {
   if (!parsedAmount) {
     inputError = inputError ?? 'Enter an amount'
   }
-  if (!pool || pool.loadingPool) {
+  if (!pool) {
     inputError = inputError ?? 'Pool Info Loading'
   }
 
-  if (pool && JSBI.equal(pool.lpTotalSupply, JSBI.BigInt('0'))) {
+  if (pool && JSBI.equal(pool.lpTotalSupply.raw, JSBI.BigInt('0'))) {
     inputError = inputError ?? 'Insufficient Liquidity'
   }
 
@@ -199,9 +195,8 @@ export function useMobiusTradeInfo(): {
     !outputCurrency ||
     !parsedAmount ||
     !pool ||
-    !mathUtil ||
     poolsLoading ||
-    JSBI.equal(pool.lpTotalSupply, JSBI.BigInt('0'))
+    JSBI.equal(pool.lpTotalSupply.raw, JSBI.BigInt('0'))
   ) {
     return {
       currencies,
@@ -211,26 +206,19 @@ export function useMobiusTradeInfo(): {
       v2Trade: undefined,
     }
   }
-  const { tokens = [] } = pool || {}
+  const tokens = pool.reserves.map(({ token }) => token)
 
   const indexFrom = inputCurrency ? tokens.map(({ address }) => address).indexOf(inputCurrency.address) : 0
   const indexTo = outputCurrency ? tokens.map(({ address }) => address).indexOf(outputCurrency.address) : 0
 
-  const tradeData = calcInputOutput(inputCurrency, outputCurrency, isExactIn, parsedAmount, mathUtil, pool)
+  const tradeData = calcInputOutput(inputCurrency, outputCurrency, parsedAmount, pool)
 
-  const basisTrade = calcInputOutput(
-    inputCurrency,
-    outputCurrency,
-    isExactIn,
-    tryParseAmount('1', inputCurrency),
-    mathUtil,
-    pool
-  )
+  const basisPrice = indexFrom === 1 ? calculateSwapPrice(pool) : calculateSwapPrice(pool).invert()
   const input = tradeData[0]
   const output = tradeData[1]
   const fee = tradeData[2]
 
-  if (!input || !output || !fee || !basisTrade[0] || !basisTrade[1]) {
+  if (!input || !output || !fee || !basisPrice) {
     return {
       currencies,
       currencyBalances,
@@ -245,8 +233,10 @@ export function useMobiusTradeInfo(): {
   }
 
   const executionPrice = new Price(inputCurrency, outputCurrency, input?.raw, output?.raw)
-  const basisPrice = new Price(inputCurrency, outputCurrency, basisTrade[0]?.raw, basisTrade[1]?.raw)
-  const priceImpactFraction = basisPrice.subtract(executionPrice).divide(basisPrice)
+  const priceImpactFraction = basisPrice
+    .subtract(executionPrice)
+    .divide(basisPrice)
+    .subtract(pool.fees.trade.divide(BIPS_BASE).multiply('100'))
   const priceImpact = new Percent(priceImpactFraction.numerator, priceImpactFraction.denominator)
 
   const v2Trade: MobiusTrade | undefined =
