@@ -199,7 +199,7 @@ export default function VeMobiRewards() {
             </RowFixed>
             <RowFixed>
               <TYPE.subHeader color={tokenColor} className="apr" fontWeight={800} fontSize={[16, 24]} textAlign="right">
-                {`Max APR: ${avgApr.toFixed(2)}%`}
+                {`Max APR: 0%`}
               </TYPE.subHeader>
             </RowFixed>
           </TopSection>
@@ -215,7 +215,7 @@ export default function VeMobiRewards() {
               fontSize={[13, 16]}
               fontWeight={800}
               color={tokenColor}
-            >{`${rewardRate.toSignificant(4, { groupSeparator: ',' })} ${rewardToken.symbol} / WEEK`}</TYPE.black>
+            >{`0 ${rewardToken.symbol} / WEEK`}</TYPE.black>
           </SecondSection>
           <SecondSection>
             <RowFixed style={{ marginTop: 10 }}>
