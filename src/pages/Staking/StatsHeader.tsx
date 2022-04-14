@@ -89,7 +89,7 @@ function StatsHeader({ stakingInfo }: PropType) {
     },
     {
       label: 'Max Staking APR',
-      value: avgApr ? `${avgApr?.toSignificant(2, { groupSeparator: ',' })}%` : undefined,
+      value: avgApr ? `--` : undefined,
       img: isDarkMode ? atmDark : atmLight,
     },
   ]
