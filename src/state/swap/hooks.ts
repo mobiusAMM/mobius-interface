@@ -170,9 +170,6 @@ export function useMobiusTradeInfo(): {
     }
 
     let inputError: string | undefined
-    if (!connected) {
-      inputError = 'Connect Wallet'
-    }
 
     if (!parsedAmount) {
       inputError = inputError ?? 'Enter an amount'
@@ -188,6 +185,10 @@ export function useMobiusTradeInfo(): {
     if (!to || !formattedTo) {
       inputError = inputError ?? 'Enter a recipient'
     }
+    if (!connected) {
+      inputError = inputError ?? 'Connect Wallet'
+    }
+
     if (!inputCurrency || !outputCurrency || !parsedAmount || initializing) {
       return {
         currencies,

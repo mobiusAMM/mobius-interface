@@ -1,8 +1,8 @@
-import { newKitFromWeb3 } from '@celo/contractkit'
+import { ContractKit, newKitFromWeb3 } from '@celo/contractkit'
 import * as Swappa from '@terminal-fi/swappa'
-import { mainnetRegistriesWhitelist } from '@terminal-fi/swappa'
+import { mainnetRegistryMobius, mainnetRegistryMoolaV2, mainnetRegistryUbeswap } from '@terminal-fi/swappa'
 import { CHAIN_INFO, ChainId } from '@ubeswap/sdk'
-import { StablePools } from 'constants/pools'
+import { STATIC_POOL_INFO } from 'constants/StablePools'
 import { getAllTokens } from 'hooks/Tokens'
 import * as React from 'react'
 import Web3 from 'web3'
@@ -12,24 +12,36 @@ export const SwappaContext = React.createContext<{
   swappa?: Swappa.SwappaManager
 }>({ initializing: true })
 
-async function initializeSwappa(): Promise<Swappa.SwappaManager> {
+const genRegistries = (kit: ContractKit) => [
+  mainnetRegistryMobius(kit),
+  mainnetRegistryMoolaV2(kit),
+  mainnetRegistryUbeswap(kit),
+]
+
+async function initializeSwappa(): Promise<Swappa.SwappaManager | undefined> {
   const web3 = new Web3(CHAIN_INFO[ChainId.MAINNET].fornoURL)
   const kit = newKitFromWeb3(web3)
-  const registries = mainnetRegistriesWhitelist(kit).filter((reg) => reg.getName() !== 'mobius')
-  const mobiusRegistry = new Swappa.RegistryStatic(
-    'mobius',
-    new Promise((resolve) =>
-      resolve(
-        StablePools[ChainId.MAINNET].map((pool) => {
-          return new Swappa.PairStableSwap(ChainId.MAINNET, web3, pool.pool.address)
-        })
-      )
-    )
-  )
-  const supportedTokens = getAllTokens()
-  const swappa = new Swappa.SwappaManager(kit, Swappa.swappaRouterV1Address, [...registries, mobiusRegistry])
-  await swappa.reinitializePairs(supportedTokens?.map(({ address }) => address) ?? [])
-  return swappa
+  const registries = genRegistries(kit)
+  console.log(STATIC_POOL_INFO[ChainId.MAINNET].map(({ address }) => address))
+  // const mobiusRegistry = new Swappa.RegistryStatic(
+  //   'mobius',
+  //   new Promise((resolve) =>
+  //     resolve(
+  //       STATIC_POOL_INFO[ChainId.MAINNET].map(({ address }) => {
+  //         return new Swappa.PairStableSwap(ChainId.MAINNET, web3, address)
+  //       })
+  //     )
+  //   )
+  // )
+  try {
+    const supportedTokens = getAllTokens()
+    const swappa = new Swappa.SwappaManager(kit, Swappa.swappaRouterV1Address, registries)
+    await swappa.reinitializePairs(supportedTokens?.map(({ address }) => address) ?? [])
+    return swappa
+  } catch (e) {
+    console.log(e)
+    return undefined
+  }
 }
 
 export default function SwappaContextProvider({ children }: { children: React.ReactNode }) {
