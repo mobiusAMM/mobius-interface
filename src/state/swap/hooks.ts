@@ -1,16 +1,19 @@
 import { parseUnits } from '@ethersproject/units'
+import { Route } from '@terminal-fi/swappa'
 import { JSBI, Percent, Price, Token, TokenAmount } from '@ubeswap/sdk'
-import { useCallback } from 'react'
+import BigNumber from 'bignumber.js'
+import { useCallback, useContext, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { StableSwapPool } from 'state/stablePools/reducer'
 import invariant from 'tiny-invariant'
 import { PairStableSwap } from 'utils/StablePairMath'
 
+import { SwappaContext } from '../../Context/SwappaContext'
 import { useWeb3Context } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
+import useDebounce from '../../hooks/useDebounce'
 import { isAddress } from '../../utils'
 import { AppDispatch, AppState } from '../index'
-import { useCurrentPool, usePairUtil, usePools } from '../stablePools/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
 import { Field, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 
@@ -84,12 +87,10 @@ export function tryParseAmount(value?: string, currency?: Token): TokenAmount | 
 export type MobiusTrade = {
   input: TokenAmount
   output: TokenAmount
-  pool: StableSwapPool
-  indexFrom: number
-  indexTo: number
   executionPrice: Price
   fee: TokenAmount
   priceImpact: Percent
+  route: Route
 }
 
 function calcInputOutput(
@@ -136,126 +137,127 @@ export function useMobiusTradeInfo(): {
   inputError?: string
 } {
   const { address, connected } = useWeb3Context()
+  const { swappa, initializing } = useContext(SwappaContext)
 
   const {
     independentField,
-    typedValue,
+    typedValue: unbouncedTypedValue,
     [Field.INPUT]: { currencyId: inputCurrencyId },
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
   } = useSwapState()
   const inputCurrency = useCurrency(inputCurrencyId)
   const outputCurrency = useCurrency(outputCurrencyId)
-
-  const pools = usePools()
-  const poolsLoading = pools.length === 0
-  const [pool] = useCurrentPool(inputCurrency?.address ?? '', outputCurrency?.address ?? '')
-  const mathUtil = usePairUtil(pool)
-
-  const to: string | null = connected ? address : null
+  const typedValue = useDebounce(unbouncedTypedValue, 100)
   const relevantTokenBalances = useCurrencyBalances(connected ? address : undefined, [
     inputCurrency ?? undefined,
     outputCurrency ?? undefined,
   ])
 
-  const isExactIn: boolean = independentField === Field.INPUT
-  const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
+  return useMemo(() => {
+    const to: string | null = connected ? address : null
 
-  const currencyBalances = {
-    [Field.INPUT]: relevantTokenBalances[0],
-    [Field.OUTPUT]: relevantTokenBalances[1],
-  }
+    const isExactIn: boolean = independentField === Field.INPUT
+    const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
 
-  const currencies: { [field in Field]?: Token } = {
-    [Field.INPUT]: inputCurrency ?? undefined,
-    [Field.OUTPUT]: outputCurrency ?? undefined,
-  }
+    const currencyBalances = {
+      [Field.INPUT]: relevantTokenBalances[0],
+      [Field.OUTPUT]: relevantTokenBalances[1],
+    }
 
-  let inputError: string | undefined
-  if (!connected) {
-    inputError = 'Connect Wallet'
-  }
+    const currencies: { [field in Field]?: Token } = {
+      [Field.INPUT]: inputCurrency ?? undefined,
+      [Field.OUTPUT]: outputCurrency ?? undefined,
+    }
 
-  if (!parsedAmount) {
-    inputError = inputError ?? 'Enter an amount'
-  }
-  if (!pool || pool.loadingPool) {
-    inputError = inputError ?? 'Pool Info Loading'
-  }
+    let inputError: string | undefined
+    if (!connected) {
+      inputError = 'Connect Wallet'
+    }
 
-  if (pool && JSBI.equal(pool.lpTotalSupply, JSBI.BigInt('0'))) {
-    inputError = inputError ?? 'Insufficient Liquidity'
-  }
+    if (!parsedAmount) {
+      inputError = inputError ?? 'Enter an amount'
+    }
+    if (initializing) {
+      inputError = inputError ?? 'Pool Info Loading'
+    }
 
-  if (!currencies[Field.INPUT] || !currencies[Field.OUTPUT]) {
-    inputError = inputError ?? 'Select a token'
-  }
-  const formattedTo = isAddress(to)
-  if (!to || !formattedTo) {
-    inputError = inputError ?? 'Enter a recipient'
-  }
-  if (
-    !inputCurrency ||
-    !outputCurrency ||
-    !parsedAmount ||
-    !pool ||
-    !mathUtil ||
-    poolsLoading ||
-    JSBI.equal(pool.lpTotalSupply, JSBI.BigInt('0'))
-  ) {
+    if (!currencies[Field.INPUT] || !currencies[Field.OUTPUT]) {
+      inputError = inputError ?? 'Select a token'
+    }
+    const formattedTo = isAddress(to)
+    if (!to || !formattedTo) {
+      inputError = inputError ?? 'Enter a recipient'
+    }
+    if (!inputCurrency || !outputCurrency || !parsedAmount || initializing) {
+      return {
+        currencies,
+        currencyBalances,
+        parsedAmount,
+        inputError,
+        v2Trade: undefined,
+      }
+    }
+
+    const basisInput = new BigNumber(`1e+${inputCurrency.decimals}`)
+    const basisTrade = swappa?.findBestRoutesForFixedInputAmount(
+      inputCurrencyId ?? '',
+      outputCurrencyId ?? '',
+      basisInput
+    )?.[0]
+    const trade = swappa?.findBestRoutesForFixedInputAmount(
+      inputCurrencyId ?? '',
+      outputCurrencyId ?? '',
+      new BigNumber(parsedAmount.raw.toString())
+    )?.[0]
+    const input = trade ? parsedAmount : undefined
+    const output = trade ? new TokenAmount(outputCurrency, trade.outputAmount.toFixed(0)) : undefined
+    const fee = trade ? new TokenAmount(inputCurrency, '0') : undefined
+
+    if (!input || !output || !fee || !basisTrade || !trade) {
+      return {
+        currencies,
+        currencyBalances,
+        parsedAmount,
+        inputError,
+        v2Trade: undefined,
+      }
+    }
+
+    if (currencyBalances[Field.INPUT]?.lessThan(input || JSBI.BigInt('0'))) {
+      inputError = 'Insufficient Balance'
+    }
+
+    const executionPrice = new Price(inputCurrency, outputCurrency, input?.raw, output?.raw)
+    const basisPrice = new Price(
+      inputCurrency,
+      outputCurrency,
+      basisInput.toFixed(0),
+      basisTrade?.outputAmount.toFixed(0)
+    )
+    const priceImpactFraction = basisPrice.subtract(executionPrice).divide(basisPrice)
+    const priceImpact = new Percent(priceImpactFraction.numerator, priceImpactFraction.denominator)
+
+    const v2Trade: MobiusTrade | undefined =
+      input && output ? { input, output, executionPrice, fee, priceImpact, route: trade } : undefined
+
     return {
       currencies,
       currencyBalances,
       parsedAmount,
+      v2Trade,
       inputError,
-      v2Trade: undefined,
     }
-  }
-  const { tokens = [] } = pool || {}
-
-  const indexFrom = inputCurrency ? tokens.map(({ address }) => address).indexOf(inputCurrency.address) : 0
-  const indexTo = outputCurrency ? tokens.map(({ address }) => address).indexOf(outputCurrency.address) : 0
-
-  const tradeData = calcInputOutput(inputCurrency, outputCurrency, isExactIn, parsedAmount, mathUtil, pool)
-
-  const basisTrade = calcInputOutput(
+  }, [
+    typedValue,
+    inputCurrencyId,
+    outputCurrencyId,
+    initializing,
+    swappa,
+    address,
+    relevantTokenBalances,
     inputCurrency,
     outputCurrency,
-    isExactIn,
-    tryParseAmount('1', inputCurrency),
-    mathUtil,
-    pool
-  )
-  const input = tradeData[0]
-  const output = tradeData[1]
-  const fee = tradeData[2]
-
-  if (!input || !output || !fee || !basisTrade[0] || !basisTrade[1]) {
-    return {
-      currencies,
-      currencyBalances,
-      parsedAmount,
-      inputError,
-      v2Trade: undefined,
-    }
-  }
-
-  if (currencyBalances[Field.INPUT]?.lessThan(input || JSBI.BigInt('0'))) {
-    inputError = 'Insufficient Balance'
-  }
-
-  const executionPrice = new Price(inputCurrency, outputCurrency, input?.raw, output?.raw)
-  const basisPrice = new Price(inputCurrency, outputCurrency, basisTrade[0]?.raw, basisTrade[1]?.raw)
-  const priceImpactFraction = basisPrice.subtract(executionPrice).divide(basisPrice)
-  const priceImpact = new Percent(priceImpactFraction.numerator, priceImpactFraction.denominator)
-
-  const v2Trade: MobiusTrade | undefined =
-    input && output && pool ? { input, output, pool, indexFrom, indexTo, executionPrice, fee, priceImpact } : undefined
-
-  return {
-    currencies,
-    currencyBalances,
-    parsedAmount,
-    v2Trade,
-    inputError,
-  }
+    connected,
+    independentField,
+  ])
 }
