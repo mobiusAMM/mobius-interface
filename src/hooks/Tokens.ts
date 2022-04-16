@@ -1,4 +1,6 @@
-import { Token } from '@ubeswap/sdk'
+import UBE_TOKENS from '@ubeswap/default-token-list'
+import { ChainId, Token } from '@ubeswap/sdk'
+import { WrappedTokenInfo } from 'state/lists/hooks'
 import { dedupeTokens } from 'utils/tokens'
 
 import { CHAIN } from '../constants'
@@ -23,10 +25,17 @@ export function useAllInactiveTokens(): { [address: string]: Token } {
   return {}
 }
 
-function getAllTokens(): Token[] | null {
+function getUbeTokenList(chain: ChainId): Token[] | null {
+  return UBE_TOKENS.tokens.filter(({ chainId }) => chainId === chain).map((info) => new WrappedTokenInfo(info, []))
+}
+
+export function getAllTokens(): Token[] | null {
   const StableTokensWithDup = STATIC_POOL_INFO[CHAIN].flatMap((pools) => pools.tokens)
   const MentoTokensWithDup = MENTO_POOL_INFO[CHAIN].flatMap((pools) => pools.tokens)
-  return dedupeTokens(MentoTokensWithDup.concat(StableTokensWithDup).concat(ExternalRewards[CHAIN]))
+  const UbeTokenList = getUbeTokenList(CHAIN) ?? []
+  return dedupeTokens(
+    MentoTokensWithDup.concat(StableTokensWithDup).concat(ExternalRewards[CHAIN]).concat(UbeTokenList)
+  )
 }
 
 // undefined if invalid or does not exist
