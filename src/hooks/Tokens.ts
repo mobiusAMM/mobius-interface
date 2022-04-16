@@ -20,7 +20,16 @@ export function useDefaultTokens(): { [address: string]: Token } {
 }
 
 export function useAllTokens(): { [address: string]: Token } {
-  return {}
+  const tokens = getAllTokens()
+  return (
+    tokens?.reduce(
+      (accum: { [address: string]: Token }, cur: Token) => ({
+        ...accum,
+        [cur.address]: cur,
+      }),
+      {}
+    ) ?? {}
+  )
 }
 
 export function useAllInactiveTokens(): { [address: string]: Token } {
