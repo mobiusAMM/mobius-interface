@@ -1,4 +1,4 @@
-import * as Swappa from '@terminal-fi/swappa'
+import * as Swappa from '@mobius-money/swappa'
 import { TokenAmount } from '@ubeswap/sdk'
 import { describeTrade } from 'components/swap/routing/describeTrade'
 import { useTradeCallback } from 'components/swap/routing/useTradeCallback'

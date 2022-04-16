@@ -3,7 +3,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { AddressZero } from '@ethersproject/constants'
 import { Contract } from '@ethersproject/contracts'
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
-import { swappaRouterV1Address } from '@terminal-fi/swappa'
+import { swappaRouterV1Address } from '@mobius-money/swappa'
 import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
 import { Exchange, Swap, SwappaRouterV1 } from 'generated/index'
 

@@ -1,5 +1,5 @@
 import { parseUnits } from '@ethersproject/units'
-import { Route } from '@terminal-fi/swappa'
+import { Route } from '@mobius-money/swappa'
 import { JSBI, Percent, Price, Token, TokenAmount } from '@ubeswap/sdk'
 import BigNumber from 'bignumber.js'
 import { useCallback, useContext, useMemo } from 'react'

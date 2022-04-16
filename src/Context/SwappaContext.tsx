@@ -1,6 +1,6 @@
 import { ContractKit, newKitFromWeb3 } from '@celo/contractkit'
-import * as Swappa from '@terminal-fi/swappa'
-import { mainnetRegistryMobius, mainnetRegistryMoolaV2, mainnetRegistryUbeswap } from '@terminal-fi/swappa'
+import * as Swappa from '@mobius-money/swappa'
+import { mainnetRegistryMobius, mainnetRegistryMoolaV2, mainnetRegistryUbeswap } from '@mobius-money/swappa'
 import { CHAIN_INFO, ChainId } from '@ubeswap/sdk'
 import { STATIC_POOL_INFO } from 'constants/StablePools'
 import { getAllTokens } from 'hooks/Tokens'
