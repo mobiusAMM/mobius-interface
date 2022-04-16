@@ -3,6 +3,7 @@ import '@celo-tools/use-contractkit/lib/styles.css'
 
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client'
 import { ContractKitProvider, Mainnet } from '@celo-tools/use-contractkit'
+import SwappaContextProvider from 'Context/SwappaContext'
 import React, { StrictMode } from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
@@ -82,17 +83,19 @@ ReactDOM.render(
         },
       }}
     >
-      <ApolloProvider client={client}>
-        <Provider store={store}>
-          <Updaters />
-          <ThemeProvider>
-            <ThemedGlobalStyle />
-            <HashRouter>
-              <App />
-            </HashRouter>
-          </ThemeProvider>
-        </Provider>
-      </ApolloProvider>
+      <SwappaContextProvider>
+        <ApolloProvider client={client}>
+          <Provider store={store}>
+            <Updaters />
+            <ThemeProvider>
+              <ThemedGlobalStyle />
+              <HashRouter>
+                <App />
+              </HashRouter>
+            </ThemeProvider>
+          </Provider>
+        </ApolloProvider>
+      </SwappaContextProvider>
     </ContractKitProvider>
   </StrictMode>,
   document.getElementById('root')

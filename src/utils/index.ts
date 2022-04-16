@@ -3,11 +3,13 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { AddressZero } from '@ethersproject/constants'
 import { Contract } from '@ethersproject/contracts'
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
+import { swappaRouterV1Address } from '@mobius-money/swappa'
 import { JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
-import { Exchange, Swap } from 'generated/index'
+import { Exchange, Swap, SwappaRouterV1 } from 'generated/index'
 
 import EXCHANGE from '../constants/abis/Exchange.json'
 import SWAP from '../constants/abis/Swap.json'
+import SWAPPA_ROUTER from '../constants/abis/SwappaRouterV1.json'
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {
@@ -75,4 +77,8 @@ export function getStableSwapContract(address: string, provider: Web3Provider, c
 
 export function getMentoContract(address: string, provider: Web3Provider, connected: boolean): Exchange {
   return getContract(address, EXCHANGE, provider, connected) as Exchange
+}
+
+export function getSwappaRouterV1Contract(provider: Web3Provider, connected: boolean): SwappaRouterV1 {
+  return getContract(swappaRouterV1Address, SWAPPA_ROUTER, provider, connected) as SwappaRouterV1
 }
