@@ -57,6 +57,14 @@ export default function SwappaContextProvider({ children }: { children: React.Re
       setInitializing(false)
       console.log(`Done initializing buckets, took ${(Date.now() - time) / 1000} seconds`)
     })()
+    const updater = setInterval(() => {
+      if (manager) {
+        manager.refreshPairs()
+      }
+    }, 60 * 1000)
+    return () => {
+      clearInterval(updater)
+    }
   }, [setManager])
 
   return <SwappaContext.Provider value={{ initializing, swappa: manager }}>{children}</SwappaContext.Provider>

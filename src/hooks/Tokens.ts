@@ -9,8 +9,10 @@ import { ExternalRewards, VEMOBI } from '../constants/tokens'
 import { isAddress } from '../utils'
 
 export function useSwappableTokens(mento: boolean): Token[] {
-  const pools = mento ? MENTO_POOL_INFO[CHAIN] : STATIC_POOL_INFO[CHAIN].filter((pool) => !pool.disabled)
-  return dedupeTokens(pools.flatMap(({ tokens }) => tokens))
+  if (mento) {
+    return dedupeTokens(MENTO_POOL_INFO[CHAIN].flatMap(({ tokens }) => tokens))
+  }
+  return getAllTokens() ?? []
 }
 
 export function useDefaultTokens(): { [address: string]: Token } {
