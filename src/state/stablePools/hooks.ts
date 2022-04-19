@@ -1,16 +1,21 @@
 // To-Do: Implement Hooks to update Client-Side contract representation
-import { JSBI, Percent, Token, TokenAmount } from '@ubeswap/sdk'
+import { Fraction, JSBI, Percent, Token, TokenAmount } from '@ubeswap/sdk'
+import { calcApy } from 'components/earn/StablePoolCard'
+import { BIG_INT_SECONDS_IN_YEAR, CHAIN } from 'constants/index'
 import { Chain, Coins } from 'constants/StablePools'
+import { MOBI } from 'constants/tokens'
 import { useWeb3Context } from 'hooks'
 import { addressToToken } from 'hooks/Tokens'
 import { useLiquidityGaugeContract, useStableSwapContract } from 'hooks/useContract'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useEthBtcPrice } from 'state/application/hooks'
+import { useEthBtcPrice, useTokenPrices } from 'state/application/hooks'
 import { useSingleContractMultipleData } from 'state/multicall/hooks'
 import { tryParseAmount } from 'state/swap/hooks'
 import invariant from 'tiny-invariant'
 import { PairStableSwap } from 'utils/StablePairMath'
+import { getDepositValues } from 'utils/stableSwaps'
+import { getCUSDPrices } from 'utils/useCUSDPrice'
 
 import WARNINGS from '../../constants/PoolWarnings.json'
 import { StableSwapMath } from '../../utils/stableSwapMath'
@@ -30,7 +35,7 @@ export interface StablePoolInfo {
   readonly totalDeposited: TokenAmount
   readonly apr?: TokenAmount
   readonly totalStakedAmount?: TokenAmount
-  readonly workingSupply?: JSBI
+  readonly workingLiquidity: TokenAmount
   readonly stakedAmount: TokenAmount
   readonly totalVolume?: TokenAmount
   readonly peggedTo: string
@@ -104,6 +109,7 @@ export const getPoolInfo = (pool: StableSwapPool): StablePoolInfo | Record<strin
         ),
         totalDeposited: new TokenAmount(pool.lpToken, pool.lpTotalSupply ?? JSBI.BigInt('0')),
         stakedAmount: new TokenAmount(pool.lpToken, pool.userStaked || JSBI.BigInt('0')),
+        workingLiquidity: new TokenAmount(pool.lpToken, pool.workingLiquidity ?? JSBI.BigInt('0')),
         apr: new TokenAmount(pool.lpToken, JSBI.BigInt('100000000000000000')),
         peggedTo: pool.peggedTo,
         virtualPrice: pool.virtualPrice,
@@ -114,7 +120,6 @@ export const getPoolInfo = (pool: StableSwapPool): StablePoolInfo | Record<strin
             JSBI.add(pool.lpOwned ?? JSBI.BigInt('0'), pool.userStaked ?? JSBI.BigInt('0'))
           )
         ),
-        workingSupply: pool.workingLiquidity,
         balances: pool.tokens.map(
           (token, i) => new TokenAmount(token, pool.balances?.[i] ?? pool.approxBalances?.[i] ?? '0')
         ),
@@ -270,4 +275,78 @@ export function useWarning(
 export function usePairUtil(pool?: StableSwapPool | string): PairStableSwap | undefined {
   const name = !pool ? '' : typeof pool == 'string' ? pool : pool.address
   return useSelector<AppState, PairStableSwap | undefined>((state) => state.stablePools.pools[name.toLowerCase()]?.pair)
+}
+
+const calcVoteRatio = (actualLiquidity: TokenAmount, workingLiquidity: TokenAmount) =>
+  workingLiquidity.divide(actualLiquidity)
+
+const calcEffectiveBalanceRatioUnboosted = (actualLiquidity: TokenAmount, workingLiquidity: TokenAmount) =>
+  actualLiquidity.divide(workingLiquidity)
+
+export function useAPR(poolName?: string): {
+  base: Fraction
+  baseDpy: Fraction
+  boostedDpy: Fraction
+  boosted: Fraction
+} {
+  const pool = useStablePoolInfoByName(poolName ?? '')
+  const tokenPrices = getCUSDPrices(useTokenPrices())
+
+  return useMemo(() => {
+    const aprs = {
+      base: new Fraction('0'),
+      baseDpy: new Fraction('0'),
+      boostedDpy: new Fraction('0'),
+      boosted: new Fraction('0'),
+    }
+    if (!pool) return aprs
+    const { totalValueDeposited, totalValueStaked } = getDepositValues(pool)
+    const { workingLiquidity, tokens, stakedAmount, mobiRate, externalRewardRates } = pool
+    const mobi = MOBI[CHAIN] as unknown as Token
+    const priceOfMobi = tokenPrices[mobi.address.toLowerCase()]
+
+    // Estimate the ratio of LPers that are getting boosted
+    const unboostedFactor = calcVoteRatio(totalValueStaked, workingLiquidity)
+    console.log({ unboostedFactor: unboostedFactor.toFixed(4) })
+    const coinPrice = tokens.reduce(
+      (accum: Fraction | undefined, { address }) => accum ?? tokenPrices[address.toLowerCase()],
+      undefined
+    )
+
+    const totalStakedAmount = totalValueDeposited
+      ? totalValueDeposited.multiply(new Fraction(coinPrice?.numerator ?? '1', coinPrice?.denominator ?? '1'))
+      : new Fraction(JSBI.BigInt(0))
+    const totalMobiRate = new TokenAmount(mobi, mobiRate ?? JSBI.BigInt('0'))
+
+    const rewardPerYear = priceOfMobi?.multiply(totalMobiRate.multiply(BIG_INT_SECONDS_IN_YEAR)) ?? new Fraction('0')
+    let rewardPerYearExternal = new Fraction('0', '1')
+    for (let i = 0; i < 8; i++) {
+      const rate = externalRewardRates?.[i] ?? totalMobiRate
+      const priceOfToken =
+        tokenPrices[rate.token.address.toLowerCase()] ?? tokenPrices['0x00be915b9dcf56a3cbe739d9b9c202ca692409ec']
+      if (externalRewardRates && i < externalRewardRates.length) {
+        rewardPerYearExternal = rewardPerYearExternal.add(
+          priceOfToken?.multiply(rate.multiply(BIG_INT_SECONDS_IN_YEAR)) ?? '0'
+        )
+      }
+    }
+    const [apyFraction, apy, dpy] =
+      mobiRate && totalStakedAmount && !totalStakedAmount.equalTo(JSBI.BigInt(0))
+        ? calcApy(rewardPerYear.add(rewardPerYearExternal), totalStakedAmount)
+        : [undefined, undefined, undefined]
+
+    const [boostedApyFraction, boostedApy, boostedDpy] =
+      mobiRate && totalStakedAmount && !totalStakedAmount.equalTo(JSBI.BigInt(0))
+        ? calcApy(
+            rewardPerYear.multiply(new Fraction(JSBI.BigInt(5), JSBI.BigInt(2))).add(rewardPerYearExternal),
+            totalStakedAmount
+          )
+        : [new Fraction('0', '1'), new Fraction('0', '1'), new Fraction('0', '1')]
+    return {
+      base: apy ?? new Fraction('0'),
+      baseDpy: dpy ?? new Fraction('0'),
+      boosted: boostedApy ?? new Fraction('0'),
+      boostedDpy: boostedDpy ?? new Fraction('0'),
+    }
+  }, [pool])
 }
