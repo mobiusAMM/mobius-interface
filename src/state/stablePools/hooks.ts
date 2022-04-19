@@ -280,6 +280,14 @@ export function usePairUtil(pool?: StableSwapPool | string): PairStableSwap | un
 const calcVoteRatio = (actualLiquidity: TokenAmount, workingLiquidity: TokenAmount) =>
   workingLiquidity.divide(actualLiquidity)
 
+// b`(x) = b - (0.4 - x)b = 1.4b - xb
+const calcAdjustedMobiRate = (unadjustedRate: Fraction, alpha: Fraction) =>
+  alpha.greaterThan('0')
+    ? unadjustedRate
+        .multiply(new Fraction('14', '10'))
+        .subtract(unadjustedRate.multiply(alpha ?? new Fraction('4', '10')))
+    : unadjustedRate
+
 const calcEffectiveBalanceRatioUnboosted = (actualLiquidity: TokenAmount, workingLiquidity: TokenAmount) =>
   actualLiquidity.divide(workingLiquidity)
 
@@ -307,7 +315,6 @@ export function useAPR(poolName?: string): {
 
     // Estimate the ratio of LPers that are getting boosted
     const unboostedFactor = calcVoteRatio(totalValueStaked, workingLiquidity)
-    console.log({ unboostedFactor: unboostedFactor.toFixed(4) })
     const coinPrice = tokens.reduce(
       (accum: Fraction | undefined, { address }) => accum ?? tokenPrices[address.toLowerCase()],
       undefined
@@ -318,7 +325,9 @@ export function useAPR(poolName?: string): {
       : new Fraction(JSBI.BigInt(0))
     const totalMobiRate = new TokenAmount(mobi, mobiRate ?? JSBI.BigInt('0'))
 
-    const rewardPerYear = priceOfMobi?.multiply(totalMobiRate.multiply(BIG_INT_SECONDS_IN_YEAR)) ?? new Fraction('0')
+    const rewardPerYearUnadjusted =
+      priceOfMobi?.multiply(totalMobiRate.multiply(BIG_INT_SECONDS_IN_YEAR)) ?? new Fraction('1')
+    const rewardPerYear = calcAdjustedMobiRate(rewardPerYearUnadjusted, unboostedFactor)
     let rewardPerYearExternal = new Fraction('0', '1')
     for (let i = 0; i < 8; i++) {
       const rate = externalRewardRates?.[i] ?? totalMobiRate
