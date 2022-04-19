@@ -357,5 +357,5 @@ export function useAPR(poolName?: string): {
       boosted: boostedApy ?? new Fraction('0'),
       boostedDpy: boostedDpy ?? new Fraction('0'),
     }
-  }, [pool])
+  }, [pool, tokenPrices])
 }
