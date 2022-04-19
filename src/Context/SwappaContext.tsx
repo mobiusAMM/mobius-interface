@@ -2,7 +2,6 @@ import { ContractKit, newKitFromWeb3 } from '@celo/contractkit'
 import * as Swappa from '@mobius-money/swappa'
 import { mainnetRegistryMobius, mainnetRegistryMoolaV2, mainnetRegistryUbeswap } from '@mobius-money/swappa'
 import { CHAIN_INFO, ChainId } from '@ubeswap/sdk'
-import { STATIC_POOL_INFO } from 'constants/StablePools'
 import { getAllTokens } from 'hooks/Tokens'
 import * as React from 'react'
 import Web3 from 'web3'
@@ -22,17 +21,6 @@ async function initializeSwappa(): Promise<Swappa.SwappaManager | undefined> {
   const web3 = new Web3(CHAIN_INFO[ChainId.MAINNET].fornoURL)
   const kit = newKitFromWeb3(web3)
   const registries = genRegistries(kit)
-  console.log(STATIC_POOL_INFO[ChainId.MAINNET].map(({ address }) => address))
-  // const mobiusRegistry = new Swappa.RegistryStatic(
-  //   'mobius',
-  //   new Promise((resolve) =>
-  //     resolve(
-  //       STATIC_POOL_INFO[ChainId.MAINNET].map(({ address }) => {
-  //         return new Swappa.PairStableSwap(ChainId.MAINNET, web3, address)
-  //       })
-  //     )
-  //   )
-  // )
   try {
     const supportedTokens = getAllTokens()
     const swappa = new Swappa.SwappaManager(kit, Swappa.swappaRouterV1Address, registries)
