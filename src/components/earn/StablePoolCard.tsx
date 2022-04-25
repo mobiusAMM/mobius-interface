@@ -1,8 +1,9 @@
-import { Fraction, JSBI, Percent, TokenAmount } from '@ubeswap/sdk'
+import { cUSD, Fraction, JSBI, Percent, Price, TokenAmount } from '@ubeswap/sdk'
 import Loader from 'components/Loader'
 import QuestionHelper from 'components/QuestionHelper'
 import { ChainLogo, Coins } from 'constants/StablePools'
 import { useWeb3Context } from 'hooks'
+import { useMobi } from 'hooks/Tokens'
 import { darken } from 'polished'
 import React, { useState } from 'react'
 import { isMobile } from 'react-device-detect'
@@ -10,10 +11,12 @@ import { useHistory } from 'react-router'
 import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 import { getDepositValues } from 'utils/stableSwaps'
+import { getCUSDPrices, useCUSDPrice } from 'utils/useCUSDPrice'
 
-import { BIG_INT_SECONDS_IN_WEEK } from '../../constants'
+import { BIG_INT_SECONDS_IN_WEEK, BIG_INT_SECONDS_IN_YEAR, CHAIN } from '../../constants'
 import { useColor, usePoolColor } from '../../hooks/useColor'
-import { StablePoolInfo, useAPR } from '../../state/stablePools/hooks'
+import { useTokenPrices } from '../../state/application/hooks'
+import { StablePoolInfo } from '../../state/stablePools/hooks'
 import { theme, TYPE } from '../../theme'
 import { ButtonPrimary } from '../Button'
 import { AutoColumn } from '../Column'
@@ -165,7 +168,9 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
     balances,
     totalDeposited,
     stakedAmount,
+    workingSupply,
     pegComesAfter,
+    feesGenerated,
     mobiRate,
     displayDecimals,
     totalStakedAmount: totalStakedLPs,
@@ -175,11 +180,47 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
   const [openDeposit, setOpenDeposit] = useState(false)
   const [openWithdraw, setOpenWithdraw] = useState(false)
   const [openManage, setOpenManage] = useState(false)
+  const tokenPrices = getCUSDPrices(useTokenPrices())
   const history = useHistory()
 
+  const mobi = useMobi()
+  const priceOfMobi = useCUSDPrice(mobi) ?? new Price(mobi, cUSD[CHAIN], '100', '1')
   const userLP = poolInfo.amountDeposited
-  const { totalValueDeposited, valueOfDeposited } = getDepositValues(poolInfo)
-  const { base: apy, baseDpy: dpy, boosted: boostedApy } = useAPR(poolInfo.poolAddress)
+  const { totalValueDeposited, valueOfDeposited } = getDepositValues(poolInfo, workingSupply)
+  const coinPrice = tokens.reduce(
+    (accum: Fraction | undefined, { address }) => accum ?? tokenPrices[address.toLowerCase()],
+    undefined
+  )
+
+  const totalStakedAmount = totalValueDeposited
+    ? totalValueDeposited.multiply(new Fraction(coinPrice?.numerator ?? '1', coinPrice?.denominator ?? '1'))
+    : new Fraction(JSBI.BigInt(0))
+  const totalMobiRate = new TokenAmount(mobi, mobiRate ?? JSBI.BigInt('0'))
+
+  const rewardPerYear = priceOfMobi.raw.multiply(totalMobiRate.multiply(BIG_INT_SECONDS_IN_YEAR))
+  let rewardPerYearExternal = new Fraction('0', '1')
+  for (let i = 0; i < 8; i++) {
+    const rate = poolInfo.externalRewardRates?.[i] ?? totalMobiRate
+    const priceOfToken =
+      tokenPrices[rate.token.address.toLowerCase()] ?? tokenPrices['0x00be915b9dcf56a3cbe739d9b9c202ca692409ec']
+    if (poolInfo.externalRewardRates && i < poolInfo.externalRewardRates.length) {
+      rewardPerYearExternal = rewardPerYearExternal.add(
+        priceOfToken?.multiply(rate.multiply(BIG_INT_SECONDS_IN_YEAR)) ?? '0'
+      )
+    }
+  }
+  const [apyFraction, apy, dpy] =
+    mobiRate && totalStakedAmount && !totalStakedAmount.equalTo(JSBI.BigInt(0))
+      ? calcApy(rewardPerYear.add(rewardPerYearExternal), totalStakedAmount)
+      : [undefined, undefined, undefined]
+
+  const [boostedApyFraction, boostedApy, boostedDpy] =
+    mobiRate && totalStakedAmount && !totalStakedAmount.equalTo(JSBI.BigInt(0))
+      ? calcApy(
+          rewardPerYear.multiply(new Fraction(JSBI.BigInt(5), JSBI.BigInt(2))).add(rewardPerYearExternal),
+          totalStakedAmount
+        )
+      : [new Fraction('0', '1'), new Fraction('0', '1'), new Fraction('0', '1')]
 
   let weeklyAPY: React.ReactNode | undefined = <>🤯</>
   try {

@@ -8,7 +8,7 @@ import isZero from 'utils/isZero'
 import { BIPS_BASE, INITIAL_ALLOWED_SLIPPAGE } from '../constants'
 import { MobiusTrade } from '../state/swap/hooks'
 import { useTransactionAdder } from '../state/transactions/hooks'
-import { getSwappaRouterV1Contract } from '../utils'
+import { getStableSwapContract } from '../utils'
 import useENS from './useENS'
 import useTransactionDeadline from './useTransactionDeadline'
 import { useWeb3Context } from './web3'
@@ -56,19 +56,17 @@ function useSwapCallArguments(
   return useMemo(() => {
     if (!trade || !recipient || !provider || !connected || !deadline) return []
 
-    const contract = getSwappaRouterV1Contract(provider, connected)
+    const contract = getStableSwapContract(trade.pool.address, provider, connected)
+    const { indexFrom = 0, indexTo = 0 } = trade || {}
     const outputRaw = trade.output.raw
     const minDy = JSBI.subtract(outputRaw, JSBI.divide(outputRaw, JSBI.divide(BIPS_BASE, JSBI.BigInt(allowedSlippage))))
-    const routeData = trade.route.pairs.map((p, idx) => p.swapData(trade.route.path[idx]))
     const swapCallParameters: SwapParameters = {
-      methodName: 'swapExactInputForOutput',
+      methodName: trade.isMeta ? 'swapUnderlying' : 'swap',
       args: [
-        trade.route.path,
-        routeData.map(({ addr }) => addr),
-        routeData.map((d) => d.extra),
+        indexFrom.toString(),
+        indexTo.toString(),
         trade.input.raw.toString(),
         minDy.toString(),
-        recipient,
         deadline.toString(),
       ],
       value: '0',

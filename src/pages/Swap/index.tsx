@@ -1,4 +1,3 @@
-import * as Swappa from '@mobius-money/swappa'
 import { TokenAmount } from '@ubeswap/sdk'
 import { describeTrade } from 'components/swap/routing/describeTrade'
 import { useTradeCallback } from 'components/swap/routing/useTradeCallback'
@@ -50,6 +49,7 @@ export default function Swap() {
   const { v2Trade, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useMobiusTradeInfo()
 
   const trade = v2Trade
+
   const parsedAmounts = {
     [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.input,
     [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.output,
@@ -93,7 +93,7 @@ export default function Swap() {
   }
 
   // check whether the user has approved the router on the input token
-  const [approval, approveCallback] = useApproveCallback(trade?.input, Swappa.swappaRouterV1Address)
+  const [approval, approveCallback] = useApproveCallback(trade?.input, trade?.pool.address)
 
   // check if user has gone through approval process, used to show two step buttons, reset on token change
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false)
@@ -141,7 +141,7 @@ export default function Swap() {
   const [showInverted, setShowInverted] = useState<boolean>(false)
 
   // warnings on slippage
-  const priceImpactSeverity = warningSeverity(trade?.priceImpact)
+  const priceImpactSeverity = warningSeverity(priceImpactWithoutFee)
 
   // show approve flow when: no error on inputs, not approved or pending, or approved in current session
   // never show if price impact is above threshold in non expert mode

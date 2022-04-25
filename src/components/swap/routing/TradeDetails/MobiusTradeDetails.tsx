@@ -1,10 +1,8 @@
 import { TradeType } from '@ubeswap/sdk'
-import { useAllTokens } from 'hooks/Tokens'
 import React, { useContext } from 'react'
 import { Field } from 'state/swap/actions'
 import { MobiusTrade } from 'state/swap/hooks'
 import { ThemeContext } from 'styled-components'
-import { shortenAddress } from 'utils'
 
 import { TYPE } from '../../../../theme'
 import {
@@ -29,7 +27,6 @@ export const MobiusTradeDetails: React.FC<Props> = ({ trade, allowedSlippage, me
     : computeTradePriceBreakdown(trade)
   const isExactIn = trade.tradeType === TradeType.EXACT_INPUT
   const slippageAdjustedAmounts = computeSlippageAdjustedAmounts(trade, allowedSlippage)
-  const tokens = useAllTokens()
 
   return (
     <>
@@ -69,23 +66,6 @@ export const MobiusTradeDetails: React.FC<Props> = ({ trade, allowedSlippage, me
           {realizedLPFee ? `${realizedLPFee.toSignificant(4)} ${trade.input.currency.symbol}` : '-'}
         </TYPE.black>
       </RowBetween>
-      <RowBetween>
-        <RowFixed>
-          <TYPE.black fontSize={14} fontWeight={400} color={theme.text2}>
-            Path
-          </TYPE.black>
-          <QuestionHelper text="Trade path to be executed" />
-        </RowFixed>
-        <TYPE.black fontSize={14} color={theme.text1}>
-          {trade.route.path.map((address) => tokens[address]?.symbol ?? shortenAddress(address)).join(' -> ')}
-        </TYPE.black>
-      </RowBetween>
-      <RowFixed>
-        <TYPE.black fontSize={14} fontWeight={400} color={theme.text2}>
-          Powered by Swappa
-        </TYPE.black>
-        <QuestionHelper text="Swappa is an open source routing library created by Zviad from WoTrust." />
-      </RowFixed>
     </>
   )
 }
