@@ -3,6 +3,7 @@ import Loader from 'components/Loader'
 import QuestionHelper from 'components/QuestionHelper'
 import { ChainLogo, Coins } from 'constants/StablePools'
 import { useWeb3Context } from 'hooks'
+import { useMobi } from 'hooks/Tokens'
 import { darken } from 'polished'
 import React, { useState } from 'react'
 import { isMobile } from 'react-device-detect'
@@ -176,6 +177,10 @@ export const StablePoolCard: React.FC<Props> = ({ poolInfo }: Props) => {
   const [openWithdraw, setOpenWithdraw] = useState(false)
   const [openManage, setOpenManage] = useState(false)
   const history = useHistory()
+
+  const mobi = useMobi()
+
+  const totalMobiRate = new TokenAmount(mobi, mobiRate ?? JSBI.BigInt('0'))
 
   const userLP = poolInfo.amountDeposited
   const { totalValueDeposited, valueOfDeposited } = getDepositValues(poolInfo)
