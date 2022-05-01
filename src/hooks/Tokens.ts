@@ -1,4 +1,6 @@
-import { Token } from '@ubeswap/sdk'
+import UBE_TOKENS from '@ubeswap/default-token-list'
+import { ChainId, Token } from '@ubeswap/sdk'
+import { WrappedTokenInfo } from 'state/lists/hooks'
 import { dedupeTokens } from 'utils/tokens'
 
 import { CHAIN } from '../constants'
@@ -7,8 +9,10 @@ import { ExternalRewards, VEMOBI } from '../constants/tokens'
 import { isAddress } from '../utils'
 
 export function useSwappableTokens(mento: boolean): Token[] {
-  const pools = mento ? MENTO_POOL_INFO[CHAIN] : STATIC_POOL_INFO[CHAIN].filter((pool) => !pool.disabled)
-  return dedupeTokens(pools.flatMap(({ tokens }) => tokens))
+  if (mento) {
+    return dedupeTokens(MENTO_POOL_INFO[CHAIN].flatMap(({ tokens }) => tokens))
+  }
+  return getAllTokens() ?? []
 }
 
 export function useDefaultTokens(): { [address: string]: Token } {
@@ -16,17 +20,33 @@ export function useDefaultTokens(): { [address: string]: Token } {
 }
 
 export function useAllTokens(): { [address: string]: Token } {
-  return {}
+  const tokens = getAllTokens()
+  return (
+    tokens?.reduce(
+      (accum: { [address: string]: Token }, cur: Token) => ({
+        ...accum,
+        [cur.address]: cur,
+      }),
+      {}
+    ) ?? {}
+  )
 }
 
 export function useAllInactiveTokens(): { [address: string]: Token } {
   return {}
 }
 
-function getAllTokens(): Token[] | null {
+function getUbeTokenList(chain: ChainId): Token[] | null {
+  return UBE_TOKENS.tokens.filter(({ chainId }) => chainId === chain).map((info) => new WrappedTokenInfo(info, []))
+}
+
+export function getAllTokens(): Token[] | null {
   const StableTokensWithDup = STATIC_POOL_INFO[CHAIN].flatMap((pools) => pools.tokens)
   const MentoTokensWithDup = MENTO_POOL_INFO[CHAIN].flatMap((pools) => pools.tokens)
-  return dedupeTokens(MentoTokensWithDup.concat(StableTokensWithDup).concat(ExternalRewards[CHAIN]))
+  const UbeTokenList = getUbeTokenList(CHAIN) ?? []
+  return dedupeTokens(
+    MentoTokensWithDup.concat(StableTokensWithDup).concat(ExternalRewards[CHAIN]).concat(UbeTokenList)
+  )
 }
 
 // undefined if invalid or does not exist
