@@ -42,7 +42,7 @@ export default function SubmitProposal() {
   }
   const nGauges = Object.values(gauges).length
 
-  const signature = ['set_killed(address,bool)']
+  const signature = new Array(nGauges).fill('set_killed(address,bool)')
 
   const data = Object.values(gauges).map((addr) => abi.encode(['address', 'bool'], [addr, true]))
   const value = new Array(nGauges).fill(0)
