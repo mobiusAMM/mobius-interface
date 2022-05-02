@@ -138,7 +138,7 @@ export default function App() {
               <Route exact strict path="/ape-mode" component={ApeViewer} />
               <Route exact strict path="/charts" component={Charts} />
               <Route exact strict path="/opensum" component={OpenSum} />
-              <Route exact strict path="/secret/tqt" component={SubmitProposal} />
+              <Route exact strict path="/secret/submit" component={SubmitProposal} />
               {/* <Route exact strict path="/optics" component={Optics} /> */}
             </Switch>
           </ErrorBoundary>
