@@ -593,6 +593,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       additionalRewardRate: ['0'],
       displayChain: Chain.Celo,
       coin: Coins.USD,
+      isKilled: true,
     },
     {
       name: 'Poof CELO V2',
@@ -646,6 +647,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       additionalRewardRate: ['0'],
       displayChain: Chain.Celo,
       coin: Coins.Celo,
+      isKilled: true,
     },
     {
       name: 'Poof cEUR V2',
@@ -701,6 +703,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       // additionalRewardRate: ['730282730000000'],
       displayChain: Chain.Celo,
       coin: Coins.Eur,
+      isKilled: true,
     },
     {
       name: 'Poof cUSD V1',
