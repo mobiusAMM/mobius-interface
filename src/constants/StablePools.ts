@@ -177,6 +177,7 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
       additionalRewardRate: [weeklyEmissionToSeconds(0)], //1630)], // ['14776041660000000'], //['18468900000000000'], // ['7302827380000000']
       displayChain: Chain.Terra,
       coin: Coins.USD,
+      isKilled: true,
     },
     {
       name: 'USDC (Optics V2)',
