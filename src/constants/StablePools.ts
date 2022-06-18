@@ -127,7 +127,7 @@ const weeklyEmissionToSeconds = (n: number) => {
 export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
   [ChainId.MAINNET]: [
     {
-      name: 'USDC (Wormhole)',
+      name: 'USDC (Portal)',
       tokenAddresses: ['0x765DE816845861e75A25fCA122bb6898B8B1282a', '0x37f750B7cC259A2f741AF45294f6a16572CF5cAd'],
       tokens: [
         new WrappedTokenInfo(
@@ -146,8 +146,8 @@ export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
             chainId: ChainId.MAINNET,
             address: '0x37f750B7cC259A2f741AF45294f6a16572CF5cAd',
             decimals: 6,
-            symbol: 'wUSDC',
-            name: 'Wormhole USDC',
+            symbol: 'USDCet',
+            name: 'USDC (Portal from Ethereum)',
             logoURI: 'https://bit.ly/3CwGimW',
           },
           []
