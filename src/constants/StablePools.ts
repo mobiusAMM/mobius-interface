@@ -127,6 +127,56 @@ const weeklyEmissionToSeconds = (n: number) => {
 export const STATIC_POOL_INFO: { [K in ChainId]: StableSwapConstants[] } = {
   [ChainId.MAINNET]: [
     {
+      name: 'USDC (Portal)',
+      tokenAddresses: ['0x765DE816845861e75A25fCA122bb6898B8B1282a', '0x37f750B7cC259A2f741AF45294f6a16572CF5cAd'],
+      tokens: [
+        new WrappedTokenInfo(
+          {
+            chainId: ChainId.MAINNET,
+            address: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
+            decimals: 18,
+            symbol: 'cUSD',
+            name: 'Celo Dollar',
+            logoURI: 'https://raw.githubusercontent.com/ubeswap/default-token-list/master/assets/asset_cUSD.png',
+          },
+          []
+        ),
+        new WrappedTokenInfo(
+          {
+            chainId: ChainId.MAINNET,
+            address: '0x37f750B7cC259A2f741AF45294f6a16572CF5cAd',
+            decimals: 6,
+            symbol: 'USDCet',
+            name: 'USDC (Portal from Ethereum)',
+            logoURI: 'https://bit.ly/3CwGimW',
+          },
+          []
+        ),
+      ],
+      address: '0xC0BA93D4aaf90d39924402162EE4a213300d1d60',
+      lpToken: new Token(
+        ChainId.MAINNET,
+        '0xE10FD4788A76d19bA0110b1BfDa5E13D35ED4359',
+        18,
+        'MobLP',
+        'Mobius cUSD/wUSDC LP'
+      ),
+      swapFee: JSBI.multiply(JSBI.BigInt('2'), JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt('7'))),
+      rates: [JSBI.BigInt('1'), JSBI.BigInt('1')],
+      lendingPrecision: JSBI.BigInt('1'),
+      precision: JSBI.BigInt('18'),
+      feeDenominator: JSBI.exponentiate(JSBI.BigInt('10'), JSBI.BigInt('10')),
+      precisionMul: [JSBI.BigInt('1'), JSBI.BigInt('1')],
+      feeIndex: 0,
+      decimals: [JSBI.BigInt('18'), JSBI.BigInt('6')],
+      peggedTo: '$',
+      pegComesAfter: false,
+      displayDecimals: 0,
+      gaugeAddress: '0x7ed927E685d7196Ff2e7Bc48c5cB5e8af88c9332',
+      displayChain: Chain.Ethereum,
+      coin: Coins.USD,
+    },
+    {
       name: 'UST (Allbridge)',
       tokenAddresses: ['0x765DE816845861e75A25fCA122bb6898B8B1282a', '0xEd193C4E69F591E42398eF54DEa65aa1bb02835c'],
       tokens: [
