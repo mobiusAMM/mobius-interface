@@ -1,6 +1,5 @@
 import { DappKitResponseStatus } from '@celo/utils'
 import { ErrorBoundary } from '@sentry/react'
-import WarningModal from 'components/WarningModal'
 import React, { Suspense, useState } from 'react'
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
@@ -111,7 +110,7 @@ export default function App() {
             </>
           )}
           <ErrorBoundary fallback={<p>An unexpected error occured on this part of the page. Please reload.</p>}>
-            <WarningModal isOpen={showWarning} onDismiss={() => setShowWarning(false)} />
+            {/* <WarningModal isOpen={showWarning} onDismiss={() => setShowWarning(false)} /> */}
             <Switch>
               <Route exact path="/">
                 <Redirect to="/swap" />

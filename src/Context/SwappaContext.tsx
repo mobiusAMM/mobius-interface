@@ -2,9 +2,11 @@ import { newKitFromWeb3 } from '@celo/contractkit'
 import * as Swappa from '@mobius-money/swappa'
 import { mainnetRegistriesWhitelist } from '@mobius-money/swappa'
 import { CHAIN_INFO, ChainId } from '@ubeswap/sdk'
-import { getAllTokens } from 'hooks/Tokens'
+import axios from 'axios'
 import * as React from 'react'
 import Web3 from 'web3'
+
+const DESCRIPTORS_PATH = 'https://raw.githubusercontent.com/mobiusAMM/swappa/main/descriptors.json'
 
 export const SwappaContext = React.createContext<{
   initializing: boolean
@@ -16,9 +18,9 @@ async function initializeSwappa(): Promise<Swappa.SwappaManager | undefined> {
   const kit = newKitFromWeb3(web3)
   const registries = mainnetRegistriesWhitelist(kit)
   try {
-    const supportedTokens = getAllTokens()
-    const swappa = new Swappa.SwappaManager(kit, Swappa.swappaRouterV1Address, registries)
-    await swappa.reinitializePairs(supportedTokens?.map(({ address }) => address) ?? [])
+    const swappa = new Swappa.SwappaManager(kit, Swappa.swappaRouterV1Address, registries, web3)
+    const descriptors = await axios.get<Swappa.PairDescriptor[]>(DESCRIPTORS_PATH)
+    await swappa.bulkInitializePairs(descriptors.data)
     return swappa
   } catch (e) {
     console.log(e)
