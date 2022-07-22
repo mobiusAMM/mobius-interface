@@ -320,9 +320,10 @@ export function useAPR(poolName?: string): {
       undefined
     )
 
-    const totalStakedAmount = totalValueDeposited
-      ? totalValueDeposited.multiply(new Fraction(coinPrice?.numerator ?? '1', coinPrice?.denominator ?? '1'))
-      : new Fraction(JSBI.BigInt(0))
+    const totalStakedAmount =
+      totalValueDeposited && coinPrice
+        ? totalValueDeposited.multiply(new Fraction(coinPrice?.numerator ?? '1', coinPrice?.denominator ?? '1'))
+        : new Fraction(JSBI.BigInt(0))
     const totalMobiRate = new TokenAmount(mobi, mobiRate ?? JSBI.BigInt('0'))
 
     const rewardPerYearUnadjusted =
